@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>局データクロスチェック 完全ガイド 0220版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'MS UI Gothic', 'ＭＳ ゴシック', 'MS Gothic', 'Osaka', monospace;
+            font-size: 12px;
+            background: #008080;
+            color: #000;
+            min-height: 100vh;
+            padding: 5px;
+            margin: 0;
+        }
+
+        .window {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #0a0a0a;
+            width: 100%;
+            min-height: calc(100vh - 10px);
+        }
+
+        .title-bar {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            padding: 3px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar h1 {
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .title-bar-buttons { display: flex; gap: 2px; }
+
+        .title-btn {
+            width: 16px; height: 14px;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-size: 9px; font-weight: bold;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .main-tabs {
+            display: flex; flex-wrap: wrap; gap: 0;
+            padding: 5px 5px 0 5px;
+            background: #c0c0c0;
+        }
+
+        .main-tab {
+            padding: 4px 12px;
+            cursor: pointer;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-family: 'MS UI Gothic', monospace;
+            font-size: 12px;
+            margin-right: 2px;
+            margin-bottom: -2px;
+            position: relative;
+        }
+
+        .main-tab:hover { background: #d4d4d4; }
+        .main-tab.active { background: #c0c0c0; border-bottom-color: #c0c0c0; z-index: 10; }
+
+        .content {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 8px;
+            min-height: calc(100vh - 100px);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .group-box {
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 12px 10px 10px 10px;
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .group-box-title {
+            position: absolute;
+            top: -8px; left: 10px;
+            background: #c0c0c0;
+            padding: 0 5px;
+            font-weight: bold;
+            color: #000080;
+        }
+
+        .inset-box {
+            background: #fff;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 8px;
+            margin: 5px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #808080;
+            padding: 4px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th { background: #000080; color: #fff; font-weight: normal; }
+        tr:nth-child(even) { background: #e8e8e8; }
+        tr:hover { background: #000080; color: #fff; }
+
+        h2 {
+            font-size: 14px;
+            color: #000080;
+            border-bottom: 1px solid #808080;
+            padding-bottom: 3px;
+            margin: 12px 0 8px 0;
+        }
+
+        h3 { font-size: 12px; color: #000; margin: 8px 0 5px 0; }
+        h4 { font-size: 12px; color: #800000; margin: 6px 0 4px 0; }
+
+        pre {
+            background: #fff;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 8px;
+            font-family: 'MS Gothic', monospace;
+            font-size: 11px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'MS Gothic', monospace;
+            background: #ffff00;
+            padding: 1px 3px;
+        }
+
+        pre code { background: none; padding: 0; }
+
+        .badge {
+            display: inline-block;
+            padding: 1px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #000;
+        }
+
+        .badge.e-series { background: #00ffff; color: #000; }
+        .badge.g-series { background: #ff0000; color: #fff; }
+        .badge.k-series { background: #ffff00; color: #000; }
+        .badge.sa { background: #00ff00; color: #000; }
+        .badge.nsa { background: #ff00ff; color: #fff; }
+        .badge.new { background: #ff0000; color: #fff; }
+
+        .alert { padding: 6px 8px; margin: 6px 0; border: 2px solid; }
+        .alert.warning { background: #ffff00; border-color: #808000; }
+        .alert.danger { background: #ff8080; border-color: #800000; }
+        .alert.info { background: #80ffff; border-color: #008080; }
+
+        .memory-box {
+            background: #ffffc0;
+            border: 2px dashed #808000;
+            padding: 8px;
+            margin: 8px 0;
+        }
+
+        .memory-box h4 { color: #008000; margin-bottom: 5px; }
+
+        .beginner-tip {
+            background: #c0ffc0;
+            border: 2px solid #008000;
+            padding: 6px 8px;
+            margin: 6px 0;
+        }
+
+        .beginner-tip::before {
+            content: '💡 ヒント: ';
+            font-weight: bold;
+            color: #008000;
+        }
+
+        .sub-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
+
+        .sub-tab {
+            padding: 3px 10px;
+            cursor: pointer;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-family: 'MS UI Gothic', monospace;
+            font-size: 11px;
+        }
+
+        .sub-tab:hover { background: #d4d4d4; }
+        .sub-tab:active { border-color: #808080 #ffffff #ffffff #808080; }
+        .sub-tab.active { background: #000080; color: #fff; border-color: #808080 #ffffff #ffffff #808080; }
+
+        .sub-content { display: none; }
+        .sub-content.active { display: block; }
+
+        .flow-item {
+            background: #fff;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 3px 8px;
+            margin: 2px 0;
+        }
+
+        .flow-arrow { text-align: center; color: #000080; font-weight: bold; line-height: 1; margin: 0; }
+
+        .file-name {
+            background: #ff0000;
+            color: #fff;
+            padding: 1px 5px;
+            font-weight: bold;
+            font-family: 'MS Gothic', monospace;
+        }
+
+        ul { margin-left: 20px; }
+        li { margin: 2px 0; }
+
+        .important { color: #ff0000; font-weight: bold; }
+
+        .search-box input {
+            width: 100%;
+            padding: 4px;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            font-family: 'MS UI Gothic', monospace;
+            font-size: 12px;
+            background: #fff;
+        }
+
+        .status-bar {
+            background: #c0c0c0;
+            border-top: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 3px 5px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .status-section {
+            border: 1px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 1px 10px;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+        @media (max-width: 600px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+
+        .column-table td:first-child { font-weight: bold; color: #800000; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">
+            <h1>📋 局データクロスチェック 完全ガイド【0220版】</h1>
+            <div class="title-bar-buttons">
+                <button class="title-btn">_</button>
+                <button class="title-btn">□</button>
+                <button class="title-btn">×</button>
+            </div>
+        </div>
+
+        <div class="main-tabs">
+            <button class="main-tab active" onclick="showTab('start')">はじめに</button>
+            <button class="main-tab" onclick="showTab('flow')">作業フロー</button>
+            <button class="main-tab" onclick="showTab('e-series')">e系ファイル</button>
+            <button class="main-tab" onclick="showTab('g-series')">g系ファイル</button>
+            <button class="main-tab" onclick="showTab('k-series')">k系ファイル</button>
+            <button class="main-tab" onclick="showTab('sys')">シスパラ</button>
+            <button class="main-tab" onclick="showTab('vendor')">ベンダー別</button>
+            <button class="main-tab" onclick="showTab('lte')">LTE側</button>
+            <button class="main-tab" onclick="showTab('tips')">覚え方</button>
+            <button class="main-tab" onclick="showTab('terms')">用語集</button>
+        </div>
+
+        <div class="content">
+
+            <!-- ========== はじめに ========== -->
+            <div id="start" class="tab-content active">
+                <h2>■ はじめに</h2>
+
+                <div class="group-box">
+                    <span class="group-box-title">このガイドについて</span>
+                    <p>局データクロスチェック業務の完全ガイドです。新人の方でも理解できるように、ファイルの役割・確認ポイント・覚え方をまとめています。</p>
+                </div>
+
+                <div class="beginner-tip">
+                    クロスチェックは「最後の門番」です。依頼票通りに局データが作成されているか、疑問点がなくなるまで確認を繰り返します。見落としは許されません。
+                </div>
+
+                <h3>■ フォルダ構成</h3>
+                <pre><code>局データ/
+├── NR/（5G関連ファイル）
+├── LTE/（4G関連ファイル）
+└── csn, cst（システムパラメータ）</code></pre>
+
+                <h3>■ 依頼元</h3>
+                <table>
+                    <tr><th>部署</th><th>役割</th><th>特記事項</th></tr>
+                    <tr><td><b>PFVT</b></td><td>現場前検証試験</td><td>kmlで1001=PFVT</td></tr>
+                    <tr><td><b>OPS</b></td><td>運用、管理簿・シート提供</td><td>管理簿確認必須、共用時はLTE側も</td></tr>
+                    <tr><td><b>LVT</b></td><td>検証関連</td><td>基本確認</td></tr>
+                </table>
+
+                <h3>■ ファイル種別の概要</h3>
+                <div class="grid-3">
+                    <div class="inset-box">
+                        <span class="badge e-series">e系</span><br>
+                        接続・回線の情報<br>
+                        「電気的な接続」のイメージ
+                    </div>
+                    <div class="inset-box">
+                        <span class="badge g-series">g系</span><br>
+                        無線・アンテナ・FHの情報<br>
+                        「外に出ていく」イメージ
+                    </div>
+                    <div class="inset-box">
+                        <span class="badge k-series">k系</span><br>
+                        識別情報<br>
+                        「Key（鍵）」のイメージ
+                    </div>
+                </div>
+
+                <h3>■ 構成図</h3>
+                <pre><code>OSS（運用支援）
+      ↓
+SMO（MANO, RIC）
+      ↓
+EMS（装置管理）
+      ↓
+vCU / vDU ←→ FHIC / FHM
+      ↓
+RU / RRU
+      ↓
+アンテナ</code></pre>
+
+                <h3>■ 外部装置の例</h3>
+                <pre><code>PFVTパターン2_LTENR,1,24,UOF_919(MA)
+Aセル#1,PFVT_パターン2_LTENR</code></pre>
+            </div>
+
+            <!-- ========== 作業フロー ========== -->
+            <div id="flow" class="tab-content">
+                <h2>■ 作業フロー</h2>
+
+                <div class="flow-item"><b>1.</b> 依頼票を確認（AMF数、構成、参照チェックシート）</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><b>2.</b> OPSの場合は管理簿も確認（カード情報）</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><b>3.</b> 依頼内容を把握</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><b>4.</b> 局データクロスチェックシートを使用</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><b>5.</b> 序盤：ecs、eih を確認</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><b>6.</b> 各ファイルを照合</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><b>7.</b> 疑問点がなくなるまで繰り返す</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><b>8.</b> 完了 ✓</div>
+
+                <div class="beginner-tip">
+                    「疑問点がなくなるまで」がポイントです。分からないことがあれば必ず確認するか、疑問点として報告しましょう。
+                </div>
+            </div>
+
+            <!-- ========== e系ファイル ========== -->
+            <div id="e-series" class="tab-content">
+                <h2>■ <span class="badge e-series">e系</span> 接続・回線ファイル</h2>
+
+                <div class="group-box">
+                    <span class="group-box-title">イメージ</span>
+                    <b>e = 電気的な接続</b> → 「接続・回線」の情報
+                </div>
+
+                <div class="memory-box">
+                    <h4>🔑 覚え方：s, p, v</h4>
+                    <pre><code>esi → s = Security  → IPsec（暗号化）
+epi → p = Physical  → 物理回線本数
+evi → v = Virtual   → 仮想IP</code></pre>
+                </div>
+
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="showSubTab('e-series', 'e-list')">一覧</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-ecs')">ecs</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-eih')">eih</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-esi')">esi</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-epi')">epi</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-epl')">epl</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-evi')">evi</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-edb')">edb</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-eee')">eee</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series', 'e-erc')">erc</button>
+                </div>
+
+                <div id="e-list" class="sub-content active">
+                    <h3>■ ファイル一覧（正しい並び）</h3>
+                    <table>
+                        <tr><th>ファイル</th><th>キーワード</th><th>何が分かる</th></tr>
+                        <tr><td><span class="file-name">ecs</span></td><td>場所</td><td>Aセル、DU番号、スロット/シェルフ/ポート番号、カード情報</td></tr>
+                        <tr><td><span class="file-name">eih</span></td><td>状態</td><td>接続状態、回線数、ミナデン設定</td></tr>
+                        <tr><td><span class="file-name">esi</span></td><td>暗号化</td><td>IPsec設定</td></tr>
+                        <tr><td><span class="file-name">epi</span></td><td>本数</td><td>物理回線本数、10G、LTE+NR</td></tr>
+                        <tr><td><span class="file-name">epl</span> <span class="badge new">NEW</span></td><td>物理回線詳細</td><td>物理回線番号、帯域、vRAN機能ON/OFF</td></tr>
+                        <tr><td><span class="file-name">evi</span></td><td>IP</td><td>仮想IP、IP種別</td></tr>
+                        <tr><td><span class="file-name">edb</span></td><td>回線番号</td><td>物理回線番号</td></tr>
+                        <tr><td><span class="file-name">eee</span></td><td>LTE-NR接続</td><td>LTE-NR接続確認</td></tr>
+                        <tr><td><span class="file-name">erc</span> <span class="badge new">NEW</span></td><td>ローミング</td><td>投入/抽出ツールeNBファイル、ローミング機能</td></tr>
+                    </table>
+                </div>
+
+                <div id="e-ecs" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">ecs - 場所情報・カード情報</span>
+                        <ul>
+                            <li>Aセル、DU番号</li>
+                            <li>スロット/シェルフ/ポート番号</li>
+                            <li>EOPL/EOPLA時のポート番号</li>
+                            <li>LTE共用時MCPは同値</li>
+                            <li><b>カード情報</b></li>
+                        </ul>
+                    </div>
+                    <div class="alert warning">
+                        ⚠️ <b>カードの相違についての疑問点は、まず聞きに行く！</b>
+                    </div>
+                    <div class="beginner-tip">
+                        序盤で最初に見るファイル。「どこの話か」を特定します。カードの相違があったら自分で判断せず確認。
+                    </div>
+                </div>
+
+                <div id="e-eih" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">eih - 接続状態</span>
+                        <ul>
+                            <li><span class="badge sa">SA</span> → 1が4つ</li>
+                            <li><span class="badge nsa">NSA</span> → 回線数のみ</li>
+                            <li>NR呼処理</li>
+                            <li>ミナデン設定</li>
+                            <li>LTE側と重複してないか確認</li>
+                            <li><b>13〜15列目</b>：トラヒック/L3Trace/警報ログ</li>
+                        </ul>
+                    </div>
+                    <div class="alert warning">
+                        ⚠️ SA/NSAで見方が変わります。SAなら「1が4つ」、NSAなら「回線数のみ」を確認。
+                    </div>
+                </div>
+
+                <div id="e-esi" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">esi - IPsec（暗号化）</span>
+                        <ul>
+                            <li>IPsec設定</li>
+                            <li><b>OPS以外は「1」</b></li>
+                        </ul>
+                    </div>
+                    <div class="beginner-tip">
+                        覚え方：esi = Security（セキュリティ）
+                    </div>
+                </div>
+
+                <div id="e-epi" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">epi - 物理回線本数</span>
+                        <ul>
+                            <li>物理回線本数</li>
+                            <li>10Gなのか</li>
+                            <li>LTE+NRなのか</li>
+                        </ul>
+                    </div>
+                    <div class="beginner-tip">
+                        覚え方：epi = Physical（物理）
+                    </div>
+                </div>
+
+                <div id="e-epl" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">epl - 物理回線詳細 <span class="badge new">NEW</span></span>
+                        <ul>
+                            <li>物理回線番号</li>
+                            <li>帯域</li>
+                            <li>vRAN機能ON/OFF</li>
+                            <li>仮想IPアドレス設定可否</li>
+                            <li>物理回線種別</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="e-evi" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">evi - 仮想IP</span>
+                        <ul>
+                            <li>仮想IPアドレス</li>
+                            <li>IP種別</li>
+                            <li class="important">LTE+NR → IP種別が同値でなければならない</li>
+                            <li class="important">IPアドレス4桁 → NRとLTEが全て同じはNG</li>
+                        </ul>
+                    </div>
+                    <div class="alert danger">
+                        🚨 LTE+NR構成時は要注意！IP種別同値、IPアドレス4桁重複NGを必ず確認。
+                    </div>
+                    <div class="beginner-tip">
+                        覚え方：evi = Virtual（仮想）
+                    </div>
+                </div>
+
+                <div id="e-edb" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">edb - 物理回線番号</span>
+                        <ul>
+                            <li>物理回線番号</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="e-eee" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">eee - LTE-NR接続確認</span>
+                        <ul>
+                            <li>LTE-NRが接続されていることを確認</li>
+                        </ul>
+                        <p>例：<code>2,1997,1,2,6023,0,0,30</code></p>
+                        <p>→ 1997=eNB番号、6023=gNB番号</p>
+                    </div>
+                </div>
+
+                <div id="e-erc" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">erc - ローミング機能 <span class="badge new">NEW</span></span>
+                        <ul>
+                            <li>投入/抽出ツールeNBファイル</li>
+                            <li>erc</li>
+                            <li>ローミング機能</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== g系ファイル ========== -->
+            <div id="g-series" class="tab-content">
+                <h2>■ <span class="badge g-series">g系</span> 無線・アンテナ・FHファイル</h2>
+
+                <div class="group-box">
+                    <span class="group-box-title">イメージ</span>
+                    <b>g = Go（外に出ていく）</b> → 「無線・アンテナ・FH」の情報
+                </div>
+
+                <div class="memory-box">
+                    <h4>🔑 覚え方：BPM（FH関連）</h4>
+                    <pre><code>gfb → b
+gfp → p    → 末尾 b-p-m = BPM
+gdm → m</code></pre>
+                </div>
+
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="showSubTab('g-series', 'g-list')">一覧</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series', 'g-fh')">FH関連(BPM)</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series', 'g-antenna')">アンテナ・周波数</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series', 'g-cell')">セル・リンク</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series', 'g-sa')">SA専用</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series', 'g-other')">その他</button>
+                </div>
+
+                <div id="g-list" class="sub-content active">
+                    <h3>■ ファイル一覧（正しい並び）</h3>
+                    <table>
+                        <tr><th>ファイル</th><th>キーワード</th><th>何が分かる</th></tr>
+                        <tr><td><span class="file-name">gfb</span></td><td>FH接続</td><td>キャリア数、FHポート番号、FHビットレート、アクティブリンク番号</td></tr>
+                        <tr><td><span class="file-name">gfp</span></td><td>DU-FHポート</td><td>DU番号、FHポート番号</td></tr>
+                        <tr><td><span class="file-name">gdm</span></td><td>接続方式</td><td>FHIC/MMU、直つなぎ/分離/一体型</td></tr>
+                        <tr><td><span class="file-name">gas</span></td><td>アンテナ全般</td><td>セル数拡張グループ番号、優先度</td></tr>
+                        <tr><td><span class="file-name">grc</span></td><td>周波数</td><td>周波数（900始まり）</td></tr>
+                        <tr><td><span class="file-name">gnf</span></td><td>メイン/サブ</td><td>周波数（1=メイン、4=サブ）</td></tr>
+                        <tr><td><span class="file-name">gnr</span></td><td>周辺CC</td><td>Aセル番号の重複確認</td></tr>
+                        <tr><td><span class="file-name">gcd</span></td><td>アンテナポート</td><td>対象アンテナポート</td></tr>
+                        <tr><td><span class="file-name">gss</span></td><td>SSB</td><td>SSB番号、一体型/分離型</td></tr>
+                        <tr><td><span class="file-name">gfa</span></td><td>張り出し</td><td>張り出し基地局、ビル番号</td></tr>
+                        <tr><td><span class="file-name">gof</span></td><td>セル特定</td><td>DU番号、gNB内Aセル番号</td></tr>
+                        <tr><td><span class="file-name">gtr</span></td><td>アクティブリンク</td><td>アクティブリンク番号、チルト</td></tr>
+                        <tr><td><span class="file-name">glr</span></td><td>FHM構成</td><td>FHM構成時のみ</td></tr>
+                        <tr><td><span class="file-name">gpo</span> <span class="badge new">NEW</span></td><td>外部装置</td><td>PFVT_FHMD_LTENR、11/14確認</td></tr>
+                        <tr><td><span class="file-name">gag</span></td><td>AMF 🎭</td><td>SA専用、AMFの数</td></tr>
+                        <tr><td><span class="file-name">g5t</span></td><td>スライス</td><td>SA専用、スライスパラメータ</td></tr>
+                        <tr><td><span class="file-name">ggg</span></td><td>隣接gNB</td><td>隣接gNB設置時に必要</td></tr>
+                    </table>
+                </div>
+
+                <div id="g-fh" class="sub-content">
+                    <h3>■ FH関連（BPM）</h3>
+                    
+                    <div class="group-box">
+                        <span class="group-box-title">gfb - FH接続</span>
+                        <ul>
+                            <li>キャリア数</li>
+                            <li>FHポート番号</li>
+                            <li>FHビットレート</li>
+                            <li><b>アクティブリンクグループ番号（LTE側キャリア番号確認）</b></li>
+                            <li><b>アクティブリンク番号（LTE側のキャリア数）</b></li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">gfp - DU-FHポート</span>
+                        <ul>
+                            <li>DU番号</li>
+                            <li>FHポート番号</li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">gdm - 接続方式 ⚠️時間がかかる</span>
+                        <ul>
+                            <li>FHIC使ってるか / MMUか</li>
+                            <li>直つなぎか / 分離か / 一体型か</li>
+                            <li>何台ついてるか</li>
+                            <li>kmnで設定した5GFHM確認</li>
+                            <li><b>3列目 → Aセル番号</b></li>
+                            <li><b>5列目 → DU番号</b></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="g-antenna" class="sub-content">
+                    <h3>■ アンテナ・周波数関連</h3>
+                    
+                    <div class="group-box">
+                        <span class="group-box-title">gas - アンテナ全般</span>
+                        <ul>
+                            <li>Xチェックシートを見る</li>
+                            <li>セル数拡張グループ番号</li>
+                            <li>優先度</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert warning">
+                        ⚠️ <b>Nokia P4001 2G,700M 構成時</b>は値が変わるため、<b>gas詳細シート</b>を確認。フォーマット0か1かを確認。
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">grc - 周波数</span>
+                        <ul>
+                            <li>周波数：900から始まり、最後は局データ番号+数値</li>
+                            <li>数値は被ってなければ問題ない</li>
+                            <li>2G/700M、3.4G(40M/80M)、3.7G、4.5G、4.7G、2.8G</li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">gnf - 周波数メイン/サブ</span>
+                        <ul>
+                            <li>1=メイン、4=サブ</li>
+                            <li><span class="badge sa">SA</span>の場合+される</li>
+                        </ul>
+                        <p>例：<code>8066,1,2144.800,0,3,,,,,,,,,,,,,8066,1,788,000,0,5</code></p>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">gnr - 周辺CC</span>
+                        <ul>
+                            <li class="important">Aセル番号が重複してはならない</li>
+                            <li>Xチェックシートに書いてあるのでよく見ること</li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">gcd - アンテナポート</span>
+                        <ul>
+                            <li><b>2列目</b>：DU</li>
+                            <li><b>3列目</b>：Aセル番号</li>
+                            <li><b>4〜7列目</b>：周波数</li>
+                            <li><b>12〜15列目</b>：対象アンテナポート</li>
+                            <li>28G/2G/700M → #1〜#2のみ</li>
+                            <li>それ以外 → #1〜#4まで設定</li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">gss - SSB</span>
+                        <ul>
+                            <li>SSB番号</li>
+                            <li>周波数</li>
+                            <li>一体型/RRU/分離型</li>
+                            <li>F-LRU(FR2)屋内一体型</li>
+                            <li>NSA+SAはSAの方法を見る</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="g-cell" class="sub-content">
+                    <h3>■ セル・リンク関連</h3>
+                    
+                    <div class="group-box">
+                        <span class="group-box-title">gfa - 張り出し基地局</span>
+                        <ul>
+                            <li>DU番号、Aセル番号</li>
+                            <li>ビル番号（1234567890）</li>
+                            <li>gNB</li>
+                            <li><b>設置数と同じか確認</b></li>
+                            <li><b>ビル番号が入ってるか確認</b></li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">gof - セル特定</span>
+                        <ul>
+                            <li>DU番号、gNB内Aセル番号</li>
+                            <li><b>2列目と8列目のDUとセルが同値か確認</b></li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">gtr - アクティブリンク</span>
+                        <ul>
+                            <li>アクティブリンク番号</li>
+                            <li><b>3列目・20列目・31列目</b>でDUとAセルの同値を確認</li>
+                            <li><b>チルト</b></li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">glr - FHM構成</span>
+                        <ul>
+                            <li>FHM構成のみ必要</li>
+                            <li><b>3列目</b>：FHM番号（kmnで設定した値）</li>
+                            <li><b>4列目</b>：論理RU番号（1, gdm40列目）</li>
+                            <li>FHM配下RU番号</li>
+                            <li>依頼のポート番号に合わせる</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="g-sa" class="sub-content">
+                    <h3>■ SA専用ファイル</h3>
+                    
+                    <div class="group-box">
+                        <span class="group-box-title">gag - AMF 🎭ギャグで覚える！</span>
+                        <ul>
+                            <li><span class="badge sa">SA専用</span></li>
+                            <li>AMFの数の行を要する</li>
+                        </ul>
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">g5t - スライス</span>
+                        <ul>
+                            <li><span class="badge sa">SA専用</span></li>
+                            <li><b>35〜38列目</b>：0.0.....</li>
+                            <li>スライスパラメータ制御機能ONの場合は別途</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="g-other" class="sub-content">
+                    <h3>■ その他</h3>
+                    
+                    <div class="group-box">
+                        <span class="group-box-title">gpo - 外部装置 <span class="badge new">NEW</span></span>
+                        <ul>
+                            <li>PFVT_FHMD_LTENR</li>
+                            <li class="important">11と14についてないといけないのに、12と15についたら疑問点にあげる</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert danger">
+                        🚨 gpoで11/14のはずが12/15になっていたら、必ず疑問点として報告！
+                    </div>
+
+                    <div class="group-box">
+                        <span class="group-box-title">ggg - 隣接gNB</span>
+                        <ul>
+                            <li>依頼票を見て、<b>隣接gNB設置の記載がある時</b>に必要</li>
+                            <li class="important">gggファイルが無かったら、疑問点にあげる</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert danger">
+                        🚨 隣接gNB設置の依頼なのにgggファイルがない場合は、必ず疑問点として報告してください。
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== k系ファイル ========== -->
+            <div id="k-series" class="tab-content">
+                <h2>■ <span class="badge k-series">k系</span> 識別情報ファイル</h2>
+
+                <div class="group-box">
+                    <span class="group-box-title">イメージ</span>
+                    <b>k = Key（鍵）</b> → 「どこの・何の」識別情報
+                </div>
+
+                <div class="group-box">
+                    <span class="group-box-title">kml - 位置・TAC</span>
+                    <ul>
+                        <li>TAC、位置情報</li>
+                        <li>LTE/NR一致確認</li>
+                        <li>Nokia → airframe=3</li>
+                        <li>1001=PFVT</li>
+                        <li>ベンダ番号</li>
+                        <li><b>装置Fならkmnとkml品名一致確認</b></li>
+                        <li>NexCs番号は管理簿の構成シート内に記載</li>
+                    </ul>
+                </div>
+
+                <div class="group-box">
+                    <span class="group-box-title">kmn - 基地局識別【列番号詳細】</span>
+                    <ul>
+                        <li>vRAN識別番号</li>
+                        <li>NexCS種別</li>
+                        <li>LTE側のeNB番号</li>
+                        <li>5GFHM有無</li>
+                        <li>5GS-TAC</li>
+                        <li>OPS → 管理簿の品名と一致確認</li>
+                        <li><b>Nokia新カード → #1〜4は左側、#5〜8は右側</b></li>
+                    </ul>
+                </div>
+
+                <h3>■ kmn 列番号まとめ</h3>
+                <table class="column-table">
+                    <tr><th>列番号</th><th>内容</th></tr>
+                    <tr><td>3列目</td><td>vRAN識別</td></tr>
+                    <tr><td>6列目</td><td>NexCs番号</td></tr>
+                    <tr><td>9列目</td><td>ベンダ種別</td></tr>
+                    <tr><td>11列目</td><td>品名</td></tr>
+                    <tr><td>15列目</td><td>装置監視構成eNB装置番号、LTE局データのeNB番号</td></tr>
+                    <tr><td>18〜19列目</td><td>2gNBモード設置位置</td></tr>
+                    <tr><td>20列目</td><td>FHM設置有無</td></tr>
+                    <tr><td>21列目</td><td>5GFHM#1ノード名</td></tr>
+                    <tr><td>22列目</td><td>5GFHM#カナノード名</td></tr>
+                    <tr><td>84列目</td><td>5GS-TAC</td></tr>
+                    <tr><td>86列目</td><td>0→FR1容量拡張なし / 1→FR1容量拡張あり</td></tr>
+                </table>
+            </div>
+
+            <!-- ========== シスパラ ========== -->
+            <div id="sys" class="tab-content">
+                <h2>■ システムパラメータ</h2>
+
+                <div class="alert danger">
+                    🚨 <b>シスパラチェック時は差分表を開く！</b><br>
+                    選択肢が違う場合は、差分表を確認すること。
+                </div>
+
+                <table>
+                    <tr><th>ファイル</th><th>内容</th></tr>
+                    <tr><td><span class="file-name">cst</span></td><td>NR標準5カ所、SCTP</td></tr>
+                    <tr><td><span class="file-name">csn</span></td><td>システムパラメータ</td></tr>
+                    <tr><td><span class="file-name">cns</span></td><td>82602→振り分け制御、83111→3.4G 40M/80M</td></tr>
+                </table>
+
+                <div class="beginner-tip">
+                    シスパラは何百という項目があります。大半は固定ですが、見落としやすいので<b>差分表を必ず開いて確認</b>しましょう。
+                </div>
+            </div>
+
+            <!-- ========== ベンダー別 ========== -->
+            <div id="vendor" class="tab-content">
+                <h2>■ ベンダー別確認</h2>
+
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="showSubTab('vendor', 'v-nokia')">Nokia</button>
+                    <button class="sub-tab" onclick="showSubTab('vendor', 'v-nec')">NEC</button>
+                    <button class="sub-tab" onclick="showSubTab('vendor', 'v-fujitsu')">富士通</button>
+                </div>
+
+                <div id="v-nokia" class="sub-content active">
+                    <div class="group-box">
+                        <span class="group-box-title">Nokia（P4001等）</span>
+                        <ul>
+                            <li><b>設置位置：#1〜4 = 左側、#5〜8 = 右側</b></li>
+                            <li>新カード → 2gNBモード</li>
+                            <li>kml → airframe=3</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert warning">
+                        ⚠️ <b>Nokia P4001 2G,700M 構成時</b><br>
+                        値が変わるため、<b>gas詳細シート</b>を確認。フォーマット0か1かを確認。
+                    </div>
+
+                    <div class="beginner-tip">
+                        Nokiaは左右の設置位置に注意。番号で左右が決まっています。
+                    </div>
+                </div>
+
+                <div id="v-nec" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">NEC（700RRE等）</span>
+                        <p>（情報追加予定）</p>
+                    </div>
+                </div>
+
+                <div id="v-fujitsu" class="sub-content">
+                    <div class="group-box">
+                        <span class="group-box-title">富士通</span>
+                        <p>（情報追加予定）</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== LTE側 ========== -->
+            <div id="lte" class="tab-content">
+                <h2>■ LTE側クロスチェック（OPS）</h2>
+
+                <div class="group-box">
+                    <span class="group-box-title">前提</span>
+                    <ul>
+                        <li>OPSはNRとLTE管理簿が別々</li>
+                        <li>NRは出荷試験Excel参照</li>
+                    </ul>
+                </div>
+
+                <h3>■ ファイル別の確認</h3>
+                <table>
+                    <tr><th>ファイル</th><th>確認内容</th><th>参照シート</th></tr>
+                    <tr><td><span class="file-name">kml</span></td><td>装置Fならkmn=kml品名一致、NexCs番号</td><td>構成シート</td></tr>
+                    <tr><td><span class="file-name">ecs(LTE)</span></td><td>MPC使用/未使用、P4001左右設置</td><td>高密度カード情報シート</td></tr>
+                    <tr><td><span class="file-name">esg(LTE)</span></td><td>？</td><td>memoシート</td></tr>
+                    <tr><td><span class="file-name">ess(LTE)</span></td><td>アドレス、SPD情報</td><td>SPD情報シート</td></tr>
+                    <tr><td><span class="file-name">epl(LTE)</span></td><td>物理回線情報</td><td>高密度物理回線情報シート</td></tr>
+                    <tr><td><span class="file-name">eih(LTE)</span></td><td>NRとLTE両方確認</td><td>高密度eNB_IPアドレスシート</td></tr>
+                    <tr><td><span class="file-name">evi(LTE)</span></td><td>仮想IP種別、IPアドレス</td><td>管理簿</td></tr>
+                    <tr><td><span class="file-name">srl(LTE)</span></td><td>赤字周波数(2135.5)、43・44列gNB/DU</td><td>Xチェックシート</td></tr>
+                </table>
+
+                <div class="beginner-tip">
+                    OPSの共用案件では、LTE側の管理簿も必ず確認。IPアドレスや仮想IPアドレス、DWGなども確認が必要です。
+                </div>
+            </div>
+
+            <!-- ========== 覚え方 ========== -->
+            <div id="tips" class="tab-content">
+                <h2>■ 覚え方のコツ</h2>
+
+                <div class="grid-2">
+                    <div class="memory-box">
+                        <h4>e系：s, p, v</h4>
+                        <pre><code>esi = Security  = IPsec
+epi = Physical  = 物理回線本数
+evi = Virtual   = 仮想IP</code></pre>
+                    </div>
+
+                    <div class="memory-box">
+                        <h4>g系：BPM</h4>
+                        <pre><code>gfb, gfp, gdm
+末尾 b-p-m = BPM
+（FH関連のファイル）</code></pre>
+                    </div>
+                </div>
+
+                <div class="memory-box">
+                    <h4>🎭 語呂合わせ</h4>
+                    <p><b>gag = ギャグ</b> → SA専用、AMF</p>
+                    <p><b>g5t = 5G</b> → スライス</p>
+                </div>
+
+                <h3>■ 質問形式で確認</h3>
+                <table>
+                    <tr><th>知りたいこと</th><th>見るファイル</th></tr>
+                    <tr><td>どのセル？どのDU？</td><td>ecs, gof</td></tr>
+                    <tr><td>どこに繋がる？</td><td>ecs</td></tr>
+                    <tr><td>回線は何本？</td><td>eih, epi</td></tr>
+                    <tr><td>IPアドレスは？</td><td>evi</td></tr>
+                    <tr><td>FHICかMMUか？</td><td>gdm</td></tr>
+                    <tr><td>FHポートは？</td><td>gfb, gfp</td></tr>
+                    <tr><td>アクティブリンクは？</td><td>gtr, gfb</td></tr>
+                    <tr><td>周波数は？</td><td>grc, gnf</td></tr>
+                    <tr><td>アンテナポートは？</td><td>gcd</td></tr>
+                    <tr><td>どこにある？TAC？</td><td>kml</td></tr>
+                    <tr><td>FHM構成？</td><td>glr, kmn</td></tr>
+                    <tr><td>SA専用の確認？</td><td>gag, g5t, eih</td></tr>
+                    <tr><td>LTE-NR接続？</td><td>eee</td></tr>
+                    <tr><td>隣接gNB？</td><td>ggg</td></tr>
+                    <tr><td>外部装置？</td><td>gpo</td></tr>
+                    <tr><td>ローミング？</td><td>erc</td></tr>
+                </table>
+
+                <h3>■ 列番号まとめ</h3>
+                <table>
+                    <tr><th>ファイル</th><th>列番号</th><th>内容</th></tr>
+                    <tr><td>eih</td><td>13〜15列目</td><td>トラヒック/L3Trace/警報ログ</td></tr>
+                    <tr><td>gcd</td><td>2列目</td><td>DU</td></tr>
+                    <tr><td>gcd</td><td>3列目</td><td>Aセル番号</td></tr>
+                    <tr><td>gcd</td><td>4〜7列目</td><td>周波数</td></tr>
+                    <tr><td>gcd</td><td>12〜15列目</td><td>対象アンテナポート</td></tr>
+                    <tr><td>gdm</td><td>3列目</td><td>Aセル番号</td></tr>
+                    <tr><td>gdm</td><td>5列目</td><td>DU番号</td></tr>
+                    <tr><td>gof</td><td>2列目・8列目</td><td>DUとセル（同値確認）</td></tr>
+                    <tr><td>gtr</td><td>3・20・31列目</td><td>DUとAセル（同値確認）</td></tr>
+                    <tr><td>glr</td><td>3列目</td><td>FHM番号</td></tr>
+                    <tr><td>glr</td><td>4列目</td><td>論理RU番号</td></tr>
+                    <tr><td>g5t</td><td>35〜38列目</td><td>スライスパラメータ</td></tr>
+                    <tr><td>srl(LTE)</td><td>43・44列目</td><td>gNBとDU番号</td></tr>
+                    <tr><td>kmn</td><td>3列目</td><td>vRAN識別</td></tr>
+                    <tr><td>kmn</td><td>6列目</td><td>NexCs番号</td></tr>
+                    <tr><td>kmn</td><td>9列目</td><td>ベンダ種別</td></tr>
+                    <tr><td>kmn</td><td>11列目</td><td>品名</td></tr>
+                    <tr><td>kmn</td><td>15列目</td><td>装置監視構成eNB装置番号</td></tr>
+                    <tr><td>kmn</td><td>18〜19列目</td><td>2gNBモード設置位置</td></tr>
+                    <tr><td>kmn</td><td>20列目</td><td>FHM設置有無</td></tr>
+                    <tr><td>kmn</td><td>21列目</td><td>5GFHM#1ノード名</td></tr>
+                    <tr><td>kmn</td><td>22列目</td><td>5GFHM#カナノード名</td></tr>
+                    <tr><td>kmn</td><td>84列目</td><td>5GS-TAC</td></tr>
+                    <tr><td>kmn</td><td>86列目</td><td>FR1容量拡張（0=なし/1=あり）</td></tr>
+                </table>
+
+                <h3>■ SA/NSAの違い</h3>
+                <table>
+                    <tr><th>項目</th><th><span class="badge sa">SA</span></th><th><span class="badge nsa">NSA</span></th></tr>
+                    <tr><td>eih</td><td>1が4つ</td><td>回線数のみ</td></tr>
+                    <tr><td>gnf</td><td>+される</td><td>通常</td></tr>
+                    <tr><td>gss</td><td>SAの方法</td><td>NSA+SAはSA</td></tr>
+                    <tr><td>gag</td><td>✓ あり</td><td>× なし</td></tr>
+                    <tr><td>g5t</td><td>✓ あり</td><td>× なし</td></tr>
+                </table>
+            </div>
+
+            <!-- ========== 用語集 ========== -->
+            <div id="terms" class="tab-content">
+                <h2>■ 用語集</h2>
+
+                <div class="search-box">
+                    <input type="text" id="termSearch" placeholder="用語を検索..." onkeyup="searchTerms()">
+                </div>
+
+                <table id="termsTable">
+                    <tr><th>用語</th><th>意味</th></tr>
+                    <tr><td>SA</td><td>Standalone（5G単独）</td></tr>
+                    <tr><td>NSA</td><td>Non-Standalone（4G+5G）</td></tr>
+                    <tr><td>NR</td><td>New Radio（5G）</td></tr>
+                    <tr><td>LTE</td><td>Long Term Evolution（4G）</td></tr>
+                    <tr><td>FDD</td><td>Frequency Division Duplex（2GHz以下）</td></tr>
+                    <tr><td>TDD</td><td>Time Division Duplex（2GHz以上）</td></tr>
+                    <tr><td>FHIC</td><td>Fronthaul Interface Card（DUに挿す、DUとRUを繋ぐカード）</td></tr>
+                    <tr><td>FHM</td><td>FH関連の装置</td></tr>
+                    <tr><td>FH</td><td>Fronthaul（DU-RU間接続）</td></tr>
+                    <tr><td>TAC</td><td>Tracking Area Code（エリア識別）</td></tr>
+                    <tr><td>SSB</td><td>Synchronization Signal Block（同期信号ブロック）</td></tr>
+                    <tr><td>gNB</td><td>5G基地局</td></tr>
+                    <tr><td>eNB</td><td>4G基地局</td></tr>
+                    <tr><td>AMF</td><td>Access and Mobility Management Function（5Gコア機能）</td></tr>
+                    <tr><td>RRU</td><td>Remote Radio Unit（=RU）</td></tr>
+                    <tr><td>MMU</td><td>装置種別</td></tr>
+                    <tr><td>DU</td><td>Distributed Unit（分散ユニット）</td></tr>
+                    <tr><td>CU</td><td>Central Unit（中央ユニット）</td></tr>
+                    <tr><td>RU</td><td>Radio Unit（無線ユニット）</td></tr>
+                    <tr><td>IPsec</td><td>IP Security（通信暗号化プロトコル）</td></tr>
+                    <tr><td>FR1</td><td>Frequency Range 1（Sub-6GHz帯）</td></tr>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="status-bar">
+            <span class="status-section">最終更新: 2026/02/20【0220版】</span>
+            <span class="status-section">新人からベテランまで使えるリファレンス</span>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showSubTab(section, subTabId) {
+            const sec = document.getElementById(section);
+            sec.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
+            sec.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(subTabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function searchTerms() {
+            const filter = document.getElementById('termSearch').value.toLowerCase();
+            const rows = document.getElementById('termsTable').getElementsByTagName('tr');
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let found = false;
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) { found = true; break; }
+                }
+                rows[i].style.display = found ? '' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>
