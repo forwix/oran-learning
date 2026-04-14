@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>局データクロスチェック 早見表【0414版】</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif; font-size: 14px; line-height: 1.6; background: #f5f5f5; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: #333; color: #fff; padding: 15px 20px; }
+        .header h1 { font-size: 20px; margin-bottom: 5px; }
+        .header .subtitle { font-size: 12px; color: #ccc; }
+        .search-container { background: #f9f9f9; padding: 10px 20px; border-bottom: 1px solid #ddd; }
+        .search-box input { width: 100%; padding: 8px 12px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+        .search-box input:focus { outline: none; border-color: #007bff; }
+        .search-results { margin-top: 8px; font-size: 12px; color: #666; }
+        .tabs { display: flex; flex-wrap: wrap; background: #f0f0f0; border-bottom: 2px solid #333; }
+        .tab { padding: 10px 15px; cursor: pointer; border: none; background: #e0e0e0; font-size: 13px; font-family: inherit; border-right: 1px solid #ccc; transition: all 0.2s; }
+        .tab:hover { background: #d0d0d0; }
+        .tab.active { background: #fff; font-weight: bold; border-bottom: 2px solid #fff; margin-bottom: -2px; }
+        .content { padding: 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        h2 { font-size: 16px; color: #fff; background: #333; padding: 8px 12px; margin: 20px 0 15px 0; }
+        h2:first-child { margin-top: 0; }
+        h3 { font-size: 14px; color: #333; border-left: 4px solid #333; padding-left: 10px; margin: 15px 0 10px 0; }
+        h4 { font-size: 13px; color: #555; margin: 12px 0 8px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; }
+        th, td { border: 1px solid #ccc; padding: 8px 10px; text-align: left; vertical-align: top; }
+        th { background: #f5f5f5; font-weight: bold; }
+        tr:hover { background: #fafafa; }
+        .file { font-family: 'Courier New', monospace; font-weight: bold; color: #c00; }
+        .badge { display: inline-block; padding: 2px 6px; font-size: 11px; font-weight: bold; border-radius: 3px; margin-right: 3px; }
+        .badge-e { background: #17a2b8; color: #fff; }
+        .badge-g { background: #dc3545; color: #fff; }
+        .badge-k { background: #ffc107; color: #000; }
+        .badge-sys { background: #6c757d; color: #fff; }
+        .badge-sa { background: #28a745; color: #fff; }
+        .badge-nsa { background: #6f42c1; color: #fff; }
+        .badge-new { background: #dc3545; color: #fff; }
+        .box { padding: 10px 12px; margin: 10px 0; font-size: 13px; }
+        .box-warning { background: #fff3cd; border: 1px solid #ffc107; }
+        .box-danger { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .box-info { background: #d1ecf1; border: 1px solid #bee5eb; }
+        .box-memory { background: #e8f5e9; border: 1px dashed #4caf50; }
+        .box-purpose { background: #f0f0f0; border-left: 4px solid #333; }
+        .hl { background: #ffff00; padding: 1px 3px; }
+        ul { margin-left: 20px; margin-bottom: 10px; }
+        li { margin: 3px 0; }
+        code { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 2px 5px; border-radius: 3px; font-size: 12px; }
+        .flow-item { background: #fff; border: 1px solid #ddd; padding: 8px 12px; margin: 5px 0; }
+        .flow-arrow { text-align: center; color: #333; font-size: 16px; margin: 2px 0; }
+        .sub-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
+        .sub-tab { padding: 5px 12px; cursor: pointer; background: #e9e9e9; border: 1px solid #ccc; font-size: 12px; font-family: inherit; border-radius: 3px; }
+        .sub-tab:hover { background: #ddd; }
+        .sub-tab.active { background: #333; color: #fff; border-color: #333; }
+        .sub-content { display: none; }
+        .sub-content.active { display: block; }
+        .footer { margin-top: 30px; padding: 15px 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; text-align: center; background: #f9f9f9; }
+        @media print { .tabs, .search-container { display: none; } .tab-content { display: block !important; } .container { box-shadow: none; } }
+        @media (max-width: 600px) { .tab { padding: 8px 10px; font-size: 11px; } .content { padding: 15px; } table { font-size: 12px; } th, td { padding: 6px 8px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 局データクロスチェック 早見表【0414版】</h1>
+            <div class="subtitle">最終更新: 2026/04/14 ｜ 原則：入ってるファイルは全て見る ｜ 自分の考えが何に基づいているか資料と結びつけることが大事</div>
+        </div>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 検索（例：gpo、11列、Nokia、RAT混載...）" onkeyup="searchContent()">
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('overview')">はじめに</button>
+            <button class="tab" onclick="showTab('flow')">作業フロー</button>
+            <button class="tab" onclick="showTab('e-series')">e系</button>
+            <button class="tab" onclick="showTab('g-series')">g系</button>
+            <button class="tab" onclick="showTab('k-series')">k系</button>
+            <button class="tab" onclick="showTab('s-series')">S系</button>
+            <button class="tab" onclick="showTab('sys')">シスパラ</button>
+            <button class="tab" onclick="showTab('column')">列番号</button>
+            <button class="tab" onclick="showTab('sa-nsa')">SA/NSA</button>
+            <button class="tab" onclick="showTab('external')">外部装置</button>
+            <button class="tab" onclick="showTab('vendor')">ベンダー</button>
+            <button class="tab" onclick="showTab('lte')">LTE側</button>
+            <button class="tab" onclick="showTab('terms')">用語</button>
+            <button class="tab" onclick="showTab('tips')">覚え方</button>
+            <button class="tab" onclick="showTab('vran')">vRAN</button>
+            <button class="tab" onclick="showTab('memo')">メモ欄</button>
+        </div>
+        <div class="content">
+            <!-- はじめに -->
+            <div id="overview" class="tab-content active">
+                <div class="box box-purpose">
+                    <strong>目的：</strong>依頼票どおりに局データが作成されているかを、疑問点がなくなるまで照合する。<br>
+                    <strong>フォルダ：</strong>局データ/NR（5G）・LTE（4G）・csn/cst（シスパラ）
+                </div>
+                <h2>依頼元</h2>
+                <table>
+                    <tr><th>部署</th><th>役割</th><th>特記事項</th></tr>
+                    <tr><td><strong>PFVT</strong></td><td>現場前検証試験</td><td>kmlで1001=PFVT</td></tr>
+                    <tr><td><strong>OPS</strong></td><td>運用、管理簿・シート提供</td><td>管理簿確認必須、共用時はLTE側も</td></tr>
+                    <tr><td><strong>LVT</strong></td><td>検証関連</td><td>基本確認</td></tr>
+                </table>
+                <h2>ファイル種別</h2>
+                <table>
+                    <tr><td><span class="badge badge-e">e系</span></td><td>接続・回線の情報。「電気的な接続」のイメージ</td></tr>
+                    <tr><td><span class="badge badge-g">g系</span></td><td>無線・アンテナ・FHの情報。「外に出ていく(Go)」のイメージ</td></tr>
+                    <tr><td><span class="badge badge-k">k系</span></td><td>識別情報。「Key（鍵）」のイメージ</td></tr>
+                </table>
+                <h2>構成図</h2>
+<pre style="background:#f5f5f5;padding:15px;font-family:monospace;font-size:13px;">
+OSS（運用支援）
+  ↓
+SMO（MANO, RIC）
+  ↓
+EMS（装置管理）
+  ↓
+vCU / vDU ←→ FHIC / FHM
+  ↓
+RU / RRU
+  ↓
+アンテナ</pre>
+                <div class="box box-info">
+                    💡 <strong>直近の勤務で何のファイルをチェックしたか記録しておく。</strong><br>
+                    💡 <strong>チェックにない項目で気づいたことがあれば、メモ帳に残す。</strong>
+                </div>
+
+                <h2>TDD / FDD / CU 条件表</h2>
+                <table>
+                    <tr><th>条件</th><th>対象周波数</th></tr>
+                    <tr><td><strong>TDD-off / N-CU_off</strong></td><td>28G</td></tr>
+                    <tr><td><strong>TDD-ON / CU_ON</strong></td><td>28G, 2G, 700M <strong>以外</strong>（= 3.4G, 3.7G, 4.5G, 4.7G）</td></tr>
+                    <tr><td><strong>FDD-ON / N_CU_ON</strong></td><td>2G, 700M</td></tr>
+                </table>
+            </div>
+
+            <!-- 作業フロー -->
+            <div id="flow" class="tab-content">
+                <h2>作業フロー</h2>
+                <div class="flow-item"><strong>1.</strong> 依頼票を確認（AMF数、構成、参照チェックシート）→ PFVT/OPS/LVTを見分ける</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>2.</strong> OPSの場合は管理簿も確認（カード情報など）→ 共用時はLTE側も</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>3.</strong> 依頼内容を把握 → 不明点は先に洗い出す</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>4.</strong> 局データクロスチェックシートで照合 → 差分の根拠を残す</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>5.</strong> 序盤は ecs → eih を先に確認 → 「どこの話か」「接続状態」を固める</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>6.</strong> 各ファイルを横断して整合性チェック → 列番号の要所に注目</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>7.</strong> 疑問点がなくなるまで繰り返す → <span class="hl">自己判断しない</span></div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>8.</strong> 完了（疑問点が0）✓</div>
+                <div class="box box-warning">
+                    ⚠️ 「疑問点がなくなるまで」がポイント。分からないことは確認するか疑問点として報告。
+                </div>
+            </div>
+            <!-- e系 -->
+            <div id="e-series" class="tab-content">
+                <h2><span class="badge badge-e">e系</span> 接続・回線ファイル</h2>
+                <div class="box box-memory">
+                    🔑 <strong>覚え方：s, p, v</strong><br>
+                    <code>esi</code> = Security = IPsec<br>
+                    <code>epl</code> = Physical = 物理回線詳細<br>
+                    <code>evi</code> = Virtual = 仮想IP
+                </div>
+                <div class="box box-warning">⚠️ <strong>NR/LTE共用</strong>はe系に時間を要する。</div>
+                <div class="box box-info">
+                    💡 <strong>SGW</strong>（OPSのみ）：管理簿をエビデンスにする。
+                </div>
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="showSubTab('e-series','e-list')">一覧</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-ecs')">ecs</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-eih')">eih</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-esi')">esi</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-epl')">epl</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-evi')">evi</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-edb')">edb</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-eee')">eee</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-erc')">erc</button>
+                    <button class="sub-tab" onclick="showSubTab('e-series','e-esg')">esg/egr</button>
+                </div>
+                <div id="e-list" class="sub-content active">
+                    <table>
+                        <tr><th>ファイル</th><th>キーワード</th><th>要点</th></tr>
+                        <tr><td><span class="file">ecs</span></td><td>場所・カード</td><td>Aセル/DU/ポート/カード情報。カード相違は即確認。</td></tr>
+                        <tr><td><span class="file">eih</span></td><td>状態</td><td>SA:1が4つ、NSA:回線数。13〜15列(トラヒック/L3Trace/警報ログ)。</td></tr>
+                        <tr><td><span class="file">esi</span></td><td>暗号化</td><td>IPsec設定。OPS以外は「1」。</td></tr>
+                        <tr><td><span class="file">epl</span></td><td>物理回線詳細</td><td>物理回線番号/帯域/vRAN ON・OFF/仮想IP可否/物理回線種別。</td></tr>
+                        <tr><td><span class="file">evi</span></td><td>仮想IP</td><td>IP種別(LTE+NRは同値)。IP下4桁がNR/LTEで全一致はNG。</td></tr>
+                        <tr><td><span class="file">edb</span></td><td>回線番号</td><td>物理回線番号。</td></tr>
+                        <tr><td><span class="file">eee</span></td><td>LTE-NR接続</td><td>eNB-gNB接続確認。</td></tr>
+                        <tr><td><span class="file">erc</span></td><td>ローミング</td><td>投入/抽出ツールeNBファイル。ローミング機能。</td></tr>
+                        <tr><td><span class="file">esg/egr</span></td><td>セクタ・キャリア</td><td>LTE→NRへ付属するセクタとキャリア。管理簿の外部装置列参照。</td></tr>
+                    </table>
+                </div>
+                <div id="e-ecs" class="sub-content">
+                    <h3>ecs - 場所・カード情報</h3>
+                    <ul>
+                        <li>Aセル、DU番号</li>
+                        <li>スロット/シェルフ/ポート番号</li>
+                        <li>EOPL/EOPLA時のポート番号</li>
+                        <li>LTE共用時MCPは同値</li>
+                        <li><strong>カード情報</strong></li>
+                    </ul>
+                    <div class="box box-danger">🚨 <strong>カードの相違についての疑問点は、まず聞きに行く！</strong>自分で判断しない。</div>
+                    <div class="box box-warning">⚠️ <strong>NR/LTE共用</strong>：MPCの設置がLTEとNRで同じになっていなければならない。</div>
+                    <div class="box box-info">
+                        💡 <strong>ecs(OPS)</strong>：slot番号の横にECBなどカード名の記載があれば、<strong>カード情報を確かめる</strong>。
+                    </div>
+                    <div class="box box-info">
+                        💡 <span class="badge badge-new">追加</span> 構成上、実装すべきところが実装されていれば、全て管理簿通りでなくても良い場合がある。局データ作成者さんに聞いても良い。
+                    </div>
+                </div>
+                <div id="e-eih" class="sub-content">
+                    <h3>eih - 接続状態</h3>
+                    <ul>
+                        <li><span class="badge badge-sa">SA</span> → <span class="hl">1が4つ</span>（<strong>Nokiaは1が5つ</strong>）</li>
+                        <li><span class="badge badge-nsa">NSA</span> → 回線数のみ</li>
+                        <li>NR呼処理</li><li>ミナデン設定</li>
+                        <li>LTE側と重複してないか確認</li>
+                        <li><strong>13〜15列目</strong>：トラヒック/L3Trace/警報ログ</li>
+                        <li><strong>OPS</strong>：物理回線+サブネット、DGW（回線0）</li>
+                    </ul>
+                    <div class="box box-warning">⚠️ <strong>NR/LTE共用の場合</strong>：物理回線番号をはじめ、指定通りの設定になっているか確認。</div>
+                    <div class="box box-danger">
+                        🚨 <strong>LTE+NR</strong>：物理回線種別と物理回線番号は<strong>同値</strong>でなければならない。<br>
+                        🚨 <strong>NR/LTE共用</strong>：Source IP Addressは<strong>同値であってはならない</strong>。
+                    </div>
+                    <div class="box box-info">
+                        💡 <span class="badge badge-sa">SA</span> 1つの物理回線に2本のアドレスを載せると<strong>3行になる</strong>（ミナデン無の場合は除く）。
+                    </div>
+                    <div class="box box-warning">
+                        ⚠️ <span class="badge badge-new">追加</span> <strong>OPS依頼時</strong>：NR/LTEのEN-DCデータ用IPsec非適用フラグの列 → IPsec有の<strong>「0」</strong>が入る。管理簿にLTEの物理回線0、仮想IPアドレスなど記載されている局データもあるので、<strong>OPSのe系は特に確認すること</strong>。
+                    </div>
+                    </div>
+                </div>
+                <div id="e-esi" class="sub-content">
+                    <h3>esi - IPsec（暗号化）</h3>
+                    <ul><li>IPsec設定</li><li><strong>OPS以外は「1」</strong></li></ul>
+                    <div class="box box-info">💡 <strong>esg・essファイル</strong>がOPS以外にないのは、IPsecが無いから。</div>
+                </div>
+                <div id="e-epl" class="sub-content">
+                    <h3>epl - 物理回線詳細</h3>
+                    <ul>
+                        <li>物理回線番号</li><li>帯域</li><li>vRAN機能ON/OFF</li>
+                        <li>仮想IPアドレス設定可否</li><li>物理回線種別</li>
+                        <li><span class="hl">指定の物理回線番号と使用G数について確認すること</span></li>
+                    </ul>
+                </div>
+                <div id="e-evi" class="sub-content">
+                    <h3>evi - 仮想IP</h3>
+                    <ul>
+                        <li>仮想IPアドレス</li><li>IP種別</li>
+                        <li><span class="hl">LTE+NR → IP種別が同値でなければならない</span></li>
+                        <li><span class="hl">IPアドレス4桁 → NRとLTEが全て同じはNG</span></li>
+                    </ul>
+                </div>
+                <div id="e-edb" class="sub-content">
+                    <h3>edb - 物理回線番号</h3>
+                    <ul><li>物理回線番号</li></ul>
+                </div>
+                <div id="e-eee" class="sub-content">
+                    <h3>eee - LTE-NR接続確認</h3>
+                    <ul><li>LTE-NRが接続されていることを確認</li></ul>
+                    <p>例：<code>2,1997,1,2,6023,0,0,30</code> → 1997=eNB番号、6023=gNB番号</p>
+                    <div class="box box-warning">
+                        ⚠️ <strong>隣接eNB-PFVTの場合</strong> <span class="badge badge-new">追加</span><br>
+                        0〜8と設置されるので、<span class="hl">9行あるか確認する</span>。
+                    </div>
+                </div>
+                <div id="e-erc" class="sub-content">
+                    <h3>erc - ローミング機能</h3>
+                    <ul><li>投入/抽出ツールeNBファイル</li><li>ローミング機能</li></ul>
+                </div>
+                <div id="e-esg" class="sub-content">
+                    <h3>esg / egr - LTE→NR付属セクタ・キャリア <span class="badge badge-new">追加</span></h3>
+                    <ul>
+                        <li>LTE→NRへ付属するセクタとキャリアを確認</li>
+                        <li>例：<strong>S5C1</strong> と記載があった場合 → <strong>管理簿の外部装置の列</strong>を見る</li>
+                        <li>外部装置のついてるAセル番号で判断できる</li>
+                    </ul>
+                    <div class="box box-info">
+                        💡 <strong>egn / egf</strong> にも同様の情報あり。FHMがある時はegnとegfもクロスチェック対象。
+                    </div>
+                </div>
+            </div>
+            <!-- g系 -->
+            <div id="g-series" class="tab-content">
+                <h2><span class="badge badge-g">g系</span> 無線・アンテナ・FHファイル</h2>
+                <div class="box box-memory">
+                    🔑 <strong>覚え方：BPM（FH関連）</strong><br>
+                    <code>gfb</code> → b / <code>gfp</code> → p / <code>gdm</code> → m　末尾 b-p-m = <strong>BPM</strong>
+                </div>
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="showSubTab('g-series','g-list')">一覧</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series','g-fh')">FH(BPM)</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series','g-antenna')">アンテナ</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series','g-cell')">セル・リンク</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series','g-sa')">SA専用</button>
+                    <button class="sub-tab" onclick="showSubTab('g-series','g-other')">その他</button>
+                </div>
+                <div id="g-list" class="sub-content active">
+                    <table>
+                        <tr><th>ファイル</th><th>キーワード</th><th>要点</th></tr>
+                        <tr><td><span class="file">gfb</span></td><td>ビットレート</td><td>キャリア数/FHポート/FHビットレート。アクティブリンク番号(LTE側のキャリア数)。</td></tr>
+                        <tr><td><span class="file">gfp</span></td><td>DU-FHポート</td><td>DU番号/FHポート番号。</td></tr>
+                        <tr><td><span class="file">gdm</span></td><td>接続方式</td><td>FHIC/MMU、直つなぎ/分離/一体型。⚠️時間がかかる。</td></tr>
+                        <tr><td><span class="file">gas</span></td><td>アンテナ全般</td><td>セル数拡張グループ番号/優先度。Xチェックシート参照。</td></tr>
+                        <tr><td><span class="file">grc</span></td><td>周波数</td><td>900から始まり。2G/700M、3.4G、3.7G、4.5G、4.7G、28G。</td></tr>
+                        <tr><td><span class="file">gnf</span></td><td>メイン/サブ</td><td>1=メイン、4=サブ。SAの場合+される。</td></tr>
+                        <tr><td><span class="file">gnr</span></td><td>周辺CC</td><td>Aセル番号重複NG。</td></tr>
+                        <tr><td><span class="file">gcd</span></td><td>アンテナポート</td><td>2列=DU、3列=Aセル、12〜15列=アンテナポート。</td></tr>
+                        <tr><td><span class="file">gss</span></td><td>SSB</td><td>SSB番号/周波数/一体型・RRU・分離型。</td></tr>
+                        <tr><td><span class="file">gfa</span></td><td>張り出し</td><td>DU/Aセル/ビル番号/gNB。設置数確認。</td></tr>
+                        <tr><td><span class="file">gof</span></td><td>セル特定</td><td>2列と8列のDU/セル同値確認。</td></tr>
+                        <tr><td><span class="file">gtr</span></td><td>アクティブリンク</td><td>3・20・31列でDU/Aセル同値確認。チルト。</td></tr>
+                        <tr><td><span class="file">gtb</span></td><td>ビットレート</td><td>REは4、RE以外は基本1。</td></tr>
+                        <tr><td><span class="file">glr</span></td><td>FHM構成</td><td>FHM構成時のみ。3列=FHM番号、4列=論理RU番号。</td></tr>
+                        <tr><td><span class="file">gpo</span></td><td>外部装置</td><td>PFVT_FHMD_LTENR。11/14が正、12/15なら疑問点。</td></tr>
+                        <tr><td><span class="file">gmi</span></td><td>固定値</td><td>0が3の時は枠が埋まっている。</td></tr>
+                        <tr><td><span class="file">gag</span></td><td>AMF</td><td><span class="badge badge-sa">SA専用</span></td></tr>
+                        <tr><td><span class="file">g5t</span></td><td>スライス</td><td><span class="badge badge-sa">SA専用</span> 35〜38列。</td></tr>
+                        <tr><td><span class="file">ggg</span></td><td>隣接gNB</td><td>隣接gNB設置時に必要。無ければ疑問点。</td></tr>
+                    </table>
+                </div>
+                <div id="g-fh" class="sub-content">
+                    <h3>gfb - ビットレート <small>（b = ビットレート）</small></h3>
+                    <ul>
+                        <li>キャリア数</li><li>FHポート番号</li><li>FHビットレート</li>
+                        <li><strong>アクティブリンクグループ番号</strong>（LTE側キャリア番号確認）→ srlとも関連</li>
+                        <li><strong>アクティブリンク番号</strong>（LTE側のキャリア数）</li>
+                        <li><strong>12列目付近</strong>：LTE帯域幅も確認する</li>
+                    </ul>
+                    <div class="box box-info">
+                        💡 <strong>アクティブリンクグループ番号の見方</strong><br>
+                        管理簿の「Active Link」列を参照して確認する。<br>
+                        NRのgfbとLTEのsrlは<strong>0</strong>となっている。
+                    </div>
+                    <div class="box box-warning">
+                        ⚠️ <strong>BRE、NR/LTE使用時</strong> <span class="badge badge-new">追加</span><br>
+                        Activeリンク番号（LTE側のキャリア数）を確認し、<strong>NR側のBRE設置FHポートにActiveリンク番号が入っているか</strong>確認する。
+                    </div>
+                    <h3>gfp - DU-FHポート <small>（p = FHポート番号）</small></h3>
+                    <ul><li>DU番号</li><li>FHポート番号</li></ul>
+                    <h3>gdm - 接続方式 ⚠️時間がかかる</h3>
+                    <ul>
+                        <li>FHIC使ってるか / MMUか</li><li>直つなぎか / 分離か / 一体型か</li><li>何台ついてるか</li>
+                        <li>kmnで設定した5GFHM確認</li>
+                        <li><strong>3列目 → Aセル番号</strong></li><li><strong>5列目 → DU番号</strong></li>
+                        <li><strong>10〜14列目</strong>：1,10,1,2,2 は固定値なので起点にすると見易い</li>
+                        <li><strong>36列目・37列目 → 送信アンテナ系・受信アンテナ系（一体型は空白）</strong></li>
+                        <li>分離型は確認が必要：<strong>700M,2G → 1</strong>、<strong>その他 → 2</strong></li>
+                        <li><strong>42列目</strong>：UL合成待ち時間満了フラグ → 1固定と記載あるが<span class="hl">FHMの場合のみ</span></li>
+                    </ul>
+                    <div class="box box-info">💡 <strong>一体型のアンテナは36列目・37列目が空白</strong>になる。</div>
+                    <div class="box box-warning">
+                        ⚠️ <strong>RRU-2 → RRS の疑問点例</strong><br>
+                        依頼票に<code>&lt;N&gt;37L4C-RRU-2</code>等の記載 → RRU-2なので<strong>RRS</strong>になると思われる → <strong>疑問点に挙げる</strong>
+                    </div>
+                </div>
+                <div id="g-antenna" class="sub-content">
+                    <h3>gas - アンテナ全般</h3>
+                    <ul>
+                        <li>Xチェックシートを見る</li><li>セル数拡張グループ番号</li><li>優先度</li>
+                        <li><span class="badge badge-sa">SA</span>の場合、後半は<code>1,1,1,,0</code></li>
+                        <li><strong>Duplex種別</strong>：1=TDD、0=FDD</li>
+                        <li><strong>60番台</strong>：SRU / <strong>70番台</strong>：RRU、MMU</li>
+                    </ul>
+                    <div class="box box-info">
+                        💡 <strong>セル数拡張モードの組み合わせ</strong> <span class="badge badge-new">追加</span><br>
+                        「Aセル#1〜#2」「Aセル#3〜#4」というようにリンクする。
+                    </div>
+                    <div class="box box-warning">⚠️ <strong>Nokia P4001 2G,700M 構成時</strong>は値が変わるため、<strong>gas詳細シート</strong>を確認。</div>
+                    <div class="box box-info">💡 <strong>gas詳細</strong>：Nokia Aセル#3以上は値が変わる。</div>
+
+                    <h4>gas詳細 23列目・24列目 FHポート番号とformat <span class="badge badge-new">追加</span></h4>
+                    <table>
+                        <tr><th>FHポート番号</th><th>format</th><th>23列目の値</th></tr>
+                        <tr><td>1〜5、16</td><td>format <strong>0</strong></td><td><strong>10</strong></td></tr>
+                        <tr><td>7〜14、17、18</td><td>format <strong>1</strong></td><td><strong>15</strong></td></tr>
+                    </table>
+                    <div class="box box-info">
+                        💡 18以降は<strong>1に戻って</strong>順番に考える。
+                    </div>
+
+                    <h3>grc - 周波数</h3>
+                    <ul>
+                        <li>周波数：900から始まり、最後は局データ番号+数値</li>
+                        <li>数値は被ってなければ問題ない</li>
+                        <li>2G/700M、3.4G(40M/80M)、3.7G、4.5G、4.7G、28G</li>
+                        <li><strong>3650.010</strong></li>
+                    </ul>
+                    <h4>Dual-MMU 2CC(3.7G+3.4G) の周波数例 <span class="badge badge-new">追加</span></h4>
+                    <div class="box box-purpose">
+<pre style="font-size:12px;margin-bottom:8px;">Aセル#1【NSA】
+  FH Link 1  : &lt;P&gt;34-37-Dual-MMU(2CC(37G+34G(80M)),16DL4UL MIMO
+  FH Link 7  : &lt;P&gt;34-37-Dual-MMU(2CC(37G+34G(80M)),16DL4UL MIMO
+Aセル#2【NSA】
+  FH Link 10 : &lt;P&gt;34-37-Dual-MMU(2CC(37G+34G(80M)),16DL4UL MIMO
+  FH Link 16 : &lt;P&gt;34-37-Dual-MMU(2CC(37G+34G(80M)),16DL4UL MIMO</pre>
+                    </div>
+                    <table>
+                        <tr><th>Aセル</th><th>周波数</th><th>帯域</th></tr>
+                        <tr><td>Aセル#1</td><td><strong>3650.010</strong></td><td>3.7G</td></tr>
+                        <tr><td>Aセル#2</td><td><strong>3480</strong></td><td>3.4G</td></tr>
+                    </table>
+                    <h3>gnf - 周波数メイン/サブ</h3>
+                    <ul>
+                        <li>1=メイン、4=サブ</li>
+                        <li><span class="badge badge-sa">SA</span>の場合+される（元の周波数が<strong>3</strong>、追加が<strong>5</strong>）</li>
+                        <li><span class="badge badge-nsa">NSA</span>：<strong>1</strong></li>
+                    </ul>
+                    <h3>gnr - 周辺CC</h3>
+                    <ul><li><span class="hl">Aセル番号が重複してはならない</span></li><li>Xチェックシートに書いてある</li></ul>
+                    <h3>gcd - アンテナポート / セル-DU関連付け <span class="badge badge-new">更新</span></h3>
+                    <ul>
+                        <li><strong>セル-DU関連付け</strong></li>
+                        <li><strong>2列目</strong>：DU / <strong>3列目</strong>：Aセル番号 / <strong>4〜7列目</strong>：周波数</li>
+                        <li><strong>12〜15列目</strong>：対象アンテナポート</li>
+                        <li>28G/2G/700M → #1〜#2のみ / それ以外 → #1〜#4まで設定</li>
+                    </ul>
+                    <h3>gss - SSB</h3>
+                    <ul>
+                        <li>SSB番号 / 周波数 / 一体型/RRU/<strong>分離型</strong></li>
+                        <li>NSA+SAはSAの方法を見る</li>
+                        <li><span class="hl">ECOの場合は一体型で分離型の設定で合う</span></li>
+                        <li><span class="hl">3.4Gは現状分離型しか存在しない。一体型の値になっている</span></li>
+                    </ul>
+                </div>
+                <div id="g-cell" class="sub-content">
+                    <h3>gfa - 張り出し基地局</h3>
+                    <ul>
+                        <li>DU番号、Aセル番号、ビル番号（1234567890）、gNB</li>
+                        <li><strong>設置数と同じか確認</strong> / <strong>ビル番号が入ってるか確認</strong></li>
+                        <li><strong>Nokia-CU</strong>：GPS遅延量が<strong>1</strong>になる</li>
+                    </ul>
+                    <h3>gof - セル特定 <small>（sofと似ている）</small></h3>
+                    <ul>
+                        <li><strong>2列目</strong>：DU番号 / <strong>18列目</strong>：gNB内セル番号（2列目と同じ）</li>
+                        <li><span class="hl">2列目と8列目のDUとセルが同値か確認</span></li>
+                    </ul>
+                    <h3>gtr - アクティブリンク</h3>
+                    <ul>
+                        <li><strong>3列目</strong>：DU番号 / <strong>20列目・31列目</strong>：3列目と同じ</li>
+                        <li><span class="hl">3列目・20列目・31列目でDUとAセルの同値確認</span></li>
+                        <li><strong>チルト</strong> / <strong>ポート番号も確認する</strong></li>
+                    </ul>
+                    <h3>gtb - ビットレート</h3>
+                    <ul><li><strong>RE</strong>：4 / <strong>RE以外</strong>：基本1</li></ul>
+                    <h3>glr - FHM構成</h3>
+                    <ul>
+                        <li>FHM構成のみ必要 / <strong>3列目</strong>：FHM番号 / <strong>4列目</strong>：論理RU番号</li>
+                    </ul>
+                    <div class="box box-warning">⚠️ <strong>5G-FHM構成</strong>では<strong>grlファイル</strong>が必要。</div>
+                    <div class="box box-info">💡 <strong>grl</strong>：論理RU番号が偶数なら偶数の値、奇数なら奇数の値が設定される。</div>
+                    <div class="box box-warning">⚠️ <strong>FHMがある時</strong>はegnとegfもクロスチェック対象。</div>
+                </div>
+                <div id="g-sa" class="sub-content">
+                    <h3>gag - AMF 🎭ギャグで覚える！</h3>
+                    <ul><li><span class="badge badge-sa">SA専用</span> AMFの数の行を要する</li></ul>
+                    <h3>g5t - スライス</h3>
+                    <ul><li><span class="badge badge-sa">SA専用</span> <strong>35〜38列目</strong>：0.0.....</li></ul>
+                </div>
+                <div id="g-other" class="sub-content">
+                    <h3>gpo - 外部装置</h3>
+                    <ul>
+                        <li>PFVT_FHMD_LTENR</li>
+                        <li><span class="hl">11と14が正しい。12と15になっていたら疑問点にあげる。</span></li>
+                        <li>セクタ、キャリアが空白の行にはBDEがついていると思われる</li>
+                    </ul>
+                    <div class="box box-danger">🚨 gpoで11/14のはずが12/15になっていたら、必ず疑問点として報告！</div>
+                    <h3>gmi - 固定値</h3>
+                    <ul><li>固定値が0なのに3の時は枠が埋まっている（ケータイ番号のイメージ）</li></ul>
+                    <h3>ggg - 隣接gNB</h3>
+                    <ul><li>隣接gNB設置時に必要。<span class="hl">無ければ疑問点</span></li></ul>
+                    <h3>egn / egf</h3>
+                    <ul>
+                        <li>LTE→NRへ付属するセクタとキャリアは外部装置のついてるAセル番号で判断</li>
+                        <li>FHMがある時にクロスチェック対象</li>
+                        <li><span class="badge badge-new">追加</span> <strong>egnファイル、egfファイルにてEN-DC設置位置を確認すること</strong>。シスパラで見落とす可能性があるため。</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- k系 -->
+            <div id="k-series" class="tab-content">
+                <h2><span class="badge badge-k">k系</span> 識別情報ファイル</h2>
+                <h3>kml - 位置・TAC</h3>
+                <ul>
+                    <li>TAC、位置情報 / LTE/NR一致確認 / Nokia → airframe=3 / 1001=PFVT / ベンダ番号</li>
+                    <li><strong>装置Fならkmnとkml品名一致確認</strong></li>
+                    <li>NexCs番号は管理簿の構成シート内に記載</li>
+                </ul>
+                <h3>kmn - 基地局識別</h3>
+                <ul>
+                    <li>vRAN識別番号 / NexCS種別 / LTE側のeNB番号 / 5GFHM有無 / 5GS-TAC</li>
+                    <li><strong>5G TAC10</strong> <span class="badge badge-sa">SAのみ</span></li>
+                    <li>OPS → 管理簿の品名と一致確認</li>
+                    <li><strong>Nokia新カード → #1〜4は左側、#5〜8は右側</strong></li>
+                </ul>
+                <h3>kmn 列番号詳細</h3>
+                <table>
+                    <tr><th>列番号</th><th>内容</th></tr>
+                    <tr><td>3</td><td>vRAN識別</td></tr>
+                    <tr><td>6</td><td>NexCs番号</td></tr>
+                    <tr><td>9</td><td>ベンダ種別</td></tr>
+                    <tr><td>11</td><td>品名</td></tr>
+                    <tr><td>15</td><td>装置監視構成eNB装置番号（<span class="hl">LTE側のeNB番号</span>）</td></tr>
+                    <tr><td>18〜19</td><td>2gNBモード設置位置</td></tr>
+                    <tr><td>20</td><td>FHM設置有無</td></tr>
+                    <tr><td>21</td><td>5GFHM#1ノード名</td></tr>
+                    <tr><td>22</td><td>5GFHM#カナノード名</td></tr>
+                    <tr><td>84</td><td>5GS-TAC</td></tr>
+                    <tr><td>86</td><td>FR1容量拡張（0=なし / 1=あり）</td></tr>
+                </table>
+                <h3>kmi</h3>
+                <table>
+                    <tr><th>列番号</th><th>内容</th></tr>
+                    <tr><td>17</td><td>eNB通番 1〜8（基本は1）</td></tr>
+                </table>
+            </div>
+
+            <!-- S系 -->
+            <div id="s-series" class="tab-content">
+                <h2><span class="badge badge-sys">S系</span> 設備情報ファイル</h2>
+                <table>
+                    <tr><th>ファイル</th><th>キーワード</th><th>要点</th></tr>
+                    <tr><td><span class="file">sdp</span></td><td>外部装置</td><td>外部装置、ポート番号、整流装置、空調機</td></tr>
+                    <tr><td><span class="file">sof</span></td><td>ポート・アンテナ</td><td>セクタ/キャリア/外部装置ポート番号、ノード名、送信/受信アンテナ</td></tr>
+                    <tr><td><span class="file">srl</span></td><td>TILT</td><td>TILT、Activeグループ番号</td></tr>
+                    <tr><td><span class="file">sfa</span></td><td>設置数</td><td>設置される数、ビル番号</td></tr>
+                    <tr><td><span class="file">sbc</span></td><td>BRE構成</td><td>BRE設定ファイル。&lt;N&gt;=カード2枚、&lt;F&gt;=カード1枚</td></tr>
+                    <tr><td><span class="file">str</span></td><td>gtrに似てる</td><td>セクタ/キャリア/外部装置ポート番号/ベンダ種別。3列=DU、20・31列=3列と同値</td></tr>
+                    <tr><td><span class="file">sbr</span></td><td>LTE周波数・BRE</td><td>27列目=LTE周波数（起点にすると見易い）。BRE番号。</td></tr>
+                    <tr><td><span class="file">sdf</span></td><td>セクタ・キャリア</td><td>セクタ/キャリア/外部装置ポート番号を見る</td></tr>
+                </table>
+                <h3>sdp - 外部装置</h3>
+                <ul><li>外部装置 / ポート番号 / ポート情報接続装置 / 整流装置 / 空調機</li></ul>
+                <h3>sof - ポート・アンテナ <small>（gofと似ている）</small> <span class="badge badge-new">更新</span></h3>
+                <ul>
+                    <li><strong>セクタとキャリアと外部装置ポート番号を見る</strong></li>
+                    <li>ポート番号 / ノード名 / 送信アンテナ / 受信アンテナ</li>
+                </ul>
+                <h3>srl - TILT</h3>
+                <ul><li>TILT</li><li>Activeグループ番号（gfbとも関連）</li></ul>
+                <div class="box box-info">💡 <strong>例</strong>：NR側に3.7Gしかなくて、LTE側に2Gしかなければ、gNB番号とDU番号が空白なのは合っている。</div>
+                <h3>sfa - 設置数</h3>
+                <ul><li>設置される数 / ビル番号</li></ul>
+                <h3>sbc - BRE構成（BRE設定ファイル） <span class="badge badge-new">更新</span></h3>
+                <ul>
+                    <li>BRE構成でFHIC（中間装置）を接続する場合、確認</li>
+                    <li><strong>&lt;N&gt;</strong>：スロット1つに対してカード<strong>2枚</strong>使用（1つにつき2つ使用）</li>
+                    <li><strong>&lt;F&gt;</strong>：スロット1つに対してカード<strong>1枚</strong>使用（1つにつき1つ使用）</li>
+                    <li><strong>BRE番号1の行は&lt;N&gt;</strong></li>
+                </ul>
+                <div class="box box-warning">
+                    ⚠️ <strong>N-BRE</strong>：slot53, 54の使用なし。slot55→RRE、slot56→LREになるため設定は不要。
+                </div>
+                <div class="box box-danger">
+                    🚨 上段でN-BRE使用になっている場合、<strong>F-BRE使用の設定がされていないか注意</strong>。設定されていなければ設定が必要になる。
+                </div>
+                <h3>str <small>（gtrに似ている）</small> <span class="badge badge-new">更新</span></h3>
+                <ul>
+                    <li><strong>セクタとキャリアと外部装置ポート番号を見る</strong></li>
+                    <li><strong>ベンダ種別を見る</strong></li>
+                    <li><strong>3列目</strong>：DU番号 / <strong>20列目・31列目</strong>：3列目と同じ値</li>
+                </ul>
+                <h3>sbr - LTE周波数・BRE番号 <span class="badge badge-new">追加</span></h3>
+                <ul>
+                    <li><strong>27列目</strong>：LTE周波数情報で目立つので<span class="hl">起点にすると見易い</span></li>
+                    <li><strong>BRE番号</strong>：要確認（どの列にどう記載されるか確認中）</li>
+                </ul>
+                <div class="box box-info">
+                    💡 sbrのBRE番号について詳細が分かったら追記予定。
+                </div>
+                <h3>sdf - セクタ・キャリア <span class="badge badge-new">更新</span></h3>
+                <ul>
+                    <li><strong>セクタとキャリアと外部装置ポート番号を見る</strong></li>
+                </ul>
+
+                <h2>S系 重要注意事項 <span class="badge badge-new">追加</span></h2>
+
+                <div class="box box-danger">
+                    🚨 <strong>3.5Gで組み合わせて使用している時</strong><br>
+                    キャリアを揃えないと作成できない。<br>
+                    例：S5C2とセットになる場合、管理簿ではS6C3となっているが、<strong>S6C2が正解</strong>。<br>
+                    → 回線の指摘を行う際は<strong>e系のファイルだけでなく、セクタとキャリアのs系のファイル見落としに注意</strong>する。
+                </div>
+
+                <div class="box box-info">
+                    💡 <strong>依頼票の構成の見方</strong><br>
+                    <code>&lt;N&gt;45L4C-RRU-2</code> → RRU-2のため、<strong>45L4C-RRS</strong>になる。
+                </div>
+            </div>
+            <!-- シスパラ -->
+            <div id="sys" class="tab-content">
+                <h2><span class="badge badge-sys">シスパラ</span> システムパラメータ</h2>
+                <div class="box box-danger">🚨 <strong>シスパラチェック時は差分表を必ず開く！</strong></div>
+                <div class="box box-info">💡 <strong>25Bチェックシート</strong>を利用すれば項目の見落とし防止。</div>
+                <div class="box box-warning">⚠️ <strong>シスパラの黄色項目</strong>は差分の有無を表している。</div>
+                <div class="box box-info">💡 <strong>Nokia-MMU（AVQY）</strong>の時は、AVQCの正規パターンと同じ。</div>
+                <div class="box box-info">💡 <strong>n79</strong> → 4.5G / <strong>TDD</strong> → 2G、700M、28G以外</div>
+                <table>
+                    <tr><th>ファイル</th><th>内容</th></tr>
+                    <tr><td><span class="file">cst</span></td><td>NR標準5カ所、SCTP</td></tr>
+                    <tr><td><span class="file">csn</span></td><td>システムパラメータ</td></tr>
+                    <tr><td><span class="file">cns</span></td><td>82602→振り分け制御、83111→3.4G 40M/80M</td></tr>
+                </table>
+                <div class="box box-info">
+                    💡 <strong>82308</strong> <span class="badge badge-new">更新</span><br>
+                    <strong>&lt;N&gt;</strong> F28Gの場合は生成NGのため、標準<strong>(off)</strong>となっているが、標準<strong>(ON)</strong>でも問題ないので合っている。
+                </div>
+                <div class="box box-warning">
+                    ⚠️ <strong>&lt;N&gt;とMMUの紐付け</strong> <span class="badge badge-new">追加</span><br>
+                    &lt;N&gt;はMMUというカードがなく、実装しているカードはRRU。シスパラを確認する際には「&lt;N&gt;MMU」というように<strong>&lt;N&gt;とMMUを紐付ける選択肢なら選択できる</strong>。
+                </div>
+            </div>
+
+            <!-- 列番号 -->
+            <div id="column" class="tab-content">
+                <h2>列番号 早見</h2>
+                <table>
+                    <tr><th>ファイル</th><th>列番号</th><th>内容</th></tr>
+                    <tr><td><span class="file">eih</span></td><td>13〜15</td><td>トラヒック / L3Trace / 警報ログ</td></tr>
+                    <tr><td><span class="file">gcd</span></td><td>2 / 3 / 4〜7 / 12〜15</td><td>DU / Aセル / 周波数 / アンテナポート</td></tr>
+                    <tr><td><span class="file">gdm</span></td><td>3 / 5 / 36・37 / 42</td><td>Aセル / DU / 送信・受信アンテナ系 / UL合成待ち時間満了フラグ(FHMのみ)</td></tr>
+                    <tr><td><span class="file">gof</span></td><td>2 と 8 / 18</td><td>DUとセル同値 / gNB内セル番号</td></tr>
+                    <tr><td><span class="file">gtr</span></td><td>3 / 20・31</td><td>DU番号 / 同値確認</td></tr>
+                    <tr><td><span class="file">glr</span></td><td>3 / 4</td><td>FHM番号 / 論理RU番号</td></tr>
+                    <tr><td><span class="file">g5t</span></td><td>35〜38</td><td>スライスパラメータ</td></tr>
+                    <tr><td><span class="file">gas</span></td><td>23・24</td><td>Nokia 700M,2G：format 0/1で値が変わる</td></tr>
+                    <tr><td><span class="file">sbr</span></td><td>27</td><td>LTE周波数（起点にすると見易い）</td></tr>
+                    <tr><td><span class="file">srl(LTE)</span></td><td>43・44</td><td>gNBとDU番号</td></tr>
+                    <tr><td><span class="file">kmn</span></td><td>3/6/9/11/15/18〜19/20/21/22/84/86</td><td>vRAN/NexCs/ベンダ/品名/eNB/設置位置/FHM/TAC/FR1</td></tr>
+                    <tr><td><span class="file">kmi</span></td><td>17</td><td>eNB通番</td></tr>
+                </table>
+            </div>
+
+            <!-- SA/NSA -->
+            <div id="sa-nsa" class="tab-content">
+                <h2>SA/NSAの違い</h2>
+                <table>
+                    <tr><th>項目</th><th><span class="badge badge-sa">SA</span></th><th><span class="badge badge-nsa">NSA</span></th></tr>
+                    <tr><td>eih</td><td>『1が4つ』を確認</td><td>回線数のみ</td></tr>
+                    <tr><td>gnf</td><td>周波数の値が+される</td><td>通常どおり</td></tr>
+                    <tr><td>gss</td><td>SAの方法で確認</td><td>NSA+SAはSA側で確認</td></tr>
+                    <tr><td>gag</td><td>✓ 必要</td><td>× 不要</td></tr>
+                    <tr><td>g5t</td><td>✓ 必要</td><td>× 不要</td></tr>
+                </table>
+                <h2>TDD / FDD / CU 条件表</h2>
+                <table>
+                    <tr><th>条件</th><th>対象周波数</th></tr>
+                    <tr><td><strong>TDD-off / N-CU_off</strong></td><td>28G</td></tr>
+                    <tr><td><strong>TDD-ON / CU_ON</strong></td><td>28G, 2G, 700M以外（= 3.4G, 3.7G, 4.5G, 4.7G）</td></tr>
+                    <tr><td><strong>FDD-ON / N_CU_ON</strong></td><td>2G, 700M</td></tr>
+                </table>
+            </div>
+
+            <!-- 外部装置 -->
+            <div id="external" class="tab-content">
+                <h2>外部装置</h2>
+                <h3>gpo</h3>
+                <ul><li>PFVT_FHMD_LTENR</li><li><span class="hl">11と14が正しい。12と15なら疑問点。</span></li></ul>
+                <h3>セクタ・キャリアが空白の場合</h3>
+                <div class="box box-info">💡 セクタ、キャリアが空白の行には<strong>BDE</strong>が設置されていると思われる。</div>
+                <h3>目次の調べ方</h3>
+                <table>
+                    <tr><th>キーワード</th><th>用途</th></tr>
+                    <tr><td><code>BDE-</code></td><td>BDE関連を検索</td></tr>
+                    <tr><td><code>CELPRA-</code></td><td>CELPRA関連を検索</td></tr>
+                    <tr><td><code>RU-</code></td><td>RU関連を検索</td></tr>
+                </table>
+            </div>
+
+            <!-- ベンダー -->
+            <div id="vendor" class="tab-content">
+                <h2>ベンダー注意点</h2>
+                <h3>Nokia（P4001等）</h3>
+                <ul>
+                    <li><strong>設置位置：#1〜4 = 左側、#5〜8 = 右側</strong></li>
+                    <li>新カード → 2gNBモード / kml → airframe=3</li>
+                    <li><strong>Nokia MMUは一体型RU</strong></li>
+                    <li><strong>Nokiaの2CCは1つに3.7Gと3.4Gの機能が入っている</strong></li>
+                </ul>
+                <div class="box box-warning">⚠️ <strong>Nokia P4001 2G,700M 構成時</strong>はgas詳細シートを確認。</div>
+                <div class="box box-info">💡 シスパラ：[RU noX + RU noX +80]のパターンシートはNokia MMU確認用として併用。</div>
+                <div class="box box-info">
+                    💡 <span class="badge badge-new">追加</span> <strong>装置P4001のシスパラ</strong>：Nokia-MMUの確認は、達成感があれば[RU noX + RU noX +80]パターンも確認する。もしくは項目数は多くないので、先に確認を終わらせる。
+                </div>
+            </div>
+
+            <!-- LTE側 -->
+            <div id="lte" class="tab-content">
+                <h2>LTE側クロスチェック（OPS共用）</h2>
+                <div class="box box-info">OPSはNRとLTE管理簿が別々。NRは出荷試験Excel参照。</div>
+                <div class="box box-warning">⚠️ <strong>LTE単独の依頼</strong>ではまず<strong>セクタとキャリアが管理簿と依頼票で合っているか</strong>を確認。</div>
+                <table>
+                    <tr><th>LTEファイル</th><th>確認内容</th><th>参照</th></tr>
+                    <tr><td><span class="file">kml</span></td><td>装置Fなら kmn=kml 品名一致、NexCs番号</td><td>構成シート</td></tr>
+                    <tr><td><span class="file">ecs(LTE)</span></td><td>MPC使用/未使用、P4001左右設置</td><td>高密度カード情報シート</td></tr>
+                    <tr><td><span class="file">esg(LTE)</span></td><td>LTE→NR付属セクタ/キャリア確認</td><td>memoシート</td></tr>
+                    <tr><td><span class="file">ess(LTE)</span></td><td>アドレス、SPD情報</td><td>SPD情報シート</td></tr>
+                    <tr><td><span class="file">epl(LTE)</span></td><td>物理回線情報</td><td>高密度物理回線情報シート</td></tr>
+                    <tr><td><span class="file">eih(LTE)</span></td><td>NRとLTE両方確認</td><td>高密度eNB_IPアドレスシート</td></tr>
+                    <tr><td><span class="file">evi(LTE)</span></td><td>仮想IP種別、IPアドレス</td><td>管理簿</td></tr>
+                    <tr><td><span class="file">srl(LTE)</span></td><td>赤字周波数(2135.5)、43・44列gNB/DU。<span class="hl">どの局データと繋がっているか記載</span></td><td>Xチェックシート</td></tr>
+                </table>
+            </div>
+
+            <!-- 用語 -->
+            <div id="terms" class="tab-content">
+                <h2>用語・概念</h2>
+                <h3>RAT混載 vs NR/LTE共有</h3>
+                <table>
+                    <tr><th>用語</th><th>意味</th><th>例</th></tr>
+                    <tr><td><strong>RAT混載</strong></td><td>CUの中にNRとLTEが1台で<strong>両方の機能</strong>が備わっている</td><td>1台で5Gと4G両方処理</td></tr>
+                    <tr><td><strong>NR/LTE共有</strong></td><td>NR(例:P4001)とLTE(例:P3201)が繋がっているが<strong>どちらかの機能しか使えない</strong></td><td>srlファイルで接続先確認</td></tr>
+                </table>
+                <div class="box box-warning">⚠️ <strong>共有の場合はsrlファイルに注意！</strong>どの局データと繋がっているか記載されている。</div>
+                <h3>基本用語</h3>
+                <table>
+                    <tr><th>用語</th><th>意味</th></tr>
+                    <tr><td>SA / NSA</td><td>Standalone（5G単独）/ Non-Standalone（4G+5G）</td></tr>
+                    <tr><td>NR / LTE</td><td>New Radio（5G）/ Long Term Evolution（4G）</td></tr>
+                    <tr><td>gNB / eNB</td><td>5G基地局 / 4G基地局</td></tr>
+                    <tr><td>FHIC</td><td>Fronthaul Interface Card（DUに挿す、DUとRUを繋ぐカード）</td></tr>
+                    <tr><td>FHM / FH</td><td>FH関連装置 / Fronthaul（DU-RU間接続）</td></tr>
+                    <tr><td>TAC</td><td>Tracking Area Code（エリア識別）</td></tr>
+                    <tr><td>SSB</td><td>Synchronization Signal Block</td></tr>
+                    <tr><td>AMF</td><td>Access and Mobility Management Function</td></tr>
+                    <tr><td>DU / CU / RU</td><td>Distributed Unit / Central Unit / Radio Unit</td></tr>
+                    <tr><td>FR1</td><td>Frequency Range 1（Sub-6GHz帯）</td></tr>
+                    <tr><td>IPsec</td><td>IP Security（通信暗号化プロトコル）</td></tr>
+                    <tr><td>BRE</td><td>Base station Radio Equipment（基地局無線装置）</td></tr>
+                </table>
+            </div>
+            <!-- 覚え方 -->
+            <div id="tips" class="tab-content">
+                <h2>覚え方のコツ</h2>
+                <div class="box box-memory">
+                    🔑 <strong>e系：s, p, v</strong><br>
+                    <code>esi</code> = Security = IPsec / <code>epl</code> = Physical = 物理回線 / <code>evi</code> = Virtual = 仮想IP
+                </div>
+                <div class="box box-memory">
+                    🔑 <strong>g系 FH関連：BPM</strong><br>
+                    <code>gfb</code> → b / <code>gfp</code> → p / <code>gdm</code> → m　末尾 = <strong>BPM</strong>
+                </div>
+                <div class="box box-memory">
+                    🎭 <strong>語呂合わせ</strong><br>
+                    <code>gag</code> = ギャグ → SA専用、AMF / <code>g5t</code> = 5G → スライス
+                </div>
+                <h3>質問形式で確認</h3>
+                <table>
+                    <tr><th>知りたいこと</th><th>見るファイル</th></tr>
+                    <tr><td>どのセル？どのDU？</td><td>ecs, gof</td></tr>
+                    <tr><td>どこに繋がる？</td><td>ecs（スロット、ポート）</td></tr>
+                    <tr><td>回線は何本？</td><td>eih, epl</td></tr>
+                    <tr><td>IPアドレスは？</td><td>evi</td></tr>
+                    <tr><td>FHICかMMUか？</td><td>gdm</td></tr>
+                    <tr><td>FHポートは？</td><td>gfb, gfp</td></tr>
+                    <tr><td>アクティブリンクは？</td><td>gtr, gfb</td></tr>
+                    <tr><td>周波数は？</td><td>grc, gnf</td></tr>
+                    <tr><td>アンテナポートは？</td><td>gcd</td></tr>
+                    <tr><td>どこにある？TAC？</td><td>kml</td></tr>
+                    <tr><td>FHM構成？</td><td>glr, kmn</td></tr>
+                    <tr><td>SA専用の確認？</td><td>gag, g5t, eih</td></tr>
+                    <tr><td>LTE-NR接続？</td><td>eee</td></tr>
+                    <tr><td>隣接gNB？</td><td>ggg</td></tr>
+                    <tr><td>外部装置？</td><td>gpo</td></tr>
+                    <tr><td>ローミング？</td><td>erc</td></tr>
+                    <tr><td>どの局データと繋がっている？</td><td>srl</td></tr>
+                    <tr><td>LTE→NR付属セクタ/キャリア？</td><td>esg, egr, egn, egf</td></tr>
+                    <tr><td>Active Link番号の確認？</td><td>管理簿Active Link列 → gfb, srl</td></tr>
+                </table>
+            </div>
+
+            <!-- vRAN -->
+            <div id="vran" class="tab-content">
+                <h2>vRAN 学習ノート</h2>
+                <div class="box box-info">
+                    💡 vRAN関連の業務で拾った単語・手順・トラブル対応を蓄積中。
+                </div>
+
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="showSubTab('vran','v-terms')">単語帳</button>
+                    <button class="sub-tab" onclick="showSubTab('vran','v-arch')">構成・インターフェース</button>
+                    <button class="sub-tab" onclick="showSubTab('vran','v-link')">リンク確認</button>
+                    <button class="sub-tab" onclick="showSubTab('vran','v-trouble')">障害対応事例</button>
+                    <button class="sub-tab" onclick="showSubTab('vran','v-flow')">active化フロー</button>
+                </div>
+
+                <div id="v-terms" class="sub-content active">
+                    <h3>インフラ・ネットワーク</h3>
+                    <table>
+                        <tr><th>単語</th><th>意味</th></tr>
+                        <tr><td><strong>vLAN ID 1001</strong></td><td>仮想ネットワークの識別番号。通信を分離するためのID</td></tr>
+                        <tr><td><strong>開発LAN</strong></td><td>開発用の閉じたネットワーク</td></tr>
+                        <tr><td><strong>試験軸PC</strong></td><td>試験を実行・管理するPC</td></tr>
+                        <tr><td><strong>バケット</strong></td><td>ファイルの保管場所（クラウドストレージ）</td></tr>
+                        <tr><td><strong>Nutanix</strong></td><td>HCI（ハイパーコンバージドインフラ）。サーバー・ストレージ・仮想化を1台にまとめた製品。会社のVMはこの上で動作</td></tr>
+                        <tr><td><strong>Bastion VM</strong></td><td>踏み台サーバー。ここが落ちるとEMSに辿り着けない</td></tr>
+                    </table>
+
+                    <h3>CU / DU 関連</h3>
+                    <table>
+                        <tr><th>単語</th><th>意味</th></tr>
+                        <tr><td><strong>CU-CPの局データ</strong></td><td>CU-CP（制御プレーン）側の設定データ。DUの局データとは別</td></tr>
+                        <tr><td><strong>DU インスタ後 IPもらえてない</strong></td><td>DUをインスタンス化（起動）した後、IPアドレスが未割り当ての状態</td></tr>
+                        <tr><td><strong>vCUプロビジョニング</strong></td><td>vCUに設定を投入して使える状態にする作業</td></tr>
+                        <tr><td><strong>EMS上 CU-CP connect インスタ</strong></td><td>EMS画面でCU-CPを接続してインスタンス化する操作</td></tr>
+                        <tr><td><strong>5GBB</strong></td><td>5G BaseBand。CU/DUに相当する信号処理装置</td></tr>
+                        <tr><td><strong>BDE</strong></td><td>Base station Digital processing Equipment。LTE用ベースバンド装置</td></tr>
+                    </table>
+
+                    <h3>操作・試験</h3>
+                    <table>
+                        <tr><th>単語</th><th>意味</th></tr>
+                        <tr><td><strong>オンボーディング</strong></td><td>新しい装置やソフトウェアをシステムに登録・導入する作業</td></tr>
+                        <tr><td><strong>FW更新試験</strong></td><td>ファームウェア更新の試験</td></tr>
+                        <tr><td><strong>edit config</strong></td><td>設定ファイルの編集（NETCONF等で使う用語）</td></tr>
+                        <tr><td><strong>imageとkubeconfigで違う</strong></td><td>ダウンロード先がソフトウェアイメージとKubernetes設定ファイルで異なる</td></tr>
+                        <tr><td><strong>再インスタ</strong></td><td>ターミネート（削除）→ 再インスタンス化（再作成）。壊れたPodを捨てて新しく作り直す</td></tr>
+                        <tr><td><strong>CISM</strong></td><td>Container Infrastructure Service Manager。Kubernetesのコンテナ管理機能</td></tr>
+                        <tr><td><strong>オートヒーリング</strong></td><td>CISM契機で障害を検知し自動復旧する仕組み。Podが落ちたら自動で再起動</td></tr>
+                    </table>
+
+                    <h3>Kubernetesコマンド</h3>
+                    <table>
+                        <tr><th>コマンド</th><th>意味</th></tr>
+                        <tr><td><strong>oc login</strong></td><td>OpenShift（Kubernetes）へのログイン</td></tr>
+                        <tr><td><strong>kubectl get pod -n &lt;namespace&gt;</strong></td><td>指定namespaceのPod状態確認</td></tr>
+                        <tr><td><strong>namespace</strong></td><td>Kubernetes内でリソースを分離する単位（cu-u等）</td></tr>
+                    </table>
+
+                    <h3>アラーム</h3>
+                    <table>
+                        <tr><th>用語</th><th>意味</th></tr>
+                        <tr><td><strong>NE connection lost ALM</strong></td><td>Network Element（装置）との接続が切れたアラーム</td></tr>
+                        <tr><td><strong>不問ALM</strong></td><td>既知で問題なしと判断済みのアラーム</td></tr>
+                    </table>
+                </div>
+
+                <div id="v-arch" class="sub-content">
+                    <h3>構成図（インターフェース付き）</h3>
+<pre style="background:#f5f5f5;padding:15px;font-family:monospace;font-size:13px;">
+AMF(コア) ←― NG(NGAP) ―→ CU-CP ←― E1 ―→ CU-UP
+                              ↓
+                         F1-C / F1-U
+                              ↓
+                             DU ←― Fronthaul(FH) ―→ RU
+
+M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</pre>
+
+                    <h3>インターフェース一覧</h3>
+                    <table>
+                        <tr><th>インターフェース</th><th>区間</th><th>呼び方</th></tr>
+                        <tr><td><strong>NG (NGAP)</strong></td><td>コア(AMF) ↔ CU</td><td>バックホール</td></tr>
+                        <tr><td><strong>E1</strong></td><td>CU-CP ↔ CU-UP</td><td>—</td></tr>
+                        <tr><td><strong>F1-C</strong></td><td>CU-CP ↔ DU（制御信号）</td><td>ミッドホール</td></tr>
+                        <tr><td><strong>F1-U</strong></td><td>CU-UP ↔ DU（ユーザーデータ）</td><td>ミッドホール</td></tr>
+                        <tr><td><strong>FH</strong></td><td>DU ↔ RU</td><td>フロントホール</td></tr>
+                        <tr><td><strong>M-Plane</strong></td><td>SMO/EMS → RU</td><td>管理プレーン</td></tr>
+                    </table>
+
+                    <h3>プロトコル</h3>
+                    <table>
+                        <tr><th>プロトコル</th><th>用途</th></tr>
+                        <tr><td><strong>SCTP</strong></td><td>基地局↔コア間の通信。TCPより高信頼</td></tr>
+                        <tr><td><strong>F1AP</strong></td><td>F1上のアプリケーションプロトコル。CU-DU間の業務通信</td></tr>
+                        <tr><td><strong>NGAP</strong></td><td>NG上のプロトコル。AMFとのやり取り</td></tr>
+                    </table>
+                </div>
+
+                <div id="v-link" class="sub-content">
+                    <h3>F1 リンク状態の確認方法</h3>
+                    <div class="box box-purpose">
+                        CU側で <code>check_link_XXXXXX.sh</code> を実行してリンク状態を確認する。
+                    </div>
+                    <table>
+                        <tr><th>リンク名の後の3桁</th><th>状態</th></tr>
+                        <tr><td><strong>000</strong></td><td>繋がっていない</td></tr>
+                        <tr><td><strong>100</strong></td><td>SCTPまで繋がっている</td></tr>
+                        <tr><td><strong>101</strong></td><td>F1APまで繋がっている（正常）</td></tr>
+                    </table>
+
+                    <h3>レイヤー別の確認</h3>
+                    <table>
+                        <tr><th>レイヤー</th><th>確認方法</th></tr>
+                        <tr><td>物理接続</td><td>F1が張れているか</td></tr>
+                        <tr><td>IP（Ping）</td><td>F1-C、F1-UともにPingが通るか</td></tr>
+                        <tr><td>SCTP（100）</td><td>リンク状態シェル確認</td></tr>
+                        <tr><td>F1AP（101）</td><td>リンク状態シェル確認</td></tr>
+                    </table>
+                    <div class="box box-warning">
+                        ⚠️ <strong>Pingは通るがF1APが通らない場合</strong>：物理・IP・SCTPはOKだが、アプリケーション層の問題。Podの状態異常、設定不一致、ソフトバージョン不整合などが原因の可能性。
+                    </div>
+
+                    <h3>DU側の確認</h3>
+                    <div class="box box-purpose">
+                        DU側で <code>du1_XXXXXX_log〜.sh</code> を実行してM-Planeが流れているか確認。
+                    </div>
+
+                    <h3>その他の確認ポイント</h3>
+                    <ul>
+                        <li>NG と E1 がリンクしているか</li>
+                        <li>AMFのやり取りでエラーが出ていないか</li>
+                        <li>NGAPのRCQに載ってきているか</li>
+                        <li>RPCやCellのエラーが出ていないか</li>
+                    </ul>
+                </div>
+
+                <div id="v-trouble" class="sub-content">
+                    <h3>瞬断後の障害対応事例（東電瞬断） <span class="badge badge-new">追加</span></h3>
+
+                    <h4>障害の流れ</h4>
+                    <div class="flow-item"><strong>1.</strong> 東電の瞬断が発生</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>2.</strong> Bastion VM停止 → EMS接続不可</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>3.</strong> 正規の電源ON手順が実施されていなかった</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>4.</strong> 再開ツールでEMS Podを落として再起動</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>5.</strong> 各環境の状態を個別に確認</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>6.</strong> 復旧完了</div>
+
+                    <h4>各環境の状態確認結果</h4>
+                    <table>
+                        <tr><th>環境</th><th>EMS接続</th><th>terminal</th><th>問題</th></tr>
+                        <tr><td>5G-CU</td><td>可能</td><td>可能</td><td>イベントリスト更新停止、kubectl namespace指定不可</td></tr>
+                        <tr><td>4G-CU</td><td>不可</td><td>—</td><td>一時的に繋がるが再切断</td></tr>
+                        <tr><td>5G-DU</td><td>可能</td><td>可能</td><td>NE connection lost ALM出力、Pod自体は正常</td></tr>
+                    </table>
+
+                    <h4>復旧の判断基準</h4>
+                    <table>
+                        <tr><th>確認項目</th><th>正常の判断</th></tr>
+                        <tr><td>EMS接続</td><td>可能</td></tr>
+                        <tr><td>リンク状態</td><td>各種リンクOK、ALMなし</td></tr>
+                        <tr><td>イベントリスト</td><td>最新日付で更新されている</td></tr>
+                        <tr><td>Pod状態</td><td>正常</td></tr>
+                        <tr><td>NE connection lost ALM</td><td>解消</td></tr>
+                    </table>
+
+                    <div class="box box-info">
+                        💡 <strong>kubectl namespace指定エラー</strong><br>
+                        <code>kubectl get pod -n &lt;namespace&gt;</code> でForbiddenエラーが出る場合、NSなしで実行するとoc loginしているNSのPodが表示される。
+                    </div>
+
+                    <div class="box box-memory">
+                        🔑 <strong>学び</strong>：Bastion VMが止まると全てに影響する。UPS（無停電電源装置）の有無が重要。
+                    </div>
+                </div>
+
+                <div id="v-flow" class="sub-content">
+                    <h3>active化までのフロー</h3>
+                    <div class="flow-item"><strong>1.</strong> CU局データ作成・投入</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>2.</strong> DU局データ作成（gdmから投入）</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>3.</strong> それぞれクロスチェック</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>4.</strong> シスパラ投入</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>5.</strong> EMS上でCU-CPをconnect / インスタンス化</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>6.</strong> DUインスタンス化（Podとしてデプロイ）</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>7.</strong> DUにIPアドレス割り当て確認</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>8.</strong> F1導通確認（CU ↔ DU間のミッドホール）</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>9.</strong> RU接続（FH導通確認）</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>10.</strong> EMS上でRUの状態確認</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>11.</strong> active</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>12.</strong> 安定性確認</div>
+
+                    <div class="box box-memory">
+                        🔑 Nokia MMU単体試験で見たこと：F1（ミッドホール）の導通確認。activeになった後もリセットを繰り返す場面あり。
+                    </div>
+                </div>
+            </div>
+
+            <!-- メモ欄 -->
+            <div id="memo" class="tab-content">
+                <h2>作業メモ欄</h2>
+                <div class="box box-info">💡 直近でチェックしたファイルや気づいた点を記録する欄（印刷して手書きで使用）</div>
+                <table>
+                    <tr><th style="width:100px;">日付</th><th style="width:200px;">チェックしたファイル</th><th>気づいた点・メモ</th></tr>
+                    <tr><td style="height:50px;"></td><td></td><td></td></tr>
+                    <tr><td style="height:50px;"></td><td></td><td></td></tr>
+                    <tr><td style="height:50px;"></td><td></td><td></td></tr>
+                    <tr><td style="height:50px;"></td><td></td><td></td></tr>
+                    <tr><td style="height:50px;"></td><td></td><td></td></tr>
+                    <tr><td style="height:50px;"></td><td></td><td></td></tr>
+                    <tr><td style="height:50px;"></td><td></td><td></td></tr>
+                    <tr><td style="height:50px;"></td><td></td><td></td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="footer">局データクロスチェック 早見表【0414版】 | 最終更新: 2026/04/14</div>
+    </div>
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        function showSubTab(section, subTabId) {
+            const sec = document.getElementById(section);
+            sec.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
+            sec.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(subTabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        function searchContent() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('searchResults');
+            document.querySelectorAll('.search-hl').forEach(el => { el.outerHTML = el.innerHTML; });
+            if (query.length < 1) { resultsDiv.innerHTML = ''; return; }
+            const tabNames = {
+                'overview':'はじめに','flow':'作業フロー','e-series':'e系','g-series':'g系',
+                'k-series':'k系','s-series':'S系','sys':'シスパラ','column':'列番号',
+                'sa-nsa':'SA/NSA','external':'外部装置','vendor':'ベンダー','lte':'LTE側',
+                'terms':'用語','tips':'覚え方','vran':'vRAN','memo':'メモ欄'
+            };
+            const tabResults = []; let totalCount = 0;
+            Object.keys(tabNames).forEach(tabId => {
+                const el = document.getElementById(tabId);
+                if (el) {
+                    const matches = el.innerText.toLowerCase().match(new RegExp(query, 'gi'));
+                    const count = matches ? matches.length : 0;
+                    if (count > 0) { tabResults.push({id:tabId, name:tabNames[tabId], count:count}); totalCount += count; }
+                }
+            });
+            if (totalCount > 0) {
+                const links = tabResults.map(t => '<a href="#" onclick="showTab(\''+t.id+'\'); return false;" style="color:#007bff;">'+t.name+'('+t.count+')</a>').join('、');
+                resultsDiv.innerHTML = '「'+query+'」が <strong>'+totalCount+'件</strong>：'+links;
+            } else { resultsDiv.innerHTML = '「'+query+'」は見つかりませんでした'; }
+        }
+    </script>
+</body>
+</html>
