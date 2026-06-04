@@ -1687,6 +1687,44 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                     <div class="flow-arrow">↓</div>
                     <div class="flow-item"><strong>5.</strong> 新しい局データで装置が立ち上がることを確認</div>
 
+                    <h4>26A出荷試験の実施手順（実績） <span class="badge badge-new">追加</span></h4>
+                    <div class="flow-item"><strong>1.</strong> FM配下のファイルを削除</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>2.</strong> FLD制御画面でSDM B面にチェック → A→Bに転送</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>3.</strong> 転送後、A面とB面が等価になったか確認（SDMファイル制御で確認）</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>4.</strong> SeNBリセットより、SDM種別A面を選択</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>5.</strong> eNBリセット実行</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>6.</strong> カード状態のERRが消えていることを確認</div>
+
+                    <h4>FLD制御の見方 <span class="badge badge-new">追加</span></h4>
+                    <table>
+                        <tr><th>項目</th><th>正常状態</th></tr>
+                        <tr><td><strong>SDM A面</strong></td><td>アクティブ（現用で動いている）</td></tr>
+                        <tr><td><strong>SDM B面</strong></td><td>スタンバイ（待機中）</td></tr>
+                    </table>
+                    <div class="box box-info">
+                        💡 SDMファイル制御でA面とB面のファイル名・バージョンが同じなら等価状態。
+                    </div>
+
+                    <h4>N3001固有の注意点 <span class="badge badge-new">追加</span></h4>
+                    <table>
+                        <tr><th>項目</th><th>内容</th></tr>
+                        <tr><td><strong>RE番号5</strong></td><td>切断のままでOK。Dip-SWの設定OFFのため</td></tr>
+                        <tr><td><strong>スロット22 AIF-Aカード</strong></td><td>RE番号5のDip-SW OFF時にERR表示される。A面指定リセット後にERRが消える</td></tr>
+                    </table>
+                    <div class="box box-info">
+                        💡 Dip-SWの設定OFFは装置リセットすると反映される。
+                    </div>
+
+                    <h4>OPSログとLTE-MTの違い <span class="badge badge-new">追加</span></h4>
+                    <div class="box box-warning">
+                        ⚠️ 同じ装置でもOPSログとLTE-MTで見え方が違う場合がある。LTE-MTでは接続確認できてもOPSログに状態変化通知が上がらないことがある。
+                    </div>
+
                     <h2>VMT確認方法 <span class="badge badge-new">追加</span></h2>
 
                     <h4>セットアップ</h4>
@@ -1852,6 +1890,7 @@ mstsc（リモートデスクトップ接続）
                 <ul>
                     <li>ネットワーク接続 → ワイヤレスネットワーク接続が「無効」なら右クリック →「有効にする」</li>
                     <li>lte-wlanに接続</li>
+                    <li>lte-wlanが見えないPCは<strong>lte-wlan-xp</strong>で代用OK</li>
                     <li>「インターネットアクセスなし」の場合はIPアドレス設定が必要（DHCP or 手動）</li>
                 </ul>
 
