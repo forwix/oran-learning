@@ -91,6 +91,7 @@
             <button class="tab" onclick="showTab('tips')">覚え方</button>
             <button class="tab" onclick="showTab('vran')">vRAN</button>
             <button class="tab" onclick="showTab('security')">セキュリティ</button>
+            <button class="tab" onclick="showTab('meeting')">定例</button>
             <button class="tab" onclick="showTab('memo')">メモ欄</button>
         </div>
         <div class="content">
@@ -1821,11 +1822,11 @@ LTOM\ツール\Macroviewer を格納してインストール
   ↓
 Apache Guacamole（desktop.randev.jp）
   ↓
-個人VM（172.29.17.153）
+個人VM
   ↓
 mstsc（リモートデスクトップ接続）
   ↓
-試験PC（114.114.x.x）
+試験PC（172.29.17.153等）→ RDC Managerで各装置PC（114.114.x.x）に接続
   ↓　※リモートPC経由の場合
 リモートPC（172.21.99.192等）</pre>
                 <div class="box box-warning">
@@ -1866,6 +1867,112 @@ mstsc（リモートデスクトップ接続）
                 <h3>発生した問題</h3>
                 <div class="box box-danger">
                     🚨 <strong>Zerospaceから直接接続してしまった</strong>：在宅勤務初日に誤ってZerospaceから試験PCに接続。気づいた時点で切断し報告。
+                </div>
+            </div>
+
+            <!-- 定例 -->
+            <div id="meeting" class="tab-content">
+                <h2>vRAN 定例会議メモ <span class="badge badge-new">追加</span></h2>
+
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="showSubTab('meeting','m-20260603')">2026/06/03</button>
+                </div>
+
+                <div id="m-20260603" class="sub-content active">
+                    <h3>2026/06/03（水）商用検証環境構築スケジュール</h3>
+
+                    <h4>環境アップグレード状況</h4>
+                    <table>
+                        <tr><th>対象</th><th>状況</th><th>予定</th></tr>
+                        <tr><td><strong>5G CU</strong></td><td>R5.0にアップグレード済み。NEC更新で1系増加</td><td>6/15 対向#1 CU#1予定</td></tr>
+                        <tr><td><strong>5G DU</strong></td><td>RH版EMS問題→Ubuntu版に一時収容→Redhat版に戻す</td><td>6/15-16 移行作業（全系ストップ）<br>6/15-19 cd11更新</td></tr>
+                        <tr><td><strong>4G CU</strong></td><td>R2.8最終版リリース済み。試験影響なし</td><td>6/10 全系更新（R008.005）</td></tr>
+                    </table>
+
+                    <h4>不具合チケット</h4>
+                    <table>
+                        <tr><th>チケット</th><th>内容</th></tr>
+                        <tr><td><strong>DFN-611</strong> [DCM] R2.7</td><td>5minトラヒック報告で総合計が無効値</td></tr>
+                        <tr><td><strong>DFN-637</strong> [NEC] R2.6</td><td>セル閉塞解除時にセル起動中フラグがON維持</td></tr>
+                        <tr><td><strong>DFN-638</strong> [DCM] R2.8</td><td>セル閉塞制御時にERR(MSGFB010_0000_006)</td></tr>
+                        <tr><td><strong>DFN-643</strong> [DCM] R2.8</td><td>繰り返しコマンドでnetconfmgr panic→Pod再起動。原因：リソース解放漏れ。Triple(B20)で5試行目に再現</td></tr>
+                    </table>
+
+                    <h4>5G/4G EMS(CU)</h4>
+                    <ul>
+                        <li>SMO26A接続パラメータ投入完了</li>
+                        <li>SFTP・HTTP疎通OK、試験項目完了</li>
+                    </ul>
+
+                    <h4>NECの手順書（5G CU Rel5.0更新）</h4>
+                    <ul>
+                        <li>参照：更新手順(06_02)。初期構築(05_Install)ではない</li>
+                        <li>06_02_Maintenance(OCP)(CU)_EN_501-02 > 3. File Update Procedure</li>
+                    </ul>
+                    <div class="box box-danger">
+                        🚨 YRPでのNEC CU Rel5.0更新作業のみに使用。契約上、目的外使用はNG。
+                    </div>
+
+                    <h4>5G DU 23版の制約事項</h4>
+                    <table>
+                        <tr><th>制約</th><th>状態</th></tr>
+                        <tr><td>BWP Switching</td><td>評価不可→次版で対応待ち</td></tr>
+                        <tr><td>PUCCH overlap</td><td>再送で対応。問題なし</td></tr>
+                        <tr><td>VoNR TTI bundling</td><td>1FINITYで評価中</td></tr>
+                        <tr><td>Configured grant</td><td>機能自体に不具合</td></tr>
+                    </table>
+                    <div class="box box-info">
+                        💡 L1L2 CU 23版（cd11）適用済みで<strong>制約事項は解消済み</strong>。
+                    </div>
+
+                    <h4>基盤スイッチ停止（メンテナンス）</h4>
+                    <table>
+                        <tr><th>項目</th><th>スケジュール</th></tr>
+                        <tr><td>作業日程</td><td>6/13-14（土日）終日</td></tr>
+                        <tr><td>NutanixFrame</td><td>金曜20時停止→月曜9時再開</td></tr>
+                        <tr><td>AuthGW</td><td>金曜18時停止→月曜9時再開</td></tr>
+                    </table>
+                    <div class="box box-warning">
+                        ⚠️ 6/13-14は全系停止。在宅でVM接続もできなくなる可能性あり。
+                    </div>
+
+                    <h4>1F ENDC接続検証</h4>
+                    <ul>
+                        <li>Ping(icmp)は上下共に停止しない</li>
+                        <li>UE(10.8.0.12)→DNS(8.8.8.8)の問い合わせあり→上りは通っている</li>
+                        <li>下り信号は存在しない</li>
+                        <li>RIC：DFN-657 cell Lock/Unlockで送波不可→送波はできるため試験は進める</li>
+                    </ul>
+
+                    <h4>MTI RU接続検証（伝送路系向け）</h4>
+                    <ul>
+                        <li>MTI RU (Dual) FW更新後、4Gの1callへ進む想定</li>
+                        <li><strong>6/5にTriple RU(b3/b7/n1)到着→4G側の局データ作成依頼</strong></li>
+                    </ul>
+
+                    <h4>RU配備状況</h4>
+                    <table>
+                        <tr><th>RU</th><th>状況</th></tr>
+                        <tr><td><strong>1F Lowband</strong></td><td>5/15に2台到着→RIC・総合投入。Proto版6/5到着予定。局データ先行準備依頼あり</td></tr>
+                        <tr><td><strong>MTI RU Tr1</strong></td><td>6/10に2台到着予定→4GvRANと伝送路系投入。局データ先行準備依頼あり</td></tr>
+                        <tr><td><strong>MTI RU Dual</strong></td><td>OREXラボでRUIOT中</td></tr>
+                    </table>
+
+                    <h4>その他共有事項</h4>
+                    <ul>
+                        <li>PLMN追加手順マニュアル共有（5G_CU_PLMN追加手順.html）</li>
+                        <li>5G CU EMSのPW変更資料共有</li>
+                        <li>vRAN FeatureList最新版（v03）共有→項目精査依頼</li>
+                    </ul>
+
+                    <h4>TEF現地ファイル版数</h4>
+                    <table>
+                        <tr><th>種別</th><th>バージョン</th></tr>
+                        <tr><td>4G 共通部</td><td>2.8</td></tr>
+                        <tr><td>4G 個別部</td><td>2.7</td></tr>
+                        <tr><td>5G CU</td><td>Rel5.0</td></tr>
+                        <tr><td>5G DU</td><td>23版</td></tr>
+                    </table>
                 </div>
             </div>
 
@@ -1911,7 +2018,7 @@ mstsc（リモートデスクトップ接続）
                 'overview':'はじめに','flow':'作業フロー','e-series':'e系','g-series':'g系',
                 'k-series':'k系','s-series':'S系','sys':'シスパラ','column':'列番号',
                 'sa-nsa':'SA/NSA','external':'外部装置','vendor':'ベンダー','lte':'LTE側',
-                'terms':'用語','tips':'覚え方','vran':'vRAN','security':'セキュリティ','memo':'メモ欄'
+                'terms':'用語','tips':'覚え方','vran':'vRAN','security':'セキュリティ','meeting':'定例','memo':'メモ欄'
             };
             const tabResults = []; let totalCount = 0;
             Object.keys(tabNames).forEach(tabId => {
