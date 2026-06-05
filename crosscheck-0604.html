@@ -91,6 +91,7 @@
             <button class="tab" onclick="showTab('tips')">覚え方</button>
             <button class="tab" onclick="showTab('vran')">vRAN</button>
             <button class="tab" onclick="showTab('security')">セキュリティ</button>
+            <button class="tab" onclick="showTab('install')">インストール</button>
             <button class="tab" onclick="showTab('meeting')">定例</button>
             <button class="tab" onclick="showTab('memo')">メモ欄</button>
         </div>
@@ -240,7 +241,6 @@ RU / RRU
                     </div>
                     <div class="box box-warning">
                         ⚠️ <span class="badge badge-new">追加</span> <strong>OPS依頼時</strong>：NR/LTEのEN-DCデータ用IPsec非適用フラグの列 → IPsec有の<strong>「0」</strong>が入る。管理簿にLTEの物理回線0、仮想IPアドレスなど記載されている局データもあるので、<strong>OPSのe系は特に確認すること</strong>。
-                    </div>
                     </div>
                 </div>
                 <div id="e-esi" class="sub-content">
@@ -907,6 +907,12 @@ Aセル#2【NSA】
                         <tr><td><strong>GW</strong></td><td>Gateway。ネットワークの出入口</td></tr>
                         <tr><td><strong>SCTP init</strong></td><td>SCTP接続の開始パケット。Wiresharkで確認できる</td></tr>
                         <tr><td><strong>基盤更改</strong></td><td>インフラの更新。切り戻し=元の状態に戻すこと</td></tr>
+                        <tr><td><strong>configmgr</strong></td><td>Configuration Manager。局データ等の設定を管理。ログをgrepすれば局データが読めているか確認できる</td></tr>
+                        <tr><td><strong>E1 Disabled</strong></td><td>CU-CP↔CU-UP間のE1インターフェースが無効状態。NGと両方Disabledなら局データ/インスタパラメータを疑う</td></tr>
+                        <tr><td><strong>N2pod（アドレス）</strong></td><td>N2(NGAP)用Podのアドレス。インスタパラメータで設定（例:10.48.52.16）</td></tr>
+                        <tr><td><strong>UP4</strong></td><td>インスタンス化の段階の一つ。UP4まで進むとDUインスタへ移れる</td></tr>
+                        <tr><td><strong>ターミネート(ターミ)</strong></td><td>インスタンスを削除すること。再インスタやRU増設の前に実施</td></tr>
+                        <tr><td><strong>VLAN誤DHCP</strong></td><td>意図したVLANと違うDHCPからIPをもらう事象。想定外のIP(172.29.x等)が付いたら疑う</td></tr>
                     </table>
                 </div>
 
@@ -1012,6 +1018,7 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <tr><td>② kubeconfig</td><td>認証・権限</td><td>sudo -i → chmod 600</td></tr>
                         <tr><td>③ F-DU同期</td><td>S-Plane（PTP）</td><td>Clockclass超過 → 自然解消</td></tr>
                         <tr><td>④ NGリンク</td><td>IP/ネットワーク（arp）</td><td>Wiresharkで SCTP init確認</td></tr>
+                        <tr><td>⑤ CU-CP NGリンク</td><td>局データ読み込み</td><td>EMSからreset → 再インスタ</td></tr>
                     </table>
 
                     <!-- 事例① 瞬断 -->
@@ -1130,6 +1137,54 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         • F1、M-Plane → インターフェースとプレーン<br>
                         <br>
                         pingが通らない → アドレスを変えてみる → まだダメ → <strong>Wiresharkで見たらSCTP initが飛んできていた</strong> → AMF SIMを立ち上げたら解決。Wiresharkがなければ「何が起きているか」がわからないままだった。
+                    </div>
+
+                    <!-- 事例⑤ CU-CP NGリンク -->
+                    <h3>⑤ Rel4.5 CU-CP NGリンク不確立（局データ読み込み失敗）</h3>
+
+                    <h4>何が起きていたか</h4>
+                    <p>VLAN850へ移行後、Rel4.5のCU-CPを立ち上げたがAMFとのNGリンクが確立しなかった。アドレス・ポート・バージョン差分を一通り疑ったが、最終的な原因は<strong>局データがEMSに正しく読み込めていなかったこと</strong>。EMSからresetして読み込み直し、最新版(R04.50.20)で再インスタしたらNG・E1ともに繋がり、2セルACTIVEまで到達した。</p>
+
+                    <h4>チャットの流れを追うと</h4>
+                    <ul>
+                        <li>「Rel4.5のCU-CP立ち上げたがNGリンク確立しない」 — VLAN850移行の影響を疑う。</li>
+                        <li>「局データは変えてない、NGリンクのIPアドレスも合ってそう」 — まず設定値を確認。AMF-SIMが立ち上がっているか担当が確認。</li>
+                        <li>「ログに <code>172.16.40.36:50052</code> 宛のエラーが繰り返し」 — アドレスかポート違いを疑う。</li>
+                        <li>「前の版数(ターミ直前)まではAMFと通信できていた」 — 今回版とリクエストパラメータの差分確認 → <strong>imageのバージョン以外差分なし</strong>。</li>
+                        <li>「前の版でインスタしてもNGリンク繋がらず、<strong>E1もDisabledのまま</strong>」 — E1も繋がらない＝局データかインスタパラメータが怪しい。</li>
+                        <li>「N2podのアドレスは <code>10.48.52.16</code> で合ってる」 — パラメータは問題なし。</li>
+                        <li>「EMSには繋がっている。局データ読み込めているか? <code>configmgr</code> のログをzipでgrepして局データファイルを確認」 — <span class="hl">ここが切り分けの肝</span>。</li>
+                        <li>「<strong>局データ読めてないですね。EMSからreset</strong>」 — リセット実行。</li>
+                        <li>「読み込みました。EMSのリンクリスト上にNGリンクも出てきた。NG・E1繋がった」 — reset後に解消。</li>
+                        <li>「R04.50.20(最新版)で再インスタ → <strong>NGリンク接続成功</strong>」 — CU-CP単独でNGリンクが繋がる瞬間を初めて観測。</li>
+                        <li>「UP4までインスタ → DUインスタ → <strong>2セルともACTIVE</strong>」 — 復旧完了。</li>
+                        <li>「DUをターミしてRU増設を試行。F45(一体型)を後接続するためケーブルを抜く → EMS上Disconnect → 再インスタ → SS34セルAct → F45接続 → F45もセルAct」 — 増設も成功。</li>
+                    </ul>
+
+                    <h4>切り分けの順番（この事例の財産）</h4>
+                    <div class="box box-purpose">
+                        上流から1つずつ潰していくのが基本。今回は最後の「局データ読み込み」で当たった。
+                    </div>
+                    <table>
+                        <tr><th>順番</th><th>確認したこと</th><th>結果</th></tr>
+                        <tr><td>1</td><td>IPアドレス・ポート（ログのエラー宛先）</td><td>合っていそう</td></tr>
+                        <tr><td>2</td><td>バージョン差分（前版との比較）</td><td>image以外差分なし</td></tr>
+                        <tr><td>3</td><td>インスタパラメータ（N2podアドレス等）</td><td>問題なし</td></tr>
+                        <tr><td>4</td><td><strong>局データの読み込み状態</strong>（configmgrログをgrep）</td><td>🚨 読めていなかった → reset で解消</td></tr>
+                    </table>
+
+                    <h4>前段：IP取得トラブル（VLAN誤接続）</h4>
+                    <div class="box box-info">
+                        💡 この日の前段で、VMに繋がらずIP再取得を試みる場面があった。<code>/release</code> → 開発LANのNIC抜く → 1分待つ → 繋ぎ直す → <code>ipconfig</code> 確認、でもIPが変わらず。見立ては「本来 <code>172.21.98.x</code> が割り当たるべきところ、VLAN100側のDHCPに繋がって <code>172.29.23.x</code> をもらっている」と思われる。時間をおいたらVM接続でき解消。
+                    </div>
+
+                    <div class="box box-memory">
+                        🔑 <strong>学び</strong>：<br>
+                        • NGリンクが張れない時の犯人は、アドレス/ポートだけでなく<strong>局データの読み込み失敗</strong>もある。<br>
+                        • E1もNGも両方Disabledなら、局データorインスタパラメータを疑う(片方だけなら別の切り分け)。<br>
+                        • <code>configmgr</code> のログをgrepすれば局データが読めているか確認できる。<br>
+                        • 困ったら <strong>EMSからreset → 再インスタ</strong> が効くことがある。<br>
+                        • IPが想定と違う時は、繋いでいるVLANとDHCPの組み合わせを疑う(VLAN100とVLAN850の取り違え)。
                     </div>
                 </div>
 
@@ -1909,6 +1964,88 @@ mstsc（リモートデスクトップ接続）
                 </div>
             </div>
 
+            <!-- インストール -->
+            <div id="install" class="tab-content">
+                <h2>社内ツール インストール <span class="badge badge-new">追加</span></h2>
+
+                <div class="box box-purpose">
+                    <strong>このタブの使い方：</strong>社内共有で「これ入れて」と展開された時の汎用テンプレ＋実例集。次に別ツールが来ても、まず汎用フローを見れば流れが思い出せる。
+                </div>
+
+                <h2>汎用テンプレ：社内ツール導入の流れ</h2>
+                <div class="flow-item"><strong>1.</strong> 共有内容を確認（誰が・誰宛て・チェックリスト有無）。OAM各位など自分が含まれていれば対応対象。</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>2.</strong> 依頼者へ一言「対応進めます」と伝える（やる前提で。問題があれば向こうから止めてくれる）。</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>3.</strong> 手順書を頭から読み、不明点を先に洗い出す（出社前に家で読んでおくと当日詰まらない）。</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>4.</strong> インストーラー類を指定の場所（多くは <code>C:\temp</code>）に格納。</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>5.</strong> 手順どおりにインストール（バッチ実行・証明書許可・拡張機能読み込み等）。</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>6.</strong> 動作確認（接続先が増えた・アプリが見える等）。</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>7.</strong> 完了報告「完了しました」＋チェックリストがあれば自分の欄にチェック。</div>
+
+                <div class="box box-info">
+                    💡 <strong>なぜローカルでバッチを流すのか</strong>：社内専用ツールは公開ストアに置けない → バッチで証明書インストールやファイル配置を自動化 → どのPCに入れたか管理できる（だから完了チェックを求められる）。
+                </div>
+                <div class="box box-warning">
+                    ⚠️ <strong>「C:\tempってどこ？」は聞かなくていい質問。</strong>Cドライブ直下のtempフォルダ。無ければ自分で作る。手順書に書いてあることは自分で読んで進め、本当に詰まった時だけ聞く。
+                </div>
+                <div class="box box-memory">
+                    🔑 <strong>所要時間の目安</strong>：手順どおりなら10〜15分、詰まっても30分あれば十分。事前に手順書を読んでおくのが最大のコツ。
+                </div>
+
+                <h2>実例① SAGConnect</h2>
+                <div class="box box-purpose">
+                    元々は社員用のリモート接続ツール。協力会社にも開放された。Guacamoleでも接続できるが、SAGConnectが入ると<strong>SFTP/AuthGW経由</strong>の接続が可能になる。手順書はOAM各位宛てに重道さんから展開。対応の連絡先は内藤さん。
+                </div>
+                <h4>事前準備</h4>
+                <ul>
+                    <li>SAGConnectのファイルを <code>C:\temp</code> に格納する</li>
+                    <li>ポータルサイトでアプリが表示されない場合は「アプリDLポータルサイトにアプリが表示されない」の手順を試す</li>
+                </ul>
+                <h4>インストール手順</h4>
+                <table>
+                    <tr><th>手順</th><th>操作</th></tr>
+                    <tr><td>1</td><td><code>C:\temp</code> 内の <code>installer.bat</code> を実行 → CMDが開く → <code>y</code> で進める</td></tr>
+                    <tr><td>2</td><td>証明書のインストール警告 → <strong>許可する</strong></td></tr>
+                    <tr><td>3</td><td>CMD実行中にEdgeが起動する</td></tr>
+                    <tr><td>4</td><td>アドレスバーをクリック → Ctrl+Vで貼り付け → <code>edge://extensions/</code> → Enter</td></tr>
+                    <tr><td>5</td><td>拡張機能ページで「開発者モード」をONにする</td></tr>
+                    <tr><td>6</td><td>「展開して読み込み」をクリック</td></tr>
+                    <tr><td>7</td><td>フォルダ選択 → <code>C:\Users\自分のID\AppData\Local\SAGConnect\browser-extension</code></td></tr>
+                    <tr><td>8</td><td>「SFTP/AuthGW接続」が追加されたことを確認</td></tr>
+                    <tr><td>9</td><td>RANDEVのプロフィールページに「リモート接続」が表示されることを確認</td></tr>
+                </table>
+                <div class="box box-danger">
+                    🚨 <strong>手順7が最大の罠</strong>：フォルダは <code>AppData\Local</code> 配下を選ぶ。<strong>C:\Tempの方ではない。</strong>AppDataは隠しフォルダなので、エクスプローラーのアドレスバーに直接パスを貼ると早い。
+                </div>
+
+                <h2>実例② 7-Zip</h2>
+                <div class="box box-purpose">
+                    ログ圧縮等で使用。申請不要でインストール可能。GEN試験やセキュリティ対応でも使うので入れておいて損はない。
+                </div>
+                <table>
+                    <tr><th>手順</th><th>操作</th></tr>
+                    <tr><td>1</td><td><code>C:\temp</code> 内のインストーラーを実行</td></tr>
+                    <tr><td>2</td><td>格納先を指定（デフォルトでOK）</td></tr>
+                    <tr><td>3</td><td>インストール完了</td></tr>
+                </table>
+
+                <h2>登場人物</h2>
+                <table>
+                    <tr><th>名前</th><th>役割</th></tr>
+                    <tr><td><strong>重道さん</strong></td><td>OAM各位宛てに手順書を展開してくれた人。何十人にも展開しているので問い合わせ対応は大変。基本は手順書を自分で読み、本当に詰まった時だけ聞く</td></tr>
+                    <tr><td><strong>内藤さん</strong></td><td>対応の連絡先。「対応進めます」と伝え、完了したら「完了しました」と報告する相手</td></tr>
+                </table>
+
+                <div class="box box-memory">
+                    🔑 <strong>連絡文の型</strong>：着手時「SAGConnectと7-Zipの件、対応進めます。」／完了時「完了しました。」 — 聞くのではなく、やると伝える。
+                </div>
+            </div>
+
             <!-- 定例 -->
             <div id="meeting" class="tab-content">
                 <h2>vRAN 定例会議メモ <span class="badge badge-new">追加</span></h2>
@@ -2057,7 +2194,7 @@ mstsc（リモートデスクトップ接続）
                 'overview':'はじめに','flow':'作業フロー','e-series':'e系','g-series':'g系',
                 'k-series':'k系','s-series':'S系','sys':'シスパラ','column':'列番号',
                 'sa-nsa':'SA/NSA','external':'外部装置','vendor':'ベンダー','lte':'LTE側',
-                'terms':'用語','tips':'覚え方','vran':'vRAN','security':'セキュリティ','meeting':'定例','memo':'メモ欄'
+                'terms':'用語','tips':'覚え方','vran':'vRAN','security':'セキュリティ','install':'インストール','meeting':'定例','memo':'メモ欄'
             };
             const tabResults = []; let totalCount = 0;
             Object.keys(tabNames).forEach(tabId => {
