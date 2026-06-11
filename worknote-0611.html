@@ -84,7 +84,7 @@
             </div>
             <div id="searchResults" class="search-results"></div>
         </div>
-        <div class="tabs">
+        <div class="tabs" id="tabs-work">
             <button class="tab active" onclick="showTab('vran')">vRAN</button>
             <button class="tab" onclick="showTab('security')">セキュリティ</button>
             <button class="tab" onclick="showTab('install')">インストール</button>
@@ -1136,6 +1136,74 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         🚨 <strong>処NGを見たら再試験</strong>。スルーしない。
                     </div>
 
+                    <h4>OPSログの読み方（実例：前手順） <span class="badge badge-new">追加</span></h4>
+                    <div class="box box-purpose">
+                        出荷試験シナリオ1「前手順」のOPSログ（N3002）を実際に読んだ時の構造。シナリオ2以降を読むときも、この型が基準になる。
+                    </div>
+                    <div class="flow-item"><strong>1. バージョンチェック</strong> — LM情報取得要求→応答でLMファイル名（<code>ENB_XXXX_T_XXXX.LEN</code>）を確認</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>2. 古いログの削除</strong> — FM配下（fm/log・fm/local・fm/program）を一括削除。<span class="hl">「削除に失敗（削除ファイル無し）」は消すものが無かっただけで正常</span></div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>3. ファイル情報の取得</strong> — SDM面状態 → LM情報 → 局データ情報（.SENファイル） → FW/HW情報 → ファイル情報</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>4. SDM面等価の確認</strong> — 「SDM面等価されていることを確認してください」→ <code>pause</code> で停止し人間が目視確認（FLD制御でA面=B面にした結果の確認ポイント）</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>5. 全状態取得</strong> — 再開状態 → 保守信号停止 → 時刻設定 → 物理回線 → 対MMEリンク → 対隣接eNBリンク → セル → CPRIリンク → 機能部 → 架 → カード → 装置構成 → 局舎 → ヘルスチェック（OA-RA-SC／TILT-INF） → 報知情報 → トラヒック警報（CNT単位／物理回線単位／セル単位）</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>6. State_Acquisition（外部装置）</strong> — 整流装置 → 空調機 → 光伝送装置 → <strong>「試験実行：正常終了」で締まる</strong></div>
+                    <div class="box box-info">
+                        💡 <strong>ログ上の見え方</strong>：<br>
+                        • <strong>【受NG】</strong>は行頭に表示される。直後に再送して応答が返っていれば問題なし（整流装置・空調機で実例を確認済み）。<br>
+                        • <strong>【ALM】</strong>はアラームを含む応答に表示される（架全状態取得応答で実例を確認済み）。<br>
+                        • ファイル名は <code>.LEN</code>=LMファイル、<code>.SEN</code>=局データファイルと思われる。<br>
+                        • カード全状態取得の応答には <strong>eNB-CNT</strong>（基地局装置監視制御機能部）がカード種別として登場する。
+                    </div>
+
+                    <h4>OPSログの読み方（実例：シナリオ2 AP固有） <span class="badge badge-new">追加</span></h4>
+                    <div class="box box-purpose">
+                        シナリオ2「AP固有」＝AP（呼処理アプリ）の機能ブロック試験（N3002、所要約30分・長い待ち時間込み）。出荷試験のシナリオは<strong>機能ブロック単位</strong>（前手順 → AP固有 → …）で構成されている。6/10メモの「AP、PF、RE共通部、CNT機能部」はこのシナリオ構成のこと。
+                    </div>
+                    <div class="box box-memory">
+                        🔑 <strong>AP固有の基本の型</strong>：各試験は「<strong>前状態確認 → 制御（わざと変化を起こす） → 状態変化通知を待つ → 復旧 → 確認</strong>」のサイクルの繰り返し。
+                    </div>
+                    <div class="flow-item"><strong>1. 試験準備</strong> — qsend系ファイル（.gz）を/fmへ転送。<span class="hl">オペレータ操作の指示が出る</span>（共通MTからMTシナリオ(.sce)でTR-ID解放、MT-PCから.ttlマクロ実施）＝半自動でも手動が挟まる</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>2. トラヒック警報</strong> — eNB-CNT単位 → 物理回線単位 → セル単位の順に発生させ、状態変化通知 → 復旧を確認</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>3. 自動規制休止／試験呼</strong> — 取得→制御→5sec安定化待ち→復旧／試験呼の登録(b101/b102)→解除→全解除</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>4. 隣接eNBリンク</strong> — 休止制御・工事中設定で<strong>【リ断】を意図的に発生</strong>させ復旧まで確認。42secや318sec（eNB番号通知待ち）の長い待ちもシナリオ設計のうち</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>5. セル設定</strong> — カード制御（閉塞）で<strong>【ALM】を意図的に発生</strong> → セル設定変更 → 閉塞解除 → 通知を確認</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>6. アクセス規制・報知情報／定期診断</strong> — 制御 → 通知 → 復旧の型どおり</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>7. 時刻＋トラヒック収集（伏線構造）</strong> — 時刻を固定値（例:2010/08/01）に偽装設定 → 即時トラヒック収集の通知タイムスタンプが偽時刻になることを確認 → 非定期トラヒックはファイル待ち3min後に <code>.UEN</code> ファイル取得 → <strong>時刻を現在時刻へ戻して</strong>「試験実行：正常終了」</div>
+                    <div class="box box-info">
+                        💡 <strong>前手順との読み方の違い</strong>：AP固有では【リ断】【ALM】は<strong>わざと起こしている</strong>ので出て当然。見るべきは「異常が出たか」ではなく<span class="hl">「制御→通知→復旧のセットが閉じているか」</span>。同じマークでもシナリオの文脈で意味が変わる。<br>
+                        💡 <strong>ファイル名の三兄弟</strong>：<code>.LEN</code>=LM／<code>.SEN</code>=局データ／<code>.UEN</code>=トラヒックファイル（と思われる）。
+                    </div>
+
+                    <h4>OPSログの読み方（実例：シナリオ3 AP/PF共有） <span class="badge badge-new">追加</span></h4>
+                    <div class="box box-purpose">
+                        シナリオ3「AP/PF共有」＝APとPFにまたがる共有機能の試験（N3002、約17分）。SDM面・eNBリセット・対MMEリンク・物理回線・Tracerouteを扱う。シナリオ構成：前手順 → AP固有 → AP/PF共有 → …
+                    </div>
+                    <div class="box box-memory">
+                        🔑 <strong>ログ読みの最重要Tips</strong>：シナリオの☆コメント行に<span class="hl">「期待されるNG」が書いてある</span>（例:「MME6台の場合、最後のMME制御は制御NGとなります。」）。マークだけ拾わず、直前の☆注記を読んでから判断する。
+                    </div>
+                    <div class="flow-item"><strong>1. SDM面状態</strong> — 前状態確認 → 制御 → 状態変化通知 → 復旧（基本の型どおり）</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>2. eNBリセット（割り込み処理）</strong> — SDM面等価制御 → eNB/gNBリセット制御。<span class="hl">リセット中は応答が【受NG】になることがあり、数分の空白を挟んで再開</span>。SDM面等価制御応答には .LEN/.SEN のファイル一覧が返る</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>3. 対MMEリンク</strong> — 休止 → 全断 → 工事中設定 → 全復旧。MME6台分を順に制御するため【受NG】が複数出るが、☆注記どおり<strong>最後の1台の制御NGは想定内</strong></div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>4. 物理回線</strong> — 休止すると対MME・対隣接eNBリンクも連鎖して【リ断】＝<span class="hl">物理を止めれば上位リンクも切れる（依存関係がログで見える）</span>。安定化待ちは150sec／360secと長め</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item"><strong>5. Traceroute導通試験</strong> — 実施 → 停止 → 「試験実行：正常終了」で締まる</div>
+                    <div class="box box-warning">
+                        ⚠️ <strong>【処NG】の例外（要確認）</strong>：Traceroute停止の直後に【処NG】が出るが、シナリオは正常終了している。停止要求で実施を中断した結果の処NGと思われる。チェックリストの「処NG=再試験」は原則であり、<strong>意図的な中断による処NGは正常扱いの可能性がある</strong>。扱いは指導時に要確認。
+                    </div>
+
                     <h2>VMT確認方法 <span class="badge badge-new">追加</span></h2>
 
                     <h4>セットアップ</h4>
@@ -1348,48 +1416,85 @@ mstsc（リモートデスクトップ接続）
                     🔑 <strong>所要時間の目安</strong>：手順どおりなら10〜15分、詰まっても30分あれば十分。事前に手順書を読んでおくのが最大のコツ。
                 </div>
 
-                <h2>実例① SAGConnect</h2>
+                <h2>実例① SAGConnect <span class="badge badge-new">手順書2種を統合・実物準拠</span></h2>
                 <div class="box box-purpose">
-                    元々は社員用のリモート接続ツール。協力会社にも開放された。Guacamoleでも接続できるが、SAGConnectが入ると<strong>SFTP/AuthGW経由</strong>の接続が可能になる。手順書はOAM各位宛てに展開される。
+                    元々は社員用のリモート接続ツール。協力会社にも開放された。導入するとプロフィールページに「リモート接続」が追加され、<strong>SFTP/AuthGW経由</strong>で個人のNutanixVM（OAM-VM-PFVT-XXX）へRDP接続できる。手順書は複数あり細部が異なる（下の差異表）。
                 </div>
-                <h4>事前準備</h4>
-                <ul>
-                    <li>SAGConnectのファイルを <code>C:\temp</code> に格納する</li>
-                    <li>ポータルサイトでアプリが表示されない場合は「アプリDLポータルサイトにアプリが表示されない」の手順を試す</li>
-                </ul>
-                <h4>インストール手順</h4>
+
+                <h4>インストールの流れ（共通の本筋）</h4>
                 <table>
                     <tr><th>手順</th><th>操作</th></tr>
-                    <tr><td>1</td><td><code>C:\temp</code> 内の <code>installer.bat</code> を実行 → CMDが開く → <code>y</code> で進める</td></tr>
-                    <tr><td>2</td><td>証明書のインストール警告 → <strong>許可する</strong></td></tr>
-                    <tr><td>3</td><td>CMD実行中にEdgeが起動する</td></tr>
-                    <tr><td>4</td><td>アドレスバーをクリック → Ctrl+Vで貼り付け → <code>edge://extensions/</code> → Enter</td></tr>
-                    <tr><td>5</td><td>拡張機能ページで「開発者モード」をONにする</td></tr>
-                    <tr><td>6</td><td>「展開して読み込み」をクリック</td></tr>
-                    <tr><td>7</td><td>フォルダ選択 → <code>C:\Users\自分のID\AppData\Local\SAGConnect\browser-extension</code></td></tr>
-                    <tr><td>8</td><td>「SFTP/AuthGW接続」が追加されたことを確認</td></tr>
-                    <tr><td>9</td><td>RANDEVのプロフィールページに「リモート接続」が表示されることを確認</td></tr>
+                    <tr><td>1</td><td>プロフィールページ（auth.gw.randev.jp/profile）を開き、<strong>ADパスワードの有効期限</strong>を確認（切れていたら再設定）</td></tr>
+                    <tr><td>2</td><td>「SAG接続クライアント」（SAGConnect_v8.11.1.7z）をダウンロード。<span class="hl">7zの解凍パスワードはDL押下時にプロフィール画面左下に赤文字で表示される</span></td></tr>
+                    <tr><td>3</td><td><strong>7-Zipで解凍</strong>（7-Zipでないと展開できない）</td></tr>
+                    <tr><td>4</td><td>解凍フォルダ内の <code>installer.bat</code> をダブルクリック → CMDを <code>y</code> で進める（開いていたEdgeは終了しておく）</td></tr>
+                    <tr><td>5</td><td>証明書（AuthGW CA）のインストール警告 → <strong>「はい」で許可</strong></td></tr>
+                    <tr><td>6</td><td><code>edge://extensions/</code> を開く（CMD中にEdgeが自動起動したらアドレスバーにCtrl+V。起動しなければ自分で開く）</td></tr>
+                    <tr><td>7</td><td>「開発者モード」をON</td></tr>
+                    <tr><td>8</td><td>「展開して読み込み」→ <strong>browser-extension</strong> フォルダを選択（<span class="hl">選ぶ場所は手順書で異なる → 下の差異表</span>）</td></tr>
+                    <tr><td>9</td><td>インストール済の拡張機能に「<strong>SFTP/AuthGW接続 8.11.1</strong>」が追加されトグルONを確認</td></tr>
+                    <tr><td>10</td><td>プロフィールページに「<strong>リモート接続</strong>」が追加されたことを確認</td></tr>
+                </table>
+
+                <h4>手順書による差異（展開先と読み込むフォルダ）</h4>
+                <table>
+                    <tr><th>項目</th><th>手順書A</th><th>手順書B</th></tr>
+                    <tr><td>解凍したフォルダの置き場所</td><td>OneDrive内の任意の場所</td><td><code>C:\Temp</code></td></tr>
+                    <tr><td>手順8で選ぶフォルダ</td><td>展開先の browser-extension</td><td><code>%LOCALAPPDATA%\SAGConnect\browser-extension</code><br>（<strong>★C:\Tempの方ではない</strong>と明記）</td></tr>
+                </table>
+                <div class="box box-info">
+                    💡 installer.batが拡張機能を <code>AppData\Local\SAGConnect</code> 配下に配置するため、どちらでも動くと思われる。ただし展開元のフォルダを後から移動・削除すると読み込みパスが切れるので、<strong>AppData側（手順書B方式）の方が堅い</strong>と思われる。
+                </div>
+
+                <h4>初回RDP接続（ダイアログ3連＋認証）</h4>
+                <table>
+                    <tr><th>画面</th><th>操作</th></tr>
+                    <tr><td>①「リモートデスクトップ接続を開いています」</td><td>左下のチェックに✔を入れて「OK」</td></tr>
+                    <tr><td>②「セキュリティ警告」（公開元: SAGConnect RDP Signing）</td><td><span class="hl">どこにも✔を入れずに</span>「接続」</td></tr>
+                    <tr><td>③「このリモートコンピューターのIDを識別できません」</td><td>「はい」（証明書エラーは想定内）</td></tr>
+                    <tr><td>④ 資格情報の入力</td><td>「その他」→「<strong>別のアカウントを使用する</strong>」→ ユーザー名 <code>randev\名_姓_XX</code>＋ADパスワード。<strong>2回目以降はパスワードのみでOK</strong></td></tr>
                 </table>
                 <div class="box box-danger">
-                    🚨 <strong>手順7が最大の罠</strong>：フォルダは <code>AppData\Local</code> 配下を選ぶ。<strong>C:\Tempの方ではない。</strong>AppDataは隠しフォルダなので、エクスプローラーのアドレスバーに直接パスを貼ると早い。
+                    🚨 <strong>終了は必ずRDPウィンドウの「×」ボタンで。</strong>ログアウトしてもRDP接続は自動で開放されない。
                 </div>
+
+                <h4>マルチモニター設定（任意）</h4>
+                <div class="flow-item"><strong>1.</strong> 検索窓で「リモートデスクトップ接続」→「オプションの表示」→「名前を付けて保存」で任意の場所にrdpファイルを保存</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>2.</strong> rdpファイルをテキストで開いて編集：<code>screen mode id:i:2</code>（デフォルトのまま）／<code>use multimon:i:1</code>（デフォルト0を変更）／<code>span monitors:i:1</code>（行を追加）</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>3.</strong> <code>edge://extensions</code> → SFTP/AuthGW接続の「詳細」→「拡張機能のオプション」→「クライアント」タブ → RDP設定ファイルに保存先とファイル名を指定して「保存」</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-item"><strong>4.</strong> プロフィール画面のリモート接続で「接続開始」→ ダイアログのコンピューターに <code>localhost:1080</code> を入力して「接続」</div>
+                <div class="box box-info">
+                    💡 <strong>1画面に戻す</strong>：「オプションの表示」→「画面」タブ →「リモートセッションですべてのモニターを使用する」の✔を外す。<strong>画面縮小</strong>：<code>smart sizing:i:1</code>
+                </div>
+
+                <h4>アンインストール</h4>
+                <table>
+                    <tr><th>手順</th><th>操作</th></tr>
+                    <tr><td>1</td><td><code>uninstaller.bat</code> を実行 → <code>y</code> で進める</td></tr>
+                    <tr><td>2</td><td><code>edge://extensions</code> → 開発者モードをOFF →「SFTP/AuthGW接続」を削除</td></tr>
+                </table>
 
                 <h2>実例② 7-Zip</h2>
                 <div class="box box-purpose">
-                    ログ圧縮等で使用。申請不要でインストール可能。GEN試験やセキュリティ対応でも使うので入れておいて損はない。
+                    ログ圧縮・解凍やSAGConnectの展開で使用。<strong>全社共通で申請不要</strong>。
                 </div>
+                <h4>未導入PCへの入れ方（Intuneポータル経由）</h4>
                 <table>
                     <tr><th>手順</th><th>操作</th></tr>
-                    <tr><td>1</td><td><code>C:\temp</code> 内のインストーラーを実行</td></tr>
-                    <tr><td>2</td><td>格納先を指定（デフォルトでOK）</td></tr>
-                    <tr><td>3</td><td>インストール完了</td></tr>
+                    <tr><td>1</td><td>Microsoft Intuneポータル（portal.manage.microsoft.com）へアクセス</td></tr>
+                    <tr><td>2</td><td>左上の3本線 →「デバイス」→ 自分のデバイスを選択（<span class="hl">アプリが何も表示されない時はこのデバイス選択ができていない</span>）</td></tr>
+                    <tr><td>3</td><td>3本線 →「アプリ」→ 下の方にある <strong>7zip</strong> を押下 →「インストール」</td></tr>
+                    <tr><td>4</td><td>ダウンロードフォルダには保存されないので、確認はスタートボタン隣の検索から</td></tr>
                 </table>
                 <div class="box box-danger">
                     🚨 <strong>解凍のやり方でつまづきやすい</strong>：解凍したい時は<strong>圧縮ファイル（.zip/.7z/.gz）本体</strong>を右クリック → <strong>「その他のオプションを表示」</strong>（Windows 11は右クリックメニューが省略されている）→ <strong>7-Zip</strong> → <strong>「展開」</strong>（展開先フォルダを選べる）。<br>
                     ⚠️ <strong>フォルダを右クリックすると「圧縮」系しか出ない。</strong>展開メニューは圧縮ファイルを選んだ時だけ出る。「解凍が無い」と思ったら、フォルダではなく圧縮ファイル本体を右クリックしているか確認。
                 </div>
                 <div class="box box-info">
-                    💡 SAGConnectの例：配布の圧縮ファイルを7-Zipで <code>C:\temp</code> に展開 → 中の <code>installer.bat</code> 等が C:\temp に置かれる。手順書の「C:\tempに格納する」はこの展開作業のこと。
+                    💡 SAGConnectの7zは<strong>解凍パスワード付き</strong>（プロフィール画面左下の赤文字）。パスワードを聞かれたら展開対象が合っている証拠。
                 </div>
 
                 <h2>連絡先・手順書の出どころ</h2>
@@ -1542,13 +1647,11 @@ mstsc（リモートデスクトップ接続）
             document.getElementById(subTabId).classList.add('active');
             event.target.classList.add('active');
         }
-        // 検索結果リンク用：タブIDだけでタブを開く（ボタンのハイライトも同期）
+        // モード切り替え（クロスチェック / 業務ノート）
+        const workTabs = {'vran':1,'security':1,'install':1,'meeting':1};
         function openTabById(tabId) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            const btn = document.querySelector('.tab[onclick*="\'' + tabId + '\'"]');
-            if (btn) btn.classList.add('active');
+            applyMode(workTabs[tabId] ? 'work' : 'cross');
+            activateTab(tabId);
         }
         // 検索結果リンク用：タブ＋サブタブまで直接開く
         function openSubTabById(tabId, subId) {
