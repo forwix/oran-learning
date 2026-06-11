@@ -62,6 +62,8 @@
         .sub-tab.active { background: #333; color: #fff; border-color: #333; }
         .sub-content { display: none; }
         .sub-content.active { display: block; }
+        .sub-tab-content { display: none; }
+        .sub-tab-content.active { display: block; }
         .footer { margin-top: 30px; padding: 15px 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; text-align: center; background: #f9f9f9; }
         @media print { .tabs, .search-container { display: none; } .tab-content { display: block !important; } .container { box-shadow: none; } }
         @media (max-width: 600px) { .tab { padding: 8px 10px; font-size: 11px; } .content { padding: 15px; } table { font-size: 12px; } th, td { padding: 6px 8px; } }
@@ -76,7 +78,7 @@
         </div>
         <div class="header">
             <h1>📋 業務ノート（vRAN・運用）【0611版】</h1>
-            <div class="subtitle">最終更新: 2026/06/11 ｜ vRAN・セキュリティ・インストール・定例</div>
+            <div class="subtitle">最終更新: 2026/06/11 ｜ vRAN・セキュリティ・インストール・定例・出荷試験</div>
         </div>
         <div class="search-container">
             <div class="search-box">
@@ -311,12 +313,9 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <tr><td>⑤ CU-CP NGリンク</td><td>局データ読み込み</td><td>EMSからreset → 再インスタ</td></tr>
                     </table>
 
-                    <!-- 事例① 瞬断 -->
                     <h3>① 瞬断後の障害対応（東電瞬断）</h3>
-
                     <h4>何が起きていたか</h4>
                     <p>東電の瞬断により踏み台サーバー（Bastion VM）が停止し、EMSに接続できなくなった。基盤電源断後の正規の起動手順が実施されていなかったことが原因。</p>
-
                     <h4>チャットの流れを追うと</h4>
                     <ul>
                         <li>「Bastion VMが停止している状況を確認」 — 踏み台が落ちたのでEMSに辿り着けない。</li>
@@ -327,7 +326,6 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <li>「kubectl namespace指定でForbiddenエラー」 — NSなしで実行すればoc loginしているNSのPodは表示される。</li>
                         <li>「イベントリストが正常に出力、NE connection lost ALMが解消」 — 復旧完了の判断。</li>
                     </ul>
-
                     <h4>復旧の判断基準</h4>
                     <table>
                         <tr><th>確認項目</th><th>正常の判断</th></tr>
@@ -337,17 +335,13 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <tr><td>Pod状態</td><td>正常</td></tr>
                         <tr><td>NE connection lost ALM</td><td>解消</td></tr>
                     </table>
-
                     <div class="box box-memory">
                         🔑 <strong>学び</strong>：Bastion VMが止まると全てに影響する。UPS（無停電電源装置）の有無が重要。kubectl namespace指定でForbiddenが出てもNSなしで確認可能。
                     </div>
 
-                    <!-- 事例② kubeconfig -->
                     <h3>② kubeconfig取得トラブル（CU認証NG）</h3>
-
                     <h4>何が起きていたか</h4>
                     <p>インスタ・1callまで成功したが、CU側のAdminMachineで認証NGエラーが発生し、コマンドが打てなくなった。kubeconfigファイルが古く、再取得しようとしたらAWS S3からForbiddenエラー。root権限で実行して解決。</p>
-
                     <h4>チャットの流れを追うと</h4>
                     <ul>
                         <li>「インスタOK＆1callも通った」 — ここまでは正常。</li>
@@ -359,7 +353,6 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <li>「fatal error、the Head object operation Forbidden」 — AWS S3からアクセス拒否。</li>
                         <li>「root権限で実行したらできました」 — sudo -i → chmod 600 で解決。</li>
                     </ul>
-
                     <h4>解決手順</h4>
                     <table>
                         <tr><th>手順</th><th>コマンド</th></tr>
@@ -368,17 +361,13 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <tr><td>3. kubeconfig権限変更</td><td><code>chmod 600 [kubeconfigファイル名]</code></td></tr>
                         <tr><td>4. rootを抜ける</td><td><code>exit</code></td></tr>
                     </table>
-
                     <div class="box box-memory">
                         🔑 <strong>学び</strong>：kubeconfigが古いと認証エラーになる。S3からのDLでForbiddenが出たらroot権限を試す。参照：o-cloud保守マニュアル-r2.0 6.3.2
                     </div>
 
-                    <!-- 事例③ F-DU同期 -->
                     <h3>③ F-DU Fronthaul同期エラー</h3>
-
                     <h4>何が起きていたか</h4>
                     <p>富士通のDU（F-DU）でFronthaul-synchronization Errorアラームが発生。PTPのClockclass上限値(7)を超えた値(180)がアナウンスされたことが原因。RUの全キャリアがDisabledになりセルもLockedになった。他系でも同時刻に発生していたため、上流の時刻源の問題と推測。</p>
-
                     <h4>チャットの流れを追うと</h4>
                     <ul>
                         <li>「F-DUでFronthaul-synchronization Errorが発生」 — DU-RU間の時刻同期が失敗。</li>
@@ -388,23 +377,18 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <li>「Clockclassの上限値(7)を超えた値(180)がアナウンスされた」 — 障害ログから原因特定。</li>
                         <li>「Alarmはクリアになってました」 — 自然解消。早めに対応された可能性あり。</li>
                     </ul>
-
                     <h4>障害ログ例</h4>
                     <div class="box box-purpose">
                         <code>stream 0: maxclockclass(7) exceeded by Rx Announce Class(187)</code><br>
                         → Clockclassの上限値7を超えた値がアナウンスされたため同期エラー
                     </div>
-
                     <div class="box box-memory">
                         🔑 <strong>学び</strong>：S-Plane（PTP）の問題。Clockclassは値が小さいほど高品質、上限値7を超えると同期NG。他系でも同時発生なら上流の時刻源を疑う。アラーム中でもEMS確認できれば試験を進められる場合がある。
                     </div>
 
-                    <!-- 事例④ NGリンク -->
                     <h3>④ NGリンク接続トラブル（IPアドレス設定不一致）</h3>
-
                     <h4>何が起きていたか</h4>
                     <p>CUをリセットしたがAMF（コア側）とのNGリンクが繋がらなかった。原因はIPアドレスの設定が合っていなかったこと。Wiresharkで確認してSCTP initが飛んできていることを発見し、AMF SIMを立ち上げて解決。</p>
-
                     <h4>チャットの流れを追うと</h4>
                     <ul>
                         <li>「NFリセットしてもNGリンク繋がらない」 — CUのPodを再起動したが、AMFとのNG接続（NGAP）が確立しない。</li>
@@ -417,7 +401,6 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <li>「NSもLabelもない」 — 基盤再構築でKubernetes上のnamespace/Labelが初期化されていた。</li>
                         <li>「F1が繋がってMplaneも見えた」 — F1（CU-DU間）とM-Plane（管理）が両方確認できたので復旧完了。</li>
                     </ul>
-
                     <div class="box box-memory">
                         🔑 <strong>学び</strong>：<br>
                         • ping、ARP → ネットワーク基礎<br>
@@ -429,12 +412,9 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         pingが通らない → アドレスを変えてみる → まだダメ → <strong>Wiresharkで見たらSCTP initが飛んできていた</strong> → AMF SIMを立ち上げたら解決。Wiresharkがなければ「何が起きているか」がわからないままだった。
                     </div>
 
-                    <!-- 事例⑤ CU-CP NGリンク -->
                     <h3>⑤ Rel4.5 CU-CP NGリンク不確立（局データ読み込み失敗）</h3>
-
                     <h4>何が起きていたか</h4>
                     <p>VLAN850へ移行後、Rel4.5のCU-CPを立ち上げたがAMFとのNGリンクが確立しなかった。アドレス・ポート・バージョン差分を一通り疑ったが、最終的な原因は<strong>局データがEMSに正しく読み込めていなかったこと</strong>。EMSからresetして読み込み直し、最新版(R04.50.20)で再インスタしたらNG・E1ともに繋がり、2セルACTIVEまで到達した。</p>
-
                     <h4>チャットの流れを追うと</h4>
                     <ul>
                         <li>「Rel4.5のCU-CP立ち上げたがNGリンク確立しない」 — VLAN850移行の影響を疑う。</li>
@@ -450,7 +430,6 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <li>「UP4までインスタ → DUインスタ → <strong>2セルともACTIVE</strong>」 — 復旧完了。</li>
                         <li>「DUをターミしてRU増設を試行。F45(一体型)を後接続するためケーブルを抜く → EMS上Disconnect → 再インスタ → SS34セルAct → F45接続 → F45もセルAct」 — 増設も成功。</li>
                     </ul>
-
                     <h4>切り分けの順番（この事例の財産）</h4>
                     <div class="box box-purpose">
                         上流から1つずつ潰していくのが基本。今回は最後の「局データ読み込み」で当たった。
@@ -462,12 +441,10 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <tr><td>3</td><td>インスタパラメータ（N2podアドレス等）</td><td>問題なし</td></tr>
                         <tr><td>4</td><td><strong>局データの読み込み状態</strong>（configmgrログをgrep）</td><td>🚨 読めていなかった → reset で解消</td></tr>
                     </table>
-
                     <h4>前段：IP取得トラブル（VLAN誤接続）</h4>
                     <div class="box box-info">
                         💡 この日の前段で、VMに繋がらずIP再取得を試みる場面があった。<code>/release</code> → 開発LANのNIC抜く → 1分待つ → 繋ぎ直す → <code>ipconfig</code> 確認、でもIPが変わらず。見立ては「本来 <code>172.21.98.x</code> が割り当たるべきところ、VLAN100側のDHCPに繋がって <code>172.29.23.x</code> をもらっている」と思われる。時間をおいたらVM接続でき解消。
                     </div>
-
                     <div class="box box-memory">
                         🔑 <strong>学び</strong>：<br>
                         • NGリンクが張れない時の犯人は、アドレス/ポートだけでなく<strong>局データの読み込み失敗</strong>もある。<br>
@@ -503,7 +480,6 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                     <div class="flow-item"><strong>11.</strong> active</div>
                     <div class="flow-arrow">↓</div>
                     <div class="flow-item"><strong>12.</strong> 安定性確認</div>
-
                     <div class="box box-memory">
                         🔑 Nokia MMU単体試験で見たこと：F1（ミッドホール）の導通確認。activeになった後もリセットを繰り返す場面あり。
                     </div>
@@ -514,7 +490,6 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                     <div class="box box-purpose">
                         SEFバージョン（25A→26A等）に合わせて、GENツールが局データファイルを正しく生成・更新できるか確認する試験。既存LTEが対象。
                     </div>
-
                     <h4>GEN試験の流れ</h4>
                     <div class="flow-item"><strong>1.</strong> リリースノートでSEF変更点を確認</div>
                     <div class="flow-arrow">↓</div>
@@ -527,910 +502,33 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                     <div class="flow-item"><strong>5.</strong> リグレッション（既存機能が壊れていないか確認）</div>
                     <div class="flow-arrow">↓</div>
                     <div class="flow-item"><strong>6.</strong> シナリオに沿って試験実施</div>
-
                     <h4>A面 / B面（冗長構成）</h4>
                     <div class="box box-info">
                         💡 装置には同じデータが入ったA面（現用）とB面（予備）がある。万が一失敗してもB面に元データが残っているので戻せる。
                     </div>
-                    <div class="flow-item"><strong>1.</strong> A面 = B面（同じ現行データの状態からスタート）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> A面 → B面に転送（バックアップ）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> 転送完了後、A面をリセット</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> A面に新バージョン（26A）の局データをGENで投入</div>
-
                     <h4>用語</h4>
                     <table>
                         <tr><th>用語</th><th>意味</th></tr>
                         <tr><td><strong>GEN</strong></td><td>局データを生成するツール</td></tr>
                         <tr><td><strong>SEF</strong></td><td>ソフトウェアバージョン（25A、26A等。25A=2025年A版）</td></tr>
                         <tr><td><strong>リグレッション</strong></td><td>回帰テスト。変更後に既存機能が壊れていないか確認</td></tr>
-                        <tr><td><strong>リリースノート</strong></td><td>SEFバージョンの変更点一覧</td></tr>
                         <tr><td><strong>LM</strong></td><td>Load Module。装置のソフトウェア</td></tr>
                         <tr><td><strong>SDM</strong></td><td>Station Data Management。局データ管理ツール</td></tr>
-                        <tr><td><strong>PF</strong></td><td>Platform。基盤環境</td></tr>
                         <tr><td><strong>A面 / B面</strong></td><td>冗長構成。同じデータが2面ある（現用/予備）</td></tr>
-                        <tr><td><strong>オペログ</strong></td><td>操作ログ。ファイル更新の履歴を確認</td></tr>
-                        <tr><td><strong>eNBメンテツール</strong></td><td>LTE基地局の保守ツール</td></tr>
-                        <tr><td><strong>シミュレータ</strong></td><td>実機ではなくシミュレータ環境で操作</td></tr>
-                        <tr><td><strong>収容追加</strong></td><td>既存の基地局に新しいセルやキャリア、回線を追加すること</td></tr>
-                    </table>
-
-                    <h4>対象装置（26A GEN正常性確認試験）</h4>
-                    <table>
-                        <tr><th>装置</th><th>構成</th></tr>
-                        <tr><td>3001</td><td>LTEシングル</td></tr>
-                        <tr><td>BDE3201</td><td>LTEシングル</td></tr>
-                        <tr><td colspan="2">計7装置が対象、3Gは作業なし</td></tr>
-                    </table>
-
-                    <h4>事前準備</h4>
-                    <ul>
-                        <li>どの装置とどのPCが繋がっているか把握しておく</li>
-                        <li>ファイル更新のオペログを確認</li>
-                        <li>eNBメンテツールの使い方を覚える</li>
-                        <li>シナリオ（試験手順書）の内容を確認</li>
-                    </ul>
-
-                    <h4>試験環境のネットワーク構成 <span class="badge badge-new">追加</span></h4>
-<pre style="background:#f5f5f5;padding:15px;font-family:monospace;font-size:13px;">
-自分のPC → VLAN100（仲介）→ VLAN850（試験PC）
-                                ↓
-                            装置（N3001, F3001等）</pre>
-                    <table>
-                        <tr><th>用語</th><th>意味</th></tr>
-                        <tr><td><strong>アドレス一覧ファイル</strong></td><td>各装置・PCのIPアドレスが記載された資料</td></tr>
-                        <tr><td><strong>VLAN100</strong></td><td>仲介用のVLAN</td></tr>
-                        <tr><td><strong>VLAN850</strong></td><td>試験PCが接続されている実際のVLAN</td></tr>
-                        <tr><td><strong>遠隔リモートPC</strong></td><td>VLAN850上の試験PC</td></tr>
-                        <tr><td><strong>RDCツールマネージャー</strong></td><td>リモートデスクトップ接続の管理ツール</td></tr>
-                    </table>
-
-                    <h4>まず理解すべき装置 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>装置</th><th>ベンダー</th></tr>
-                        <tr><td><strong>N3001</strong></td><td>Nokia</td></tr>
-                        <tr><td><strong>F3001</strong></td><td>富士通</td></tr>
-                    </table>
-
-                    <h4>立ち上げ後の保守監視手順 <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> 保守モード的なものをOFFにする → 操作可能になる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> 時刻をPCの時間に合わせる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> 全状態を流す</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> OPSシミュレーション or eNBメンテナンスツールに状態が流れてくる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> カード情報監視、CPRI、FLD等の各種状態を確認可能</div>
-                    <div class="box box-info">
-                        💡 A面/B面のどちらで立ち上がっているかも確認できる。
-                    </div>
-
-                    <h4>ツール一覧 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>ツール</th><th>用途</th></tr>
-                        <tr><td><strong>LTE-MT</strong></td><td>LTEメンテナンスツール。何もチェックせず起動。ヘルプ画面から簡易的に確認可能</td></tr>
-                        <tr><td><strong>Autologcontrol</strong></td><td>自動実行ツール</td></tr>
-                        <tr><td><strong>OPSシミュレーション</strong></td><td>装置の状態がログのように流れてくる</td></tr>
-                        <tr><td><strong>ONENOTE</strong></td><td>マシンファイルで立ち上げ状況を確認</td></tr>
-                    </table>
-                    <div class="box box-info">
-                        💡 エラーは<strong>カード制御</strong>から閲覧できる。
-                    </div>
-                    <div class="box box-warning">
-                        ⚠️ 保守モードをOFFにするまでのプロセスは次回レクチャーで確認予定。
-                    </div>
-
-                    <h4>バージョンダウン・バージョンアップ正常性確認 <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        新バージョン（26A）だけでなく、旧バージョン（25B）に戻しても正常に動くか確認する。「元に戻せる」ことを実際に検証する試験。
-                    </div>
-
-                    <h4>A面/B面の状態</h4>
-                    <table>
-                        <tr><th>面</th><th>内容</th></tr>
-                        <tr><td><strong>A面</strong></td><td>新SEF（26A）</td></tr>
-                        <tr><td><strong>B面</strong></td><td>LMと旧SEF（25B）のGEN正常性で作った局データ</td></tr>
-                    </table>
-
-                    <h4>バージョンダウン確認の流れ</h4>
-                    <div class="flow-item"><strong>1.</strong> B面に25Bの局データを入れる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> SDMファイル制御で何が入っているか確認</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> eNBリセットでB面指定立ち上げ</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> 立ち上げ → FLD制御</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> 正常に動作するか確認</div>
-
-                    <h4>追加用語</h4>
-                    <table>
-                        <tr><th>用語</th><th>意味</th></tr>
-                        <tr><td><strong>FLD制御</strong></td><td>LTE-MTのツールの一つ。A面の局データをB面に転送してA面/B面を同値にする時に使う</td></tr>
-                        <tr><td><strong>SDMファイル制御</strong></td><td>SDMで局データの中身を確認する操作</td></tr>
-                        <tr><td><strong>eNBリセット B面指定</strong></td><td>B面を指定して装置を再起動</td></tr>
-                    </table>
-
-                    <div class="box box-memory">
-                        🔑 <strong>まずはA面とB面があると覚えること。</strong>バージョンアップもダウンも、A面/B面を使い分けて行う。
-                    </div>
-
-                    <h4>OPS立ち上げ〜監視 <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> OPS立ち上げ（長くて5分、RE接続ありだと速い。接続が無いと接続確認のため遅くなる）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> 保守信号停止OFF → 監視できる状態になる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> 時刻設定 → PCの時刻が設定される</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> 全状態を流す</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> OPSシミュでカード情報など見れる状態になる</div>
-
-                    <h4>コマンド・レスポンス一覧 <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-warning">
-                        ⚠️ コマンドとレスポンスは全部覚える必要がある。
-                    </div>
-                    <table>
-                        <tr><th>コマンド</th><th>内容</th></tr>
-                        <tr><td><strong>再開状態要求</strong></td><td>再開の状態を要求</td></tr>
-                        <tr><td><strong>再開状態取得</strong></td><td>再開の状態を取得</td></tr>
-                        <tr><td><strong>保守信号停止要求</strong></td><td>保守信号を停止して監視可能にする</td></tr>
-                        <tr><td><strong>時刻設定制御要求/応答</strong></td><td>時刻を設定する</td></tr>
-                        <tr><td><strong>LM情報取得要求</strong></td><td>Load Moduleの情報を取得</td></tr>
-                        <tr><td><strong>RREリンク全状態取得要求</strong></td><td>RREの全リンク状態を取得</td></tr>
-                        <tr><td><strong>架全状態</strong></td><td>架（ラック）の全体状態</td></tr>
-                        <tr><td><strong>card状態</strong></td><td>カードの状態確認</td></tr>
-                        <tr><td><strong>装置構成情報</strong></td><td>装置の構成情報</td></tr>
-                        <tr><td><strong>対向ノード</strong></td><td>接続相手のノード情報</td></tr>
                         <tr><td><strong>FLD制御</strong></td><td>LTE-MTのツール。A面→B面へ局データを転送し同値にする</td></tr>
-                        <tr><td><strong>カード情報</strong></td><td>カード情報の確認</td></tr>
-                    </table>
-
-                    <h4>追加用語 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>用語</th><th>意味</th></tr>
-                        <tr><td><strong>MME</strong></td><td>上位装置のこと。切断されると休止状態になる</td></tr>
-                        <tr><td><strong>RE</strong></td><td>Radio Equipment。接続されているとOPS立ち上げが速い</td></tr>
-                    </table>
-
-                    <h4>試験ログの種類 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>ログ</th><th>用途</th></tr>
-                        <tr><td><strong>ベンダメンテログ</strong></td><td>ベンダー側の保守ログ</td></tr>
-                        <tr><td><strong>OPSログ</strong></td><td>OPS側の運用ログ</td></tr>
                     </table>
                     <div class="box box-info">
-                        💡 試験ログは、この2つを見ることが多い。
+                        💡 出荷試験・OPSログの読み方は「出荷試験」タブに集約しました。
                     </div>
-
-                    <h4>その他メモ</h4>
-                    <ul>
-                        <li>自動試験の動きを「こんな動きしてるんだな」と理解する</li>
-                        <li>N3001の環境の作り方を見せてもらった</li>
-                        <li>MMEが切断されると休止状態になる</li>
-                    </ul>
-
-                    <h4>ログ取得・管理の流れ <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> 試験前のCSVファイルの状態を保存</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> JwishPlayerツールでログ取得開始</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> 試験実施</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> ログ停止</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> ツールを落とす（ログを掴んでると転送できない）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>6.</strong> 7Zipで圧縮</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>7.</strong> ログ転送・格納（障害ログはC直下のAuto\OAMに格納）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>8.</strong> ログ解析</div>
-                    <div class="box box-info">
-                        💡 <strong>OPS-SIMログ</strong>が基本のログ。最終的にログを取得して解析できるようにする。
-                    </div>
-
-                    <h4>ツールと役割 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>ツール</th><th>役割</th></tr>
-                        <tr><td><strong>JwishPlayerツール</strong></td><td>ログ取得開始・停止</td></tr>
-                        <tr><td><strong>Autologcontrol</strong></td><td>半自動化ツール。時刻補正を各PCに投げる。制御用PCの時刻を基準に他PCに反映</td></tr>
-                        <tr><td><strong>WindowsAgent</strong></td><td>制御用。装置ごとに専用のAgentがいる</td></tr>
-                        <tr><td><strong>7Zip</strong></td><td>ログを圧縮して格納</td></tr>
-                    </table>
-
-                    <h4>WindowsAgentの構成 <span class="badge badge-new">追加</span></h4>
-<pre style="background:#f5f5f5;padding:15px;font-family:monospace;font-size:13px;">
-制御用PC
-  ├→ N3001のWindowsAgent → N3001装置
-  ├→ F3001のWindowsAgent → F3001装置
-  └→ ...</pre>
-                    <div class="box box-info">
-                        💡 制御するのはWindowsAgent。シナリオとファイルセットで試験を実行する。
-                    </div>
-
-                    <h4>注意点 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>注意</th><th>内容</th></tr>
-                        <tr><td><strong>ログは掴んでると持ってこれない</strong></td><td>ツールがログ使用中だと転送できない。転送時はツールを落とす</td></tr>
-                        <tr><td><strong>半自動化でも転送は手動</strong></td><td>Autologcontrolでも転送は手動でやる</td></tr>
-                        <tr><td><strong>試験前にCSV状態を保存</strong></td><td>試験前の状態を残しておく</td></tr>
-                        <tr><td><strong>旧SEFから新SEFにパス変更</strong></td><td>FTPフォルダのパスを変える作業がある</td></tr>
-                        <tr><td><strong>WindowsAgentに投げる</strong></td><td>半自動化の転送はWindowsAgent経由</td></tr>
-                    </table>
-
-                    <h4>試験実施の全体フロー <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> 転送先にアクセスできるか事前確認（アクセスできないと転送失敗する）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> JwishPlayer簡易版で作成</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> C直下\Auto\26Aフォルダを作成し、シナリオとファイルセットを配置（編集は後程）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> 構成設定ファイルを26A用に変更（起動時に読み込ませる）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> 各WindowsAgentを立ち上げる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>6.</strong> 各PCからログ転送先にアクセスできるか確認</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>7.</strong> 事前シナリオを投げる（FM配下削除など）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>8.</strong> 試験シナリオを投げる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>9.</strong> 障害ログを取って終了</div>
-
-                    <h4>試験実施の用語 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>用語</th><th>意味</th></tr>
-                        <tr><td><strong>JwishPlayer簡易版</strong></td><td>簡易版の試験ファイルを作成するツール</td></tr>
-                        <tr><td><strong>構成設定ファイル</strong></td><td>起動時に読み込む設定。SEFバージョンに合わせて変更</td></tr>
-                        <tr><td><strong>事前シナリオ</strong></td><td>試験前の準備操作（FM配下削除等）</td></tr>
-                        <tr><td><strong>試験シナリオ</strong></td><td>本番の試験操作</td></tr>
-                        <tr><td><strong>FM配下削除</strong></td><td>事前シナリオで実施する準備操作</td></tr>
-                        <tr><td><strong>エラーREP11</strong></td><td>ツール起動時のエラー（原因要確認）</td></tr>
-                    </table>
-                    <div class="box box-warning">
-                        ⚠️ 転送先にアクセスできるか事前に確認すること。簡易版試験ファイルを流す前に行う。
-                    </div>
-
-                    <h4>マクロトレースとファイル設定 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>環境</th><th>マクロトレース</th></tr>
-                        <tr><td><strong>商用</strong></td><td>なし</td></tr>
-                        <tr><td><strong>試験</strong></td><td>あり（マクロトレース有のファイルにする）</td></tr>
-                    </table>
-                    <div class="box box-info">
-                        💡 Nokiaはベンダ特有のマクロトレース設定がある。
-                    </div>
-
-                    <h4>ファイル関連の操作 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>操作</th><th>内容</th></tr>
-                        <tr><td><strong>FLD制御</strong></td><td>VND_CMNファイルに書き換える</td></tr>
-                        <tr><td><strong>VND_CMNファイル</strong></td><td>書き換えると試験で使用するファイルになる</td></tr>
-                        <tr><td><strong>テスト用0kbファイル</strong></td><td>テスト用に0kbのダミーファイルを用意する</td></tr>
-                        <tr><td><strong>gzファイル</strong></td><td>GEN試験で使うファイルはgz（圧縮ファイル）を使う</td></tr>
-                        <tr><td><strong>add archive</strong></td><td>アーカイブ追加操作</td></tr>
-                    </table>
-
-                    <h4>ダミーファイルと若番ルール <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-info">
-                        💡 ダミーの方が若番。新SEFのファイルセットの方に若い番号のダミーを入れる。
-                    </div>
-
-                    <h4>SEFスケジュール <span class="badge badge-new">追加</span></h4>
-                    <ul>
-                        <li>1日にSEFは25Bになる</li>
-                        <li>25BのLMを使用</li>
-                    </ul>
-
-                    <div class="box box-danger">
-                        🚨 <strong>gzファイル混入に注意</strong>：マクロログ確認時にgzファイルが紛れ込んでいると中身を読み込めない。発見した場合はシナリオ作成からやり直しになる。
-                    </div>
-
-                    <h4>シナリオ・ファイル編集の操作 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>操作</th><th>内容</th></tr>
-                        <tr><td><strong>grep</strong></td><td>文字列検索・置換。検索文字列→置換文字列</td></tr>
-                        <tr><td><strong>シナリオ書き換え</strong></td><td>シナリオ番号、ファイルサイズ、局データファイル名を書き換える</td></tr>
-                        <tr><td><strong>ファイルサイズ確認</strong></td><td>書き換えたファイルのサイズを確認</td></tr>
-                        <tr><td><strong>WinMerge</strong></td><td>書き換えた内容を差分確認する</td></tr>
-                        <tr><td><strong>ファイルセット確認</strong></td><td>ファイルセットが正しいか確認</td></tr>
-                        <tr><td><strong>局データ更新戻し</strong></td><td>局データを元に戻す操作</td></tr>
-                    </table>
-
-                    <h4>バージョンダウン→アップの流れ <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> LM・FW・局データを旧SEFに落とす（一段階下げる）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> 一気に最新のものにする</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> 最後はダミー局データで局データだけ新SEF化する</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> 更新後、手順シナリオでログを取得して終了</div>
-
-                    <h4>試験実施の詳細操作 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>操作</th><th>内容</th></tr>
-                        <tr><td><strong>応答ファイル</strong></td><td>どういう順番に流すか設定するファイル</td></tr>
-                        <tr><td><strong>FTPフォルダ → OPSシミュ</strong></td><td>FTPフォルダのものをOPSシミュレーションで流す</td></tr>
-                        <tr><td><strong>JwishPlayer簡易版</strong></td><td>簡易版を流してログ転送できるか確認</td></tr>
-                        <tr><td><strong>FWファイル削除</strong></td><td>不要なFWファイルを削除</td></tr>
-                    </table>
-
-                    <h4>試験後の確認 <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> ログ転送完了</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> 格納されたログの中身を見る</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> CSVファイルを確認</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> ベンダログなど格納される</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> 障害ログを確認</div>
-
-                    <h4>FTP・ログファイル関連 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>項目</th><th>内容</th></tr>
-                        <tr><td><strong>FTPファイル</strong></td><td>障害ログなどが格納される場所</td></tr>
-                        <tr><td><strong>ベンダメンテ crbファイル</strong></td><td>ベンダメンテにcrbというファイルができる</td></tr>
-                        <tr><td><strong>OPSの解析</strong></td><td>実際に解析するのはOPSログ</td></tr>
-                        <tr><td><strong>簡易版ファイル名書き換え</strong></td><td>簡易版のファイル名を書き換えて使用</td></tr>
-                    </table>
-                    <div class="box box-warning">
-                        ⚠️ <strong>本試験はA面で終わるようにする。</strong>
-                    </div>
-
-                    <h4>正常性試験の実施 <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        Jwish Executor-Scenarioで実行
-                    </div>
-                    <div class="flow-item"><strong>1.</strong> 開始後、全自動で進む</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> CPRIS接続確認シナリオでERRとなるが、光スイッチの関係のため進めて問題ない</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> eNBメンテ立ち上げ → eNBと接続 → 情報処理</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> OPS SIMにもENDが表示される</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> OPS SIMのcmdFでFTP関係のログが流れる</div>
-                    <div class="box box-info">
-                        💡 CPRIS接続確認のERRは光スイッチの関係なので、そのまま進めてOK。
-                    </div>
-
-                    <h4>試験ログの格納・解析 <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> OPSログを解凍してもらう</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> 分割フォルダを作成する</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> order3001ファイルなど解析対象のログを確認</div>
-
-                    <h4>追加用語 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>用語</th><th>意味</th></tr>
-                        <tr><td><strong>Jwish Executor-Scenario</strong></td><td>正常性試験を実行するシナリオツール</td></tr>
-                        <tr><td><strong>CPRIS接続確認</strong></td><td>CPRI接続を確認するシナリオ。光スイッチの関係でERRになるが問題なし</td></tr>
-                        <tr><td><strong>cmdF</strong></td><td>OPS SIMのコマンド。FTP関係のログが流れる</td></tr>
-                        <tr><td><strong>crbファイル</strong></td><td>ベンダメンテに生成されるファイル</td></tr>
-                        <tr><td><strong>order3001ファイル</strong></td><td>解析対象のログファイル</td></tr>
-                        <tr><td><strong>分割フォルダ</strong></td><td>OPSログ解凍後に作成するフォルダ</td></tr>
-                    </table>
-
-                    <h4>ログ格納・解析の詳細 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>操作・ツール</th><th>内容</th></tr>
-                        <tr><td><strong>OPS logスプリッター</strong></td><td>OPSログを分割するツール</td></tr>
-                        <tr><td><strong>CRBファイル</strong></td><td>ベンダメンテに生成されるファイル</td></tr>
-                        <tr><td><strong>OPS SIMでOPEログ比較</strong></td><td>OPS SIMを使ってオペレーションログの比較を行う</td></tr>
-                        <tr><td><strong>OPS-SIMでログ解析</strong></td><td>読み込みで解析する</td></tr>
-                        <tr><td><strong>障害ログタイムアウト</strong></td><td>タイムアウトした場合→NVMTに</td></tr>
-                    </table>
-
-                    <h4>格納先・ツールの場所 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>パス</th><th>用途</th></tr>
-                        <tr><td><code>rantastorage\OAM\SV.自動化\02-GEN正常性試験</code></td><td>変換先フォルダの格納場所</td></tr>
-                        <tr><td><code>受渡フォルダ\26A試験ツール\OPS-SIM</code></td><td>OPS-SIMのツール格納場所</td></tr>
-                    </table>
-
-                    <h4>シナリオの構成 <span class="badge badge-new">追加</span></h4>
-                    <ul>
-                        <li>シナリオには<strong>FMとPF</strong>を入れる</li>
-                        <li>OPSファイル制限あり</li>
-                        <li>シナリオを覚えること</li>
-                    </ul>
-
-                    <h4>B面書き込みの確認 <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> 1日SEFのLMを入れる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> B面に書き込み</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> エラーがないか確認</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> 差分がないか確認</div>
-
-                    <h4>発生した問題 <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-danger">
-                        🚨 <strong>マクロ掃き出しのないものがB面に入っていた</strong>。今回発生した問題として記録。
-                    </div>
-
-                    <h4>試験後の確認作業 <span class="badge badge-new">追加</span></h4>
-                    <ul>
-                        <li>eNB MTを立ち上げてもらい、エラーやアラームがないか確認</li>
-                        <li>NFP3002は半自動のツール（autologcontrol）を使用</li>
-                        <li>ログは<strong>VMTとOPS</strong>に絞っている</li>
-                        <li>FTPに障害ログが格納される</li>
-                    </ul>
-
-                    <h4>半自動化での手動操作 <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-warning">
-                        ⚠️ 半自動化でもOPS-SIMは手動。以下も手動で行う：
-                    </div>
-                    <ul>
-                        <li>試験開始</li>
-                        <li>ログ取得</li>
-                        <li>試験後のログ転送と圧縮</li>
-                    </ul>
-                    <div class="box box-info">
-                        💡 シナリオとファイルセットを作ることが必要。
-                    </div>
-
-                    <h4>バッチ操作と事前クリア <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        batをたたく：<code>ローカル\Auto\プログラムファイル</code>
-                    </div>
-                    <p><strong>全フォルダクリアバッチ</strong>で以下をクリアする：</p>
-                    <ul>
-                        <li>FTPフォルダ内</li>
-                        <li>シナリオフォルダ</li>
-                        <li>tool内</li>
-                    </ul>
-                    <div class="flow-item"><strong>1.</strong> 全フォルダクリアバッチ実行（事前クリア）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> シナリオフォルダ内にpause</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> シナリオを流すだけの状態を作る</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> 試験実施</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> 試験後にツールを落とす</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>6.</strong> 結果ログは自動削除</div>
-
-                    <h2>出荷試験 <span class="badge badge-new">追加</span></h2>
-
-                    <div class="box box-purpose">
-                        リリース基準を全て満たしているか確認する試験。LMリリース後、お客さんに納品する前の最終確認。
-                    </div>
-
-                    <h4>正常性確認試験との違い</h4>
-                    <table>
-                        <tr><th>試験</th><th>確認すること</th></tr>
-                        <tr><td><strong>正常性確認試験</strong></td><td>ファイル更新が正しくできるか</td></tr>
-                        <tr><td><strong>リグレッション試験</strong></td><td>更新後に既存機能が壊れていないか</td></tr>
-                        <tr><td><strong>出荷試験</strong></td><td>リリース基準を全て満たしているか</td></tr>
-                    </table>
-
-                    <h4>既存装置のファイル更新の場合</h4>
-                    <div class="box box-info">
-                        💡 差分としてはファイル名のみのため、基本的にERRやALMは起きない。起きるとすれば：
-                    </div>
-                    <ul>
-                        <li>立ち上げ時の不安定によるリンク断</li>
-                        <li>シナリオでは隣接を設定しているが、実機から外されている場合</li>
-                    </ul>
-
-                    <h4>26A出荷試験の準備手順</h4>
-                    <div class="flow-item"><strong>1.</strong> LTE-MTでFM削除（事前準備）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> FLD制御で、ローカルのC直下のHDDフォルダ内に格納した26A局データをA面にセット</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> A面 → B面に転送（両方とも同じ局データにする）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> A面を指定してリセット（ツール → SeNBリセットから実施）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> 新しい局データで装置が立ち上がることを確認</div>
-
-                    <h4>26A出荷試験の実施手順（実績） <span class="badge badge-new">追加</span></h4>
-                    <div class="flow-item"><strong>1.</strong> FM配下のファイルを削除</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> FLD制御画面でSDM B面にチェック → A→Bに転送</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> 転送後、A面とB面が等価になったか確認（SDMファイル制御で確認）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> SeNBリセットより、SDM種別A面を選択</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> eNBリセット実行</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>6.</strong> カード状態のERRが消えていることを確認</div>
-
-                    <h4>FLD制御の見方 <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-info">
-                        💡 <strong>FLD制御</strong>はLTE-MTのツールの一つ。A面の局データをB面に転送してA面/B面を同値にする時に使う。
-                    </div>
-                    <table>
-                        <tr><th>項目</th><th>正常状態</th></tr>
-                        <tr><td><strong>SDM A面</strong></td><td>アクティブ（現用で動いている）</td></tr>
-                        <tr><td><strong>SDM B面</strong></td><td>スタンバイ（待機中）</td></tr>
-                    </table>
-                    <div class="box box-info">
-                        💡 SDMファイル制御でA面とB面のファイル名・バージョンが同じなら等価状態。
-                    </div>
-
-                    <h4>LTE-MT リセット手順（記憶ベース・要確認） <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-warning">
-                        ⚠️ <strong>これは記憶ベースのメモ。手順書で裏が取れたら正式版に統合する。</strong>細部（順番・操作名）は要確認。
-                    </div>
-                    <div class="flow-item"><strong>1.</strong> FLD制御で FM削除</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> A面に立ち上げる局データをセット</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> B面に転送（A→B）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> SDM（ファイル制御）でA面とB面が同じか確認</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> 同値が確認できたら リセット実施</div>
-                    <div class="box box-info">
-                        💡 既存の「26A出荷試験の実施手順（実績）」とほぼ同じ流れ。確認できたら統合する。
-                    </div>
-
-                    <h4>N3001固有の注意点 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>項目</th><th>内容</th></tr>
-                        <tr><td><strong>RE番号5</strong></td><td>切断のままでOK。Dip-SWの設定OFFのため</td></tr>
-                        <tr><td><strong>スロット22 AIF-Aカード</strong></td><td>RE番号5のDip-SW OFF時にERR表示される。A面指定リセット後にERRが消える</td></tr>
-                    </table>
-                    <div class="box box-info">
-                        💡 Dip-SWの設定OFFは装置リセットすると反映される。
-                    </div>
-
-                    <h4>OPSログとLTE-MTの違い <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-warning">
-                        ⚠️ 同じ装置でもOPSログとLTE-MTで見え方が違う場合がある。LTE-MTでは接続確認できてもOPSログに状態変化通知が上がらないことがある。
-                    </div>
-
-                    <h4>ログ確認チェックリスト（当日用） <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        出荷試験でログを見る時に上から消し込むための一覧。判断に迷ったら止まって確認する。
-                    </div>
-
-                    <p><strong>① 事前（試験前にやっておく）</strong></p>
-                    <table>
-                        <tr><th>✓</th><th>確認すること</th></tr>
-                        <tr><td>☐</td><td>OPS logスプリッター・7-Zipが使うPCに入っていて起動できるか</td></tr>
-                        <tr><td>☐</td><td>OPSログ／ベンダメンテログの格納先パスを開けるか（アクセス確認）</td></tr>
-                        <tr><td>☐</td><td>障害ログの格納先（C直下のAuto\OAM）を確認</td></tr>
-                        <tr><td>☐</td><td>試験前のCSVファイルの状態を保存したか</td></tr>
-                    </table>
-
-                    <p><strong>② 取得（ログを取る）</strong></p>
-                    <table>
-                        <tr><th>✓</th><th>手順</th></tr>
-                        <tr><td>☐</td><td>ログ取得 → 停止 → <strong>ツールを落とす</strong>（掴んだままだと転送できない）</td></tr>
-                        <tr><td>☐</td><td>7-Zipで圧縮 → 転送・格納</td></tr>
-                    </table>
-
-                    <p><strong>③ 解析（OPSログを見る）</strong></p>
-                    <table>
-                        <tr><th>✓</th><th>手順</th></tr>
-                        <tr><td>☐</td><td>見るログは2つ：ベンダメンテログ／<strong>OPSログ</strong>（実際に解析するのはOPSログ）</td></tr>
-                        <tr><td>☐</td><td>OPS logスプリッターで分割 → 分割フォルダ作成 → order3001等の対象ファイルを確認</td></tr>
-                        <tr><td>☐</td><td>立ち上げたバージョンになっているか（バージョン情報取得要求／FW・HW情報取得応答）</td></tr>
-                    </table>
-
-                    <p><strong>④ ステータス判断（OPS-SIM）</strong></p>
-                    <table>
-                        <tr><th>ステータス</th><th>判断</th></tr>
-                        <tr><td><strong>受付NG</strong></td><td>原則まずい。ただし自律処理中／再送で通っていればOK</td></tr>
-                        <tr><td><strong>ERR / ALM / 受NG</strong></td><td>⚠️ 要注意</td></tr>
-                        <tr><td><strong>処NG</strong></td><td>🚨 <strong>再試験が必要</strong>（止まって確認）</td></tr>
-                        <tr><td><strong>LS / FB</strong></td><td>転送なしでOK</td></tr>
-                    </table>
-                    <div class="box box-info">
-                        💡 リンク確立後に隣接が見えないのは、MMEを接続していなければ正常。隣接のXnリンク断も隣接がなければ当然。
-                    </div>
-
-                    <p><strong>⑤ 地雷（見つけたら止まる）</strong></p>
-                    <div class="box box-danger">
-                        🚨 <strong>gzファイル混入</strong>：マクロログにgzが紛れていると中身を読めない → シナリオ作成からやり直し。過去にこれでP3201が再試験になった（SDM面等価制御応答にgzが含まれ、実行されないシナリオがあった）。<br>
-                        🚨 <strong>処NGを見たら再試験</strong>。スルーしない。
-                    </div>
-
-                    <h4>OPSログの読み方（実例：前手順） <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        出荷試験シナリオ1「前手順」のOPSログ（N3002）を実際に読んだ時の構造。シナリオ2以降を読むときも、この型が基準になる。
-                    </div>
-                    <div class="flow-item"><strong>1. バージョンチェック</strong> — LM情報取得要求→応答でLMファイル名（<code>ENB_XXXX_T_XXXX.LEN</code>）を確認</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2. 古いログの削除</strong> — FM配下（fm/log・fm/local・fm/program）を一括削除。<span class="hl">「削除に失敗（削除ファイル無し）」は消すものが無かっただけで正常</span></div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3. ファイル情報の取得</strong> — SDM面状態 → LM情報 → 局データ情報（.SENファイル） → FW/HW情報 → ファイル情報</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4. SDM面等価の確認</strong> — 「SDM面等価されていることを確認してください」→ <code>pause</code> で停止し人間が目視確認（FLD制御でA面=B面にした結果の確認ポイント）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5. 全状態取得</strong> — 再開状態 → 保守信号停止 → 時刻設定 → 物理回線 → 対MMEリンク → 対隣接eNBリンク → セル → CPRIリンク → 機能部 → 架 → カード → 装置構成 → 局舎 → ヘルスチェック（OA-RA-SC／TILT-INF） → 報知情報 → トラヒック警報（CNT単位／物理回線単位／セル単位）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>6. State_Acquisition（外部装置）</strong> — 整流装置 → 空調機 → 光伝送装置 → <strong>「試験実行：正常終了」で締まる</strong></div>
-                    <div class="box box-info">
-                        💡 <strong>ログ上の見え方</strong>：<br>
-                        • <strong>【受NG】</strong>は行頭に表示される。直後に再送して応答が返っていれば問題なし（整流装置・空調機で実例を確認済み）。<br>
-                        • <strong>【ALM】</strong>はアラームを含む応答に表示される（架全状態取得応答で実例を確認済み）。<br>
-                        • ファイル名は <code>.LEN</code>=LMファイル、<code>.SEN</code>=局データファイルと思われる。<br>
-                        • カード全状態取得の応答には <strong>eNB-CNT</strong>（基地局装置監視制御機能部）がカード種別として登場する。
-                    </div>
-
-                    <h4>OPSログの読み方（実例：シナリオ2 AP固有） <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        シナリオ2「AP固有」＝AP（呼処理アプリ）の機能ブロック試験（N3002、所要約30分・長い待ち時間込み）。出荷試験のシナリオは<strong>機能ブロック単位</strong>（前手順 → AP固有 → …）で構成されている。6/10メモの「AP、PF、RE共通部、CNT機能部」はこのシナリオ構成のこと。
-                    </div>
-                    <div class="box box-memory">
-                        🔑 <strong>AP固有の基本の型</strong>：各試験は「<strong>前状態確認 → 制御（わざと変化を起こす） → 状態変化通知を待つ → 復旧 → 確認</strong>」のサイクルの繰り返し。
-                    </div>
-                    <div class="flow-item"><strong>1. 試験準備</strong> — qsend系ファイル（.gz）を/fmへ転送。<span class="hl">オペレータ操作の指示が出る</span>（共通MTからMTシナリオ(.sce)でTR-ID解放、MT-PCから.ttlマクロ実施）＝半自動でも手動が挟まる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2. トラヒック警報</strong> — eNB-CNT単位 → 物理回線単位 → セル単位の順に発生させ、状態変化通知 → 復旧を確認</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3. 自動規制休止／試験呼</strong> — 取得→制御→5sec安定化待ち→復旧／試験呼の登録(b101/b102)→解除→全解除</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4. 隣接eNBリンク</strong> — 休止制御・工事中設定で<strong>【リ断】を意図的に発生</strong>させ復旧まで確認。42secや318sec（eNB番号通知待ち）の長い待ちもシナリオ設計のうち</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5. セル設定</strong> — カード制御（閉塞）で<strong>【ALM】を意図的に発生</strong> → セル設定変更 → 閉塞解除 → 通知を確認</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>6. アクセス規制・報知情報／定期診断</strong> — 制御 → 通知 → 復旧の型どおり</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>7. 時刻＋トラヒック収集（伏線構造）</strong> — 時刻を固定値（例:2010/08/01）に偽装設定 → 即時トラヒック収集の通知タイムスタンプが偽時刻になることを確認 → 非定期トラヒックはファイル待ち3min後に <code>.UEN</code> ファイル取得 → <strong>時刻を現在時刻へ戻して</strong>「試験実行：正常終了」</div>
-                    <div class="box box-info">
-                        💡 <strong>前手順との読み方の違い</strong>：AP固有では【リ断】【ALM】は<strong>わざと起こしている</strong>ので出て当然。見るべきは「異常が出たか」ではなく<span class="hl">「制御→通知→復旧のセットが閉じているか」</span>。同じマークでもシナリオの文脈で意味が変わる。<br>
-                        💡 <strong>ファイル名の三兄弟</strong>：<code>.LEN</code>=LM／<code>.SEN</code>=局データ／<code>.UEN</code>=トラヒックファイル（と思われる）。
-                    </div>
-
-                    <h4>OPSログの読み方（実例：シナリオ3 AP/PF共有） <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        シナリオ3「AP/PF共有」＝APとPFにまたがる共有機能の試験（N3002、約17分）。SDM面・eNBリセット・対MMEリンク・物理回線・Tracerouteを扱う。シナリオ構成：前手順 → AP固有 → AP/PF共有 → …
-                    </div>
-                    <div class="box box-memory">
-                        🔑 <strong>ログ読みの最重要Tips</strong>：シナリオの☆コメント行に<span class="hl">「期待されるNG」が書いてある</span>（例:「MME6台の場合、最後のMME制御は制御NGとなります。」）。マークだけ拾わず、直前の☆注記を読んでから判断する。
-                    </div>
-                    <div class="flow-item"><strong>1. SDM面状態</strong> — 前状態確認 → 制御 → 状態変化通知 → 復旧（基本の型どおり）</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2. eNBリセット（割り込み処理）</strong> — SDM面等価制御 → eNB/gNBリセット制御。<span class="hl">リセット中は応答が【受NG】になることがあり、数分の空白を挟んで再開</span>。SDM面等価制御応答には .LEN/.SEN のファイル一覧が返る</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3. 対MMEリンク</strong> — 休止 → 全断 → 工事中設定 → 全復旧。MME6台分を順に制御するため【受NG】が複数出るが、☆注記どおり<strong>最後の1台の制御NGは想定内</strong></div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4. 物理回線</strong> — 休止すると対MME・対隣接eNBリンクも連鎖して【リ断】＝<span class="hl">物理を止めれば上位リンクも切れる（依存関係がログで見える）</span>。安定化待ちは150sec／360secと長め</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5. Traceroute導通試験</strong> — 実施 → 停止 → 「試験実行：正常終了」で締まる</div>
-                    <div class="box box-warning">
-                        ⚠️ <strong>【処NG】の例外（要確認）</strong>：Traceroute停止の直後に【処NG】が出るが、シナリオは正常終了している。停止要求で実施を中断した結果の処NGと思われる。チェックリストの「処NG=再試験」は原則であり、<strong>意図的な中断による処NGは正常扱いの可能性がある</strong>。扱いは指導時に要確認。
-                    </div>
-
-                    <!-- 追記ブロック1: シナリオ4〜7 (worknoteのシナリオ3ブロック末尾の直後に挿入) -->
-
-                    <h4>OPSログの読み方（実例：シナリオ4 PF固有） <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        シナリオ4「PF固有」＝PF(Platform=基盤部)の機能試験（N3002、約12分）。ASCIIアート「PF-UNIQUE」。遠隔システムリセット＋OPSファイル取得サイクルが核心。
-                    </div>
-                    <div class="flow-item"><strong>1. 遠隔システムリセット(eNB再開)</strong> — 遠隔リセット要求 → 「10.1.1.6から切断しました」→ 再開通知待ち(残り3分→2分→1分)→「10.255.68.11から10.1.1.6へ接続しました」で復帰</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2. 全状態取得一式</strong> — 再起動後も全機能が正常か確認。前手順と同じ並び(再開状態→保守信号停止→時刻→物理回線→対MME…→トラヒック警報→外部装置)</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3. OPSファイル取得サイクル ★最重要</strong> — ①使用ファイル(.MOA)を /fm/ftp/put と /fm/log/oam_ap へ転送 → ②OPSファイル取得開始制御 → ③.MOA.gz を /fm/ftp/get へ転送成功 → ④OPSファイル取得終了制御 → ⑤ファイル情報取得→削除→再確認(消えたか)→正常終了</div>
-                    <div class="box box-info">
-                        💡 <strong>ファイル名の四兄弟</strong>：<code>.LEN</code>=LM／<code>.SEN</code>=局データ／<code>.UEN</code>=トラヒック／<code>.MOA</code>=OPSファイル（と思われる）<br>
-                        ⚠️ <strong>GEN試験PCの流し込み手順</strong>に直結する可能性あり(要指導・要確認)
-                    </div>
-
-                    <h4>OPSログの読み方（実例：シナリオ5〜10 カード診断共通） <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        シナリオ5〜10は「カード/機能部の個別診断」。全て<strong>同じテンプレ</strong>で対象カード名だけ差し替え。各約1分。BDEを構成する機能部を一個ずつ自己診断にかけて全部正常に応答するかを確認するパート。
-                    </div>
-                    <div class="box box-memory">
-                        🔑 <strong>共通テンプレ</strong>：カード全状態取得 → カード診断要求 → カード状態変化通知 → カード診断応答 → カード全状態取得 → swait → 正常終了
-                    </div>
-                    <div class="flow-item"><strong>シナリオ5 eNB-CNT</strong>（基地局装置監視制御機能部=コントローラ）— テンプレそのまま。約1分。</div>
-                    <div class="flow-item"><strong>シナリオ6 TRX-LTE</strong>（無線送受信IF機能部のLTE側）— テンプレそのまま。約1分。</div>
-                    <div class="flow-item"><strong>シナリオ7 BB-LTE</strong>（ベースバンド信号処理）— 前半はテンプレ。後半に<span class="hl">カード制御(swait_70)→通知大量→装置内試験</span>が入り複雑化。カード制御で【ALM】が複数回。通知にカード名"8HRR2AD""2GLR2AA""BB-LTE""eNB-CNT"が登場し、BB-LTEの試験で他カードに状態変化が波及する様子が見える。</div>
-                    <div class="flow-item"><strong>シナリオ8 HWY</strong>（伝送路IF機能部）— 冒頭に<strong>遠隔EM実施判定処理</strong>(再開状態取得→遠隔EM実施済み確認)が入る。その後テンプレ。</div>
-                    <div class="flow-item"><strong>シナリオ9 PORT</strong>（ポート/物理IF）— テンプレそのまま。約1分。</div>
-                    <div class="flow-item"><strong>シナリオ10 SDM-LTE</strong>（局データ保持の記憶系カード）— テンプレそのまま。約1分。前手順でさんざん出てきた「SDM面A/B等価」のSDMカードを単体診断にかける。</div>
-
-<!-- 追記ブロック2: シナリオ11〜13 -->
-
-                    <h4>OPSログの読み方（実例：シナリオ11 新世代RE共通）<span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        シナリオ11「新世代RE共通」(CPRI-MUX<strong>含む</strong>) — ASCIIアート「NEO」。約57分。RE(Radio Equipment=無線装置)との光伝送路(CPRI)を含むリセットを繰り返し、無線装置が毎回ちゃんと再接続・立ち上がるかを反復確認する。
-                    </div>
-                    <div class="box box-memory">
-                        🔑 <strong>構造</strong>：eNBリセット(CPRI-MUX含む)ゾーンを<span class="hl">3回以上繰り返す</span>。各ゾーン＝リセット→切断→再開通知待ち(3分カウントダウン)→再接続→全状態取得一式→State_Acquisition(受NG込み)→「装置立ち上がりまでお待ちください」→TILT-INFヘルスチェック通知多数→Dual/シングル判定 → また次のリセット…→ END
-                    </div>
-                    <div class="flow-item"><strong>Dual判定/シングル判定</strong> — 各ゾーンの締めに必ず入る。局データ情報を取得して構成(冗長/単独)を判定して処理を分岐。新世代RE特有。</div>
-                    <div class="flow-item"><strong>AISG用タイマ</strong> — リセットゾーン内に長い待ち(残り8分等)が入る。AISG=アンテナ制御規格。</div>
-                    <div class="box box-info">
-                        💡 リセットのたびに整流装置・空調機の【受NG】、架全状態取得の【ALM】が出るが、全部「リセット直後で装置が立ち上がり中だから」。ログにも「装置立ち上がりまでしばらくお待ちください」と書いてある。<strong>リセット→不安定→待つ→安定</strong>が装置の毎回のサイクル。
-                    </div>
-
-                    <h4>OPSログの読み方（実例：シナリオ12 新世代RE共通_2）<span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        シナリオ12「新世代RE共通_2」(CPRI-MUX<strong>含まない</strong>) — 約3時間。REとの光伝送路は保ったまま、eNB側だけをリセット。eNBリセット応答待ち<strong>58分</strong>×3ゾーンで長時間になる。
-                    </div>
-                    <div class="flow-item"><strong>【処NG】の注記実例</strong> — リセット応答に【処NG】が出るが、直前の☆行に「<strong>BBカードリセット動作となる。OAM(N)_s12B_004にて事象は整理済み</strong>」と明記。管理番号まで採番された既知事象なので出ても問題なし。</div>
-                    <div class="flow-item"><strong>装置種別判定分岐</strong> — 「ResetMaster_RECKard」「BS3002は、対象外」→対象外機種はスキップ。シナリオが装置を見て賢く動いている。</div>
-                    <div class="box box-warning">
-                        ⚠️ チェックリストの「処NG=再試験」は原則。<strong>☆注記に「整理済み」「既知事象」と書かれている場合は例外</strong>。注記の有無で判断が変わる。
-                    </div>
-
-                    <h4>OPSログの読み方（実例：シナリオ13 N-LRE 出荷オペ）<span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        シナリオ13「N-LRE 出荷オペ」— 「FINISH!!」で締め。約19分。1セクタ・1キャリアに対して実運用操作を一通り流す<strong>最終リハーサル</strong>。前半の「機能試験」・中盤の「カード診断」と違い、<strong>現場で実際にやる操作を順番に流す</strong>シナリオ。
-                    </div>
-                    <div class="flow-item"><strong>操作の流れ</strong> — カード使用状態確認 → とまり木CH制御 → キャリア制御 → 送信アンテナ系制御(アンテナ数:2向け処理) → セル工事中規制 → 局舎制御 → 光伝送装置ON/OFF・リセット → チルト角遠隔制御(制御→10度に戻し) → 整流装置・空調機確認</div>
-                    <div class="box box-memory">
-                        🔑 <strong>各操作の型</strong>：制御 → 状態安定化待ち(10sec/15sec/40sec) → 復旧 → 前後状態確認
-                    </div>
-                    <div class="box box-info">
-                        💡 <strong>4種のマークが勢揃いの総復習ログ</strong>：<br>
-                        【ALM】カード閉塞(RRE/LRE)で意図的にアラーム → 閉塞解除で復旧<br>
-                        【リ断】カード制御でCPRIリンクが一時的に断<br>
-                        【ERR】閉塞でカードがエラー状態 → 閉塞解除で消える<br>
-                        【制御失敗】局舎制御で出るが☆注記に「<strong>OF-AMPは非対応のため『制御失敗』となります。</strong>」→ 想定内
-                    </div>
-
-<!-- 追記ブロック3: マーク類の体系化 (シナリオ13ブロックの直後に挿入) -->
-
-                    <h4>OPSログのマーク類 — なぜ出るのか <span class="badge badge-new">追加</span></h4>
-                    <div class="box box-purpose">
-                        <strong>大前提</strong>：N3002の出荷試験OPSログ13本は<span class="hl">すべて正常終了(OK)となった完了済みログ</span>。これらのログに出る5つのマークは「OKログに当たり前に出る想定内のマーク」であり、異常の証拠ではない。
-                    </div>
-                    <div class="box box-memory">
-                        🔑 <strong>読み方の核心2点</strong><br>
-                        ①<span class="hl">そのマークの直前に「状態を揺らす操作」があったか</span>（制御/リセット/再開/停止/閉塞）→ あれば「揺らした結果だから正常」、なければ本当の異常かも<br>
-                        ②<span class="hl">☆コメント行を読む</span> → シナリオが「期待されるNG」を自分で宣言している
-                    </div>
-
-                    <table class="param-table">
-                        <thead><tr><th>マーク</th><th>意味</th><th>なぜ出るか</th><th>判断</th></tr></thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>受NG</strong></td>
-                                <td>装置が要求を今は受け付けられない</td>
-                                <td>状態変化中に要求を投げたため弾かれた</td>
-                                <td><span class="hl">再送で通れば問題なし</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>リ断</strong></td>
-                                <td>リンク断</td>
-                                <td>切る操作をした/リセットで一時的に切れた/物理回線を止めると上位リンクも連鎖で切れる</td>
-                                <td><span class="hl">リセット・制御の直後なら正常</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>ALM</strong></td>
-                                <td>アラーム報告</td>
-                                <td>意図的にカードを閉塞した/リセット直後で装置がまだ立ち上がり中</td>
-                                <td><span class="hl">閉塞・立ち上がり中なら正常。復旧操作で消える</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>ERR</strong></td>
-                                <td>対象がエラー状態</td>
-                                <td>閉塞でカードがエラー状態になった</td>
-                                <td><span class="hl">閉塞解除/リセット/復旧で消える</span>（早見表既出「A面指定リセット後に消える」）</td>
-                            </tr>
-                            <tr>
-                                <td><strong>処NG</strong></td>
-                                <td>処理失敗</td>
-                                <td>①停止操作で処理が中断した ②BBカードリセットで発生する既知事象(OAM(N)_s12B_004整理済み)</td>
-                                <td><span class="hl">☆注記に「整理済み」「想定内」があれば正常。注記なしは要確認</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div class="box box-info">
-                        💡 <strong>☆注記の実例3つ</strong>（シナリオが自ら宣言した期待されるNG）：<br>
-                        「MME6台の場合、最後のMME制御は制御NGとなります。」（シナリオ3）<br>
-                        「BBカードリセット動作となる。OAM(N)_s12B_004にて事象は整理済み」（シナリオ12）<br>
-                        「OF-AMPは非対応のため『制御失敗』となります。」（シナリオ13）
-                    </div>
-
-
-                    <h2>VMT確認方法 <span class="badge badge-new">追加</span></h2>
-
-                    <h4>セットアップ</h4>
-<pre style="background:#f5f5f5;padding:15px;font-family:monospace;font-size:13px;">
-LTOM\ツール\Macroviewer を格納してインストール
-→ programfilex86内のeNBMacroViewerにアプリ格納
-→ パスワード：3192</pre>
-
-                    <h4>起動手順</h4>
-                    <div class="flow-item"><strong>1.</strong> 先に局データマクロを読み込ませる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>2.</strong> 立ち上げる</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>3.</strong> 時刻設定する</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>4.</strong> カード状態監視開始マクロが発行される</div>
-                    <div class="flow-arrow">↓</div>
-                    <div class="flow-item"><strong>5.</strong> セルが張られる</div>
-
-                    <h4>マクロの流れ</h4>
-                    <div class="box box-danger">
-                        🚨 必ず<strong>発行 → 応答 → メール通知</strong>の順番になる。メール通知がないと、0以外のエラーはないという確認ができる。
-                    </div>
-                    <ul>
-                        <li>最初の4桁（1D等）がオペレーション番号でマクロに送信→装置に行く</li>
-                        <li>装置に時刻を設定→OPSに応答を返す</li>
-                        <li>主に<strong>カード状態監視開始マクロ</strong>でエラーが無いか確認</li>
-                    </ul>
-
-                    <h4>VMT確認ポイント</h4>
-                    <table>
-                        <tr><th>項目</th><th>内容</th></tr>
-                        <tr><td><strong>カード状態監視開始マクロ</strong></td><td>エラーが無いか確認</td></tr>
-                        <tr><td><strong>シェルフ・スロット</strong></td><td>カード位置の確認</td></tr>
-                        <tr><td><strong>TRX設定</strong></td><td>送受信設定</td></tr>
-                        <tr><td><strong>CPRIリンク状態</strong></td><td>接続状態の確認</td></tr>
-                        <tr><td><strong>API技術資料</strong></td><td>読む必要がある</td></tr>
-                    </table>
-
-                    <h4>ベンダー別VMT注意点 <span class="badge badge-new">追加</span></h4>
-                    <table>
-                        <tr><th>ベンダー</th><th>注意点</th></tr>
-                        <tr><td><strong>P装置</strong></td><td>VMTベンダログは<strong>MMT</strong>という名前。SDM書き込み中はERR発生する仕様。CPRI MUXリセットでもERR表示</td></tr>
-                        <tr><td><strong>N装置</strong></td><td>差分で発行がない</td></tr>
-                        <tr><td><strong>F3002</strong></td><td>解析できる形式でログ格納をし直してもらった</td></tr>
-                    </table>
-
-                    <h2>OPS-SIMログ解析・比較 <span class="badge badge-new">追加</span></h2>
-
-                    <h4>ステータス判断基準</h4>
-                    <table>
-                        <tr><th>ステータス</th><th>判断</th></tr>
-                        <tr><td><strong>受付NG</strong></td><td>🚨 まずい。ただし自律処理中なら問題なし。再送で通っていれば問題なし</td></tr>
-                        <tr><td><strong>ERR / ALM / 受NG</strong></td><td>⚠️ 要注意</td></tr>
-                        <tr><td><strong>処NG</strong></td><td>🚨 再試験が必要</td></tr>
-                        <tr><td><strong>LS / FB</strong></td><td>転送なしでOK</td></tr>
-                    </table>
-                    <div class="box box-info">
-                        💡 OPSシミュは再送がオプションで入っている。再送で通っていれば問題なし。
-                    </div>
-                    <div class="box box-info">
-                        💡 リンクが確立されても隣接が見えてないのは、MMEを接続してなければ<strong>正常性の動作として正常</strong>。
-                    </div>
-
-                    <h4>バージョン確認</h4>
-                    <ul>
-                        <li>立ち上げたバージョンになっているか確認（今回はLMだけ）</li>
-                        <li><strong>バージョン情報取得要求</strong>で確認</li>
-                        <li><strong>ファームウェア/ハードウェア情報取得応答</strong>で確認</li>
-                    </ul>
-
-                    <h4>ファイル名差分</h4>
-                    <div class="box box-info">
-                        💡 前回はPFを使っているため、ファイル名に差分が出ている。
-                    </div>
-
-                    <h4>P3201再試験の原因</h4>
-                    <div class="box box-danger">
-                        🚨 <strong>処NG → 再試験</strong><br>
-                        SDM面等価制御応答でgzファイルが含まれており、実行されていないシナリオがあった → シナリオミス → P3201の正常性確認再試験。
-                    </div>
-
-                    <h4>SCTP補足</h4>
-                    <ul>
-                        <li>普通はリンク断されない</li>
-                        <li>LTEだと隣接やS1リンクのプロトコル（MME↔BDE）</li>
-                        <li>隣接のXnリンクが切れている場合は正常（隣接がなければ当然）</li>
-                    </ul>
                 </div>
             </div>
 
             <!-- セキュリティ対応 -->
             <div id="security" class="tab-content">
                 <h2>セキュリティ対応 <span class="badge badge-new">追加</span></h2>
-
                 <div class="box box-purpose">
                     <strong>目的：</strong>全PCが最新の防御状態にあるか確認し、そうでなければ最新にする。
                 </div>
-
                 <h3>やること（一般化）</h3>
                 <table>
                     <tr><th>作業</th><th>目的</th></tr>
@@ -1438,7 +536,6 @@ LTOM\ツール\Macroviewer を格納してインストール
                     <tr><td><strong>ウイルスチェック（検索）</strong></td><td>PCにマルウェアがないか確認</td></tr>
                     <tr><td><strong>Windowsアップデート</strong></td><td>OSのセキュリティ脆弱性を塞ぐ</td></tr>
                 </table>
-
                 <h3>作業の順番</h3>
                 <div class="flow-item"><strong>1.</strong> ウイルスパターンファイルをアップデート（最新定義に更新）</div>
                 <div class="flow-arrow">↓</div>
@@ -1451,7 +548,6 @@ LTOM\ツール\Macroviewer を格納してインストール
                 <div class="flow-item"><strong>5.</strong> 完了画面をスクショ</div>
                 <div class="flow-arrow">↓</div>
                 <div class="flow-item"><strong>6.</strong> 結果を記録（PC名、日時、結果）</div>
-
                 <h3>エビデンス</h3>
                 <div class="box box-danger">
                     🚨 <strong>コンポーネントアップデート完了画面は必ずスクショを撮ってから閉じる。</strong>閉じると戻せない。
@@ -1460,7 +556,6 @@ LTOM\ツール\Macroviewer を格納してインストール
                     <li>スクショの保存先：PCセキュリティLOG → 2026 → 202606フォルダを作成して格納</li>
                     <li>ファイル名例：20260603_完了.PNG</li>
                 </ul>
-
                 <h3>接続経路（在宅勤務時）</h3>
 <pre style="background:#f5f5f5;padding:15px;font-family:monospace;font-size:13px;">
 自分のPC
@@ -1480,7 +575,6 @@ mstsc（リモートデスクトップ接続）
                 <div class="box box-info">
                     💡 在宅メンバーが多い時間帯はRDP接続が繋がりにくい。
                 </div>
-
                 <h3>ツール</h3>
                 <table>
                     <tr><th>ツール</th><th>用途</th></tr>
@@ -1489,7 +583,6 @@ mstsc（リモートデスクトップ接続）
                     <tr><td><strong>Apache Guacamole</strong></td><td>ブラウザ経由でVMにアクセス</td></tr>
                     <tr><td><strong>Snipping Tool</strong></td><td>スクリーンショット取得</td></tr>
                 </table>
-
                 <h3>インターネット接続が必要な場合</h3>
                 <div class="box box-info">
                     💡 試験PCにインターネットアクセスがない場合、ウイルスパターンファイルが更新できない。ワイヤレスネットワーク接続（lte-wlan）を有効化してインターネットに接続する必要がある。
@@ -1500,7 +593,6 @@ mstsc（リモートデスクトップ接続）
                     <li>lte-wlanが見えないPCは<strong>lte-wlan-xp</strong>で代用OK</li>
                     <li>「インターネットアクセスなし」の場合はIPアドレス設定が必要（DHCP or 手動）</li>
                 </ul>
-
                 <h3>注意事項</h3>
                 <table>
                     <tr><th>注意</th><th>内容</th></tr>
@@ -1514,11 +606,9 @@ mstsc（リモートデスクトップ接続）
             <!-- インストール -->
             <div id="install" class="tab-content">
                 <h2>社内ツール インストール <span class="badge badge-new">追加</span></h2>
-
                 <div class="box box-purpose">
                     <strong>このタブの使い方：</strong>社内共有で「これ入れて」と展開された時の汎用テンプレ＋実例集。次に別ツールが来ても、まず汎用フローを見れば流れが思い出せる。
                 </div>
-
                 <h2>汎用テンプレ：社内ツール導入の流れ</h2>
                 <div class="flow-item"><strong>1.</strong> 共有内容を確認（誰が・誰宛て・チェックリスト有無）。OAM各位など自分が含まれていれば対応対象。</div>
                 <div class="flow-arrow">↓</div>
@@ -1533,7 +623,6 @@ mstsc（リモートデスクトップ接続）
                 <div class="flow-item"><strong>6.</strong> 動作確認（接続先が増えた・アプリが見える等）。</div>
                 <div class="flow-arrow">↓</div>
                 <div class="flow-item"><strong>7.</strong> 完了報告「完了しました」＋チェックリストがあれば自分の欄にチェック。</div>
-
                 <div class="box box-info">
                     💡 <strong>なぜローカルでバッチを流すのか</strong>：社内専用ツールは公開ストアに置けない → バッチで証明書インストールやファイル配置を自動化 → どのPCに入れたか管理できる（だから完了チェックを求められる）。
                 </div>
@@ -1543,12 +632,10 @@ mstsc（リモートデスクトップ接続）
                 <div class="box box-memory">
                     🔑 <strong>所要時間の目安</strong>：手順どおりなら10〜15分、詰まっても30分あれば十分。事前に手順書を読んでおくのが最大のコツ。
                 </div>
-
                 <h2>実例① SAGConnect <span class="badge badge-new">手順書2種を統合・実物準拠</span></h2>
                 <div class="box box-purpose">
                     元々は社員用のリモート接続ツール。協力会社にも開放された。導入するとプロフィールページに「リモート接続」が追加され、<strong>SFTP/AuthGW経由</strong>で個人のNutanixVM（OAM-VM-PFVT-XXX）へRDP接続できる。手順書は複数あり細部が異なる（下の差異表）。
                 </div>
-
                 <h4>インストールの流れ（共通の本筋）</h4>
                 <table>
                     <tr><th>手順</th><th>操作</th></tr>
@@ -1563,7 +650,6 @@ mstsc（リモートデスクトップ接続）
                     <tr><td>9</td><td>インストール済の拡張機能に「<strong>SFTP/AuthGW接続 8.11.1</strong>」が追加されトグルONを確認</td></tr>
                     <tr><td>10</td><td>プロフィールページに「<strong>リモート接続</strong>」が追加されたことを確認</td></tr>
                 </table>
-
                 <h4>手順書による差異（展開先と読み込むフォルダ）</h4>
                 <table>
                     <tr><th>項目</th><th>手順書A</th><th>手順書B</th></tr>
@@ -1573,7 +659,6 @@ mstsc（リモートデスクトップ接続）
                 <div class="box box-info">
                     💡 installer.batが拡張機能を <code>AppData\Local\SAGConnect</code> 配下に配置するため、どちらでも動くと思われる。ただし展開元のフォルダを後から移動・削除すると読み込みパスが切れるので、<strong>AppData側（手順書B方式）の方が堅い</strong>と思われる。
                 </div>
-
                 <h4>初回RDP接続（ダイアログ3連＋認証）</h4>
                 <table>
                     <tr><th>画面</th><th>操作</th></tr>
@@ -1585,7 +670,6 @@ mstsc（リモートデスクトップ接続）
                 <div class="box box-danger">
                     🚨 <strong>終了は必ずRDPウィンドウの「×」ボタンで。</strong>ログアウトしてもRDP接続は自動で開放されない。
                 </div>
-
                 <h4>マルチモニター設定（任意）</h4>
                 <div class="flow-item"><strong>1.</strong> 検索窓で「リモートデスクトップ接続」→「オプションの表示」→「名前を付けて保存」で任意の場所にrdpファイルを保存</div>
                 <div class="flow-arrow">↓</div>
@@ -1597,14 +681,12 @@ mstsc（リモートデスクトップ接続）
                 <div class="box box-info">
                     💡 <strong>1画面に戻す</strong>：「オプションの表示」→「画面」タブ →「リモートセッションですべてのモニターを使用する」の✔を外す。<strong>画面縮小</strong>：<code>smart sizing:i:1</code>
                 </div>
-
                 <h4>アンインストール</h4>
                 <table>
                     <tr><th>手順</th><th>操作</th></tr>
                     <tr><td>1</td><td><code>uninstaller.bat</code> を実行 → <code>y</code> で進める</td></tr>
                     <tr><td>2</td><td><code>edge://extensions</code> → 開発者モードをOFF →「SFTP/AuthGW接続」を削除</td></tr>
                 </table>
-
                 <h2>実例② 7-Zip</h2>
                 <div class="box box-purpose">
                     ログ圧縮・解凍やSAGConnectの展開で使用。<strong>全社共通で申請不要</strong>。
@@ -1624,18 +706,15 @@ mstsc（リモートデスクトップ接続）
                 <div class="box box-info">
                     💡 SAGConnectの7zは<strong>解凍パスワード付き</strong>（プロフィール画面左下の赤文字）。パスワードを聞かれたら展開対象が合っている証拠。
                 </div>
-
                 <h2>連絡先・手順書の出どころ</h2>
                 <table>
                     <tr><th>区分</th><th>内容</th></tr>
                     <tr><td><strong>手順書の展開元</strong></td><td>OAM各位宛てに手順書が展開される。記載どおりに進め、不明点は確認する</td></tr>
                     <tr><td><strong>対応の連絡先</strong></td><td>着手時に「対応進めます」、完了時に「完了しました」と報告する</td></tr>
                 </table>
-
                 <div class="box box-memory">
                     🔑 <strong>連絡文の型</strong>：着手時「SAGConnectと7-Zipの件、対応進めます。」／完了時「完了しました。」 — 聞くのではなく、やると伝える。
                 </div>
-
                 <h2>社内研修・eラーニング対応 <span class="badge badge-new">追加</span></h2>
                 <div class="box box-purpose">
                     情報セキュリティ研修などのeラーニングが配信された時の流れ。標的型攻撃メール訓練（届いたメールは開かず報告）とは別物で、こちらは受講必須のeラーニング。
@@ -1655,14 +734,11 @@ mstsc（リモートデスクトップ接続）
             <!-- 定例 -->
             <div id="meeting" class="tab-content">
                 <h2>vRAN 定例会議メモ <span class="badge badge-new">追加</span></h2>
-
                 <div class="sub-tabs">
                     <button class="sub-tab active" onclick="showSubTab('meeting','m-20260603')">2026/06/03</button>
                 </div>
-
                 <div id="m-20260603" class="sub-content active">
                     <h3>2026/06/03（水）商用検証環境構築スケジュール</h3>
-
                     <h4>環境アップグレード状況</h4>
                     <table>
                         <tr><th>対象</th><th>状況</th><th>予定</th></tr>
@@ -1670,7 +746,6 @@ mstsc（リモートデスクトップ接続）
                         <tr><td><strong>5G DU</strong></td><td>RH版EMS問題→Ubuntu版に一時収容→Redhat版に戻す</td><td>6/15-16 移行作業（全系ストップ）<br>6/15-19 cd11更新</td></tr>
                         <tr><td><strong>4G CU</strong></td><td>R2.8最終版リリース済み。試験影響なし</td><td>6/10 全系更新（R008.005）</td></tr>
                     </table>
-
                     <h4>不具合チケット</h4>
                     <table>
                         <tr><th>チケット</th><th>内容</th></tr>
@@ -1679,13 +754,11 @@ mstsc（リモートデスクトップ接続）
                         <tr><td><strong>DFN-638</strong> [DCM] R2.8</td><td>セル閉塞制御時にERR(MSGFB010_0000_006)</td></tr>
                         <tr><td><strong>DFN-643</strong> [DCM] R2.8</td><td>繰り返しコマンドでnetconfmgr panic→Pod再起動。原因：リソース解放漏れ。Triple(B20)で5試行目に再現</td></tr>
                     </table>
-
                     <h4>5G/4G EMS(CU)</h4>
                     <ul>
                         <li>SMO26A接続パラメータ投入完了</li>
                         <li>SFTP・HTTP疎通OK、試験項目完了</li>
                     </ul>
-
                     <h4>NECの手順書（5G CU Rel5.0更新）</h4>
                     <ul>
                         <li>参照：更新手順(06_02)。初期構築(05_Install)ではない</li>
@@ -1694,7 +767,6 @@ mstsc（リモートデスクトップ接続）
                     <div class="box box-danger">
                         🚨 YRPでのNEC CU Rel5.0更新作業のみに使用。契約上、目的外使用はNG。
                     </div>
-
                     <h4>5G DU 23版の制約事項</h4>
                     <table>
                         <tr><th>制約</th><th>状態</th></tr>
@@ -1706,7 +778,6 @@ mstsc（リモートデスクトップ接続）
                     <div class="box box-info">
                         💡 L1L2 CU 23版（cd11）適用済みで<strong>制約事項は解消済み</strong>。
                     </div>
-
                     <h4>基盤スイッチ停止（メンテナンス）</h4>
                     <table>
                         <tr><th>項目</th><th>スケジュール</th></tr>
@@ -1717,7 +788,6 @@ mstsc（リモートデスクトップ接続）
                     <div class="box box-warning">
                         ⚠️ 6/13-14は全系停止。在宅でVM接続もできなくなる可能性あり。
                     </div>
-
                     <h4>1F ENDC接続検証</h4>
                     <ul>
                         <li>Ping(icmp)は上下共に停止しない</li>
@@ -1725,13 +795,11 @@ mstsc（リモートデスクトップ接続）
                         <li>下り信号は存在しない</li>
                         <li>RIC：DFN-657 cell Lock/Unlockで送波不可→送波はできるため試験は進める</li>
                     </ul>
-
                     <h4>MTI RU接続検証（伝送路系向け）</h4>
                     <ul>
                         <li>MTI RU (Dual) FW更新後、4Gの1callへ進む想定</li>
                         <li><strong>6/5にTriple RU(b3/b7/n1)到着→4G側の局データ作成依頼</strong></li>
                     </ul>
-
                     <h4>RU配備状況</h4>
                     <table>
                         <tr><th>RU</th><th>状況</th></tr>
@@ -1739,14 +807,12 @@ mstsc（リモートデスクトップ接続）
                         <tr><td><strong>MTI RU Tr1</strong></td><td>6/10に2台到着予定→4GvRANと伝送路系投入。局データ先行準備依頼あり</td></tr>
                         <tr><td><strong>MTI RU Dual</strong></td><td>OREXラボでRUIOT中</td></tr>
                     </table>
-
                     <h4>その他共有事項</h4>
                     <ul>
                         <li>PLMN追加手順マニュアル共有（5G_CU_PLMN追加手順.html）</li>
                         <li>5G CU EMSのPW変更資料共有</li>
                         <li>vRAN FeatureList最新版（v03）共有→項目精査依頼</li>
                     </ul>
-
                     <h4>TEF現地ファイル版数</h4>
                     <table>
                         <tr><th>種別</th><th>バージョン</th></tr>
@@ -1760,11 +826,24 @@ mstsc（リモートデスクトップ接続）
 
             <!-- ===== 出荷試験タブ ===== -->
             <div id="shipping" class="tab-content">
+                <h2>出荷試験 OPSログの読み方</h2>
+                <div class="box box-purpose">
+                    リリース基準を全て満たしているか確認する試験。LMリリース後、納品前の最終確認。OPSログの読み方とシナリオ解説をここに集約。
+                </div>
+                <h4>正常性確認試験との違い</h4>
+                <table>
+                    <tr><th>試験</th><th>確認すること</th></tr>
+                    <tr><td><strong>正常性確認試験</strong></td><td>ファイル更新が正しくできるか</td></tr>
+                    <tr><td><strong>リグレッション試験</strong></td><td>更新後に既存機能が壊れていないか</td></tr>
+                    <tr><td><strong>出荷試験</strong></td><td>リリース基準を全て満たしているか</td></tr>
+                </table>
                 <div class="sub-tabs">
                     <button class="sub-tab active" onclick="showSubTab('shipping','sh-overview')">概要・一覧</button>
                     <button class="sub-tab" onclick="showSubTab('shipping','sh-marks')">マーク解説</button>
                     <button class="sub-tab" onclick="showSubTab('shipping','sh-s01s04')">シナリオ1〜4</button>
                     <button class="sub-tab" onclick="showSubTab('shipping','sh-s05s13')">シナリオ5〜13</button>
+                    <button class="sub-tab" onclick="showSubTab('shipping','sh-s14s23')">シナリオ14〜23</button>
+                    <button class="sub-tab" onclick="showSubTab('shipping','sh-s24s36')">シナリオ24〜36</button>
                 </div>
                 <div id="sh-overview" class="sub-tab-content active">
                     <h2>N3002 出荷試験 OPSログ 全13本</h2>
@@ -1806,235 +885,563 @@ mstsc（リモートデスクトップ接続）
                 </div>
                 <div id="sh-s01s04" class="sub-tab-content">
                     <h2>シナリオ1〜4（前半：機能をまたいだ動作試験）</h2>
-
                     <h3>シナリオ1「前手順」</h3>
-                    <div class="box box-purpose">
-                        <strong>目的</strong>：試験開始前の全体状態確認。装置が試験を受けられる状態かを確認する準備シナリオ。
-                    </div>
+                    <div class="box box-purpose"><strong>目的</strong>：試験開始前の全体状態確認。装置が試験を受けられる状態かを確認する準備シナリオ。</div>
                     <div class="flow-item"><strong>流れ</strong>：バージョンチェック → 古いログ削除 → ファイル情報取得 → SDM面A/B等価のpause目視 → 全状態取得一式 → State_Acquisition(外部装置) → 正常終了</div>
-                    <div class="box box-info">
-                        💡 <strong>マークについて</strong>：このシナリオでは【ALM】【ERR】【受NG】【リ断】は出ません。理由はシンプルで、<span class="hl">前手順は「何も動かさず、ただ状態を読みに行くだけ」</span>だからです。制御もリセットも閉塞も一切しない。読み取り専用の確認作業なので、状態を揺らす操作がなく、マークが出る場面がそもそもありません。<br><br>
-                        唯一「削除ファイル無し」という表示が出ることがありますが、これはエラーではなく「削除すべき古いログが存在しなかった＝正常」という意味です。
-                    </div>
-
+                    <div class="box box-info">💡 <strong>マークについて</strong>：このシナリオでは【ALM】【ERR】【受NG】【リ断】は出ません。<span class="hl">前手順は「何も動かさず、ただ状態を読みに行くだけ」</span>だから。読み取り専用で状態を揺らす操作がなく、マークが出る場面がそもそもありません。<br><br>唯一「削除ファイル無し」が出ることがありますが、これはエラーではなく「削除すべき古いログが無かった＝正常」という意味です。</div>
                     <h3>シナリオ2「AP固有」約30分</h3>
-                    <div class="box box-purpose">
-                        <strong>目的</strong>：AP(呼処理アプリ)の機能ブロック試験。呼処理に関わる各機能を「制御→通知→復旧」のサイクルで一つずつ確認する。
-                    </div>
+                    <div class="box box-purpose"><strong>目的</strong>：AP(呼処理アプリ)の機能ブロック試験。呼処理に関わる各機能を「制御→通知→復旧」のサイクルで一つずつ確認する。</div>
                     <div class="flow-item"><strong>流れ</strong>：試験準備(qsend/.gz転送、オペレータ操作あり) → トラヒック警報(3単位) → 自動規制休止/試験呼 → 隣接eNBリンク → セル設定 → アクセス規制・定期診断 → 時刻偽装(2010/08/01)+トラヒック収集 → 時刻を現在に戻して正常終了</div>
-                    <div class="box box-memory">
-                        🔑 <strong>AP固有の基本型</strong>：「前状態確認 → 制御(わざと変化を起こす) → 状態変化通知を待つ → 復旧 → 確認」のサイクルの繰り返し。各試験はこの型で動いている。
-                    </div>
-
+                    <div class="box box-memory">🔑 <strong>AP固有の基本型</strong>：「前状態確認 → 制御(わざと変化を起こす) → 状態変化通知を待つ → 復旧 → 確認」のサイクルの繰り返し。</div>
                     <h4>【リ断】隣接eNBリンクの箇所</h4>
-                    <div class="box box-info">
-                        隣接eNBリンクを「休止制御」「工事中設定」で<span class="hl">意図的に切っています</span>。切る操作をしたのだから切れるのは当然です。復旧操作の後にリンクが戻ることを確認するのがこの試験の目的なので、リ断は「試験が正しく動いている証拠」です。
-                    </div>
-
+                    <div class="box box-info">隣接eNBリンクを「休止制御」「工事中設定」で<span class="hl">意図的に切っています</span>。切る操作をしたのだから切れるのは当然。復旧操作の後にリンクが戻ることを確認するのが目的なので、リ断は「試験が正しく動いている証拠」です。</div>
                     <h4>【ALM】セル設定の箇所</h4>
-                    <div class="box box-info">
-                        カードを<span class="hl">意図的に閉塞</span>しています。「閉塞」とは、そのカードを強制的にアラーム状態にする操作です。ALMが出るのは当然で、閉塞解除後にALMが消えることを確認するのがセットになっています。
-                    </div>
-
+                    <div class="box box-info">カードを<span class="hl">意図的に閉塞</span>しています。閉塞＝強制的にアラーム状態にする操作。ALMが出るのは当然で、閉塞解除後にALMが消えることを確認するのがセットです。</div>
                     <h4>【受NG】各所で散発的に発生</h4>
-                    <div class="box box-info">
-                        制御操作の直後、装置がまだ状態変化中のタイミングで次の要求を投げると弾かれます。「今忙しいから後にして」という装置の返答です。少し待って再送すれば通ります。
-                    </div>
-
-                    <h4>時刻偽装＋トラヒック収集（シナリオ後半の伏線回収）</h4>
-                    <div class="box box-info">
-                        時刻を固定値(2010/08/01)に偽装設定 → 即時トラヒック収集の通知タイムスタンプが偽時刻になることを確認 → 非定期トラヒックは<span class="hl">.UENファイル</span>取得 → <strong>時刻を現在時刻へ戻して</strong>正常終了。「なぜ時刻を偽装するのか」は、トラヒック収集機能が正しく時刻を記録できるかを確認するためです。偽の時刻を入れて、収集データにその時刻が刻まれるかを検証しています。
-                    </div>
-
+                    <div class="box box-info">制御操作の直後、装置がまだ状態変化中のタイミングで次の要求を投げると弾かれます。「今忙しいから後にして」という返答。少し待って再送すれば通ります。</div>
+                    <h4>時刻偽装＋トラヒック収集（後半の伏線回収）</h4>
+                    <div class="box box-info">時刻を固定値(2010/08/01)に偽装 → 即時トラヒック収集の通知タイムスタンプが偽時刻になることを確認 → 非定期トラヒックは<span class="hl">.UENファイル</span>取得 → <strong>時刻を現在へ戻して</strong>正常終了。トラヒック収集機能が正しく時刻を記録できるかを検証しています。</div>
                     <h3>シナリオ3「AP/PF共有」約17分</h3>
-                    <div class="box box-purpose">
-                        <strong>目的</strong>：APとPFにまたがる共有機能の試験。SDM面・eNBリセット・対MMEリンク・物理回線・Tracerouteを扱う。
-                    </div>
+                    <div class="box box-purpose"><strong>目的</strong>：APとPFにまたがる共有機能の試験。SDM面・eNBリセット・対MMEリンク・物理回線・Tracerouteを扱う。</div>
                     <div class="flow-item"><strong>流れ</strong>：SDM面状態(制御→通知→復旧) → eNBリセット(割り込み処理) → 対MMEリンク(休止→全断→工事中→全復旧) → 物理回線(休止→復旧) → Traceroute導通試験 → 正常終了</div>
-
                     <h4>【受NG】eNBリセットの箇所で大量発生</h4>
-                    <div class="box box-info">
-                        eNBリセットをかけると装置が再起動中になります。その最中に状態取得要求を投げても「今リセット中だから受け付けられない」と弾かれます。数分の空白を挟んで再起動が完了すると、その後の要求は通ります。<span class="hl">リセット中の受NGは完全に正常</span>です。
-                    </div>
-
+                    <div class="box box-info">eNBリセットで装置が再起動中になります。その最中に状態取得要求を投げても「今リセット中だから受け付けられない」と弾かれます。数分の空白の後、再起動が完了すれば通ります。<span class="hl">リセット中の受NGは完全に正常</span>です。</div>
                     <h4>【受NG】対MMEリンクでも発生（☆注記の実例）</h4>
-                    <div class="box box-info">
-                        MME6台を順番に制御していく中で、☆注記に<span class="hl">「MME6台の場合、最後のMME制御は制御NGとなります。」</span>と書いてあります。シナリオ自身が「最後の1台はNGになる」と宣言している。これが<strong>「☆コメント行を読む」</strong>の典型例です。注記があれば想定内。
-                    </div>
-
+                    <div class="box box-info">MME6台を順番に制御する中で、☆注記に<span class="hl">「MME6台の場合、最後のMME制御は制御NGとなります。」</span>と書いてあります。シナリオ自身が「最後の1台はNG」と宣言。これが<strong>「☆コメント行を読む」</strong>の典型例です。</div>
                     <h4>【リ断】物理回線を止めた箇所</h4>
-                    <div class="box box-info">
-                        物理回線を休止すると、その上に乗っている対MMEリンク・対隣接eNBリンクも<span class="hl">連鎖して切れます</span>。物理層を止めれば上位のリンクも切れるのは当然の依存関係です。「物理→論理」という層の構造がログで見えている瞬間です。物理を復旧すれば上位リンクも戻ります。
-                    </div>
-
+                    <div class="box box-info">物理回線を休止すると、その上の対MMEリンク・対隣接eNBリンクも<span class="hl">連鎖して切れます</span>。物理層を止めれば上位リンクも切れる依存関係。物理を復旧すれば上位リンクも戻ります。</div>
                     <h4>【処NG】Traceroute停止の箇所</h4>
-                    <div class="box box-info">
-                        Traceroute試験を「停止要求」で中断した結果です。処理を途中で止めたので処理が完了しなかった＝処NGという記録が残ります。ただしシナリオとしては「停止できたか」を確認するのが目的なので、これで正常終了しています。チェックリストの「処NG=再試験」は原則ですが、<span class="hl">停止操作の結果として出た処NGは例外</span>になります。
-                    </div>
-
+                    <div class="box box-info">Traceroute試験を「停止要求」で中断した結果。処理を途中で止めたので完了しなかった＝処NG。シナリオとしては「停止できたか」を確認するのが目的なので正常終了します。「処NG=再試験」は原則ですが、<span class="hl">停止操作の結果の処NGは例外</span>です。</div>
                     <h3>シナリオ4「PF固有」約12分</h3>
-                    <div class="box box-purpose">
-                        <strong>目的</strong>：PF(Platform=基盤部)の機能試験。遠隔システムリセットで基盤を実際に再起動し、戻ってくるまでを確認する。さらにOPSファイルの取得サイクルを試験する。ASCIIアート「PF-UNIQUE」。
-                    </div>
-                    <div class="flow-item"><strong>流れ</strong>：遠隔システムリセット → 「10.1.1.6から切断しました」→ 再開通知待ち(残り3分→2分→1分のカウントダウン) → 「10.255.68.11から10.1.1.6へ接続しました」で復帰 → 全状態取得一式 → OPSファイル取得サイクル(.MOA) → 正常終了</div>
-
+                    <div class="box box-purpose"><strong>目的</strong>：PF(Platform=基盤部)の機能試験。遠隔システムリセットで基盤を実際に再起動し戻ってくるまでを確認。さらにOPSファイル取得サイクルを試験。ASCIIアート「PF-UNIQUE」。</div>
+                    <div class="flow-item"><strong>流れ</strong>：遠隔システムリセット → 「10.1.1.6から切断しました」→ 再開通知待ち(残り3分→2分→1分) → 「10.255.68.11から10.1.1.6へ接続しました」で復帰 → 全状態取得一式 → OPSファイル取得サイクル(.MOA) → 正常終了</div>
                     <h4>【受NG】【ALM】【ERR】再接続直後の全状態取得</h4>
-                    <div class="box box-info">
-                        遠隔リセットで装置が実際に再起動しています。「10.1.1.6から切断しました」という記録が残るくらい、本当に落ちて戻ってくる。再接続直後は装置がまだ完全に立ち上がりきっていないので、この状態で状態取得要求を投げると受NGが出ます。ALMは「立ち上がり途中のカードがまだアラーム状態」、ERRは「立ち上がり途中のカードがエラー状態」という記録です。時間が経って安定すれば全部消えます。
-                    </div>
-
+                    <div class="box box-info">遠隔リセットで装置が実際に再起動しています。再接続直後は立ち上がりきっていないので、状態取得要求に受NG。ALMは「立ち上がり途中のカードがまだアラーム状態」、ERRは「立ち上がり途中のカードがエラー状態」。時間が経って安定すれば全部消えます。</div>
                     <h4>OPSファイル取得サイクル ★最重要</h4>
-                    <div class="box box-warning">
-                        ⚠️ <strong>GEN試験PCの流し込み手順に直結する可能性あり（要指導・要確認）</strong><br><br>
-                        流れ：①使用ファイル(<code>.MOA</code>)を /fm/ftp/put と /fm/log/oam_ap へ転送 → ②OPSファイル取得開始制御 → ③.MOA.gz を /fm/ftp/get へ転送成功 → ④OPSファイル取得終了制御 → ⑤ファイル情報取得 → 削除 → 再度ファイル情報取得(消えたか確認) → 正常終了<br><br>
-                        つまり「ファイルを置く → OPS経由で取得(get) → 確認 → 削除」という、<span class="hl">ファイルの出し入れと後始末</span>が一つの試験になっています。このサイクル部分にはマークは出ません。ファイル操作だけで装置の状態を揺らす操作がないからです。
-                    </div>
+                    <div class="box box-warning">⚠️ <strong>GEN試験PCの流し込み手順に直結する可能性あり（要指導・要確認）</strong><br><br>流れ：①使用ファイル(<code>.MOA</code>)を /fm/ftp/put と /fm/log/oam_ap へ転送 → ②OPSファイル取得開始制御 → ③.MOA.gz を /fm/ftp/get へ転送成功 → ④OPSファイル取得終了制御 → ⑤ファイル情報取得 → 削除 → 再確認(消えたか) → 正常終了<br><br>「ファイルを置く → OPS経由で取得(get) → 確認 → 削除」という<span class="hl">ファイルの出し入れと後始末</span>が一つの試験。このサイクルにマークは出ません（状態を揺らす操作がないため）。</div>
                 </div>
                 <div id="sh-s05s13" class="sub-tab-content">
                     <h2>シナリオ5〜13</h2>
-
                     <h3>シナリオ5〜10「カード診断」の共通構造</h3>
-                    <div class="box box-purpose">
-                        シナリオ5〜10は「カード/機能部の個別診断」パート。BDE(基地局を構成する機能部)を一個ずつ自己診断にかけて、全部正常に応答するかを確認する。全て同じテンプレで動いていて、対象カード名だけ差し替わる。各約1分。
-                    </div>
-                    <div class="box box-memory">
-                        🔑 <strong>共通テンプレ</strong>：カード全状態取得 → カード診断要求 → カード状態変化通知 → カード診断応答 → カード全状態取得 → swait → 正常終了<br><br>
-                        <strong>基本的にマークなし</strong>。カード診断は「診断してください」と命令を投げて「異常なし」が返ってくるだけで、カードを閉塞するわけでも、リセットをかけるわけでも、リンクを切るわけでもない。状態を揺らす操作が一切ないのでマークが出る場面がない。診断要求の後に「カード状態変化通知」が来るが、これは「診断中にカードが内部的に自己チェックを走らせた」という正常な報告。
-                    </div>
-
+                    <div class="box box-purpose">シナリオ5〜10は「カード/機能部の個別診断」。BDE(基地局を構成する機能部)を一個ずつ自己診断にかけ、全部正常に応答するか確認する。全て同じテンプレで対象カード名だけ差し替わる。各約1分。</div>
+                    <div class="box box-memory">🔑 <strong>共通テンプレ</strong>：カード全状態取得 → カード診断要求 → カード状態変化通知 → カード診断応答 → カード全状態取得 → swait → 正常終了<br><br><strong>基本的にマークなし</strong>。診断は「診断して」と投げて「異常なし」が返るだけで、閉塞もリセットもリンク切断もしない。状態を揺らす操作がないのでマークが出ない。診断後の「カード状態変化通知」は「診断中に自己チェックを走らせた」正常な報告。</div>
                     <h3>シナリオ5「eNB-CNT」</h3>
-                    <div class="box box-purpose">
-                        <strong>eNB-CNT</strong>(基地局装置監視制御機能部=コントローラ)カードの単体自己診断。約1分。<br>
-                        CNT=CoNTrollerの略。基地局全体の監視・制御を担う「司令塔」のようなカード。無線回線管理や呼処理制御を行う。テンプレそのまま、マークなし。
-                    </div>
-
+                    <div class="box box-purpose"><strong>eNB-CNT</strong>(基地局装置監視制御機能部=コントローラ)カードの単体自己診断。約1分。CNT=CoNTroller。基地局全体の監視・制御を担う司令塔カード。テンプレそのまま、マークなし。</div>
                     <h3>シナリオ6「TRX-LTE」</h3>
-                    <div class="box box-purpose">
-                        <strong>TRX-INF</strong>(無線送受信インタフェース機能部)のLTE側カードの単体自己診断。約1分。<br>
-                        TRX=Transmitter/Receiverの略。基地局はアンテナで電波を出したり受けたりしているが、そのデジタル↔アナログ変換や変調・復調を処理するのがTRXカード。いわば<span class="hl">基地局の「口と耳」</span>にあたる部分。TRXが壊れると電波が出なくなる、または受信できなくなる。テンプレそのまま、マークなし。
-                    </div>
-
+                    <div class="box box-purpose"><strong>TRX-INF</strong>(無線送受信IF機能部)のLTE側カードの単体自己診断。約1分。TRX=Transmitter/Receiver。電波の送受信・変調復調を処理する<span class="hl">基地局の「口と耳」</span>。テンプレそのまま、マークなし。</div>
                     <h3>シナリオ7「BB-LTE」★マークあり</h3>
-                    <div class="box box-purpose">
-                        <strong>BB</strong>(ベースバンド信号処理)のLTE側カードの診断。約3分。シナリオ5・6と違い、<span class="hl">カード制御(閉塞)と装置内試験が追加</span>されるため複雑化する。
-                    </div>
+                    <div class="box box-purpose"><strong>BB</strong>(ベースバンド信号処理)のLTE側カードの診断。約3分。5・6と違い<span class="hl">カード制御(閉塞)と装置内試験が追加</span>され複雑化。</div>
                     <div class="flow-item"><strong>流れ</strong>：カード全状態取得 → カード診断要求 → 状態変化通知 → 診断応答 → カード全状態取得 → <strong>カード制御要求(閉塞)</strong> → swait_70(70秒待ち) → 通知大量発生 → カード全状態取得 → 機能部全状態取得 → セル全状態取得 → <strong>装置内試験要求</strong> → 装置内試験応答 → 正常終了</div>
-
                     <h4>【ALM】カード制御(閉塞)の直後に大量発生</h4>
-                    <div class="box box-info">
-                        BBカードを<span class="hl">意図的に閉塞</span>しています。閉塞＝強制的にアラーム状態にする操作なので、ALMが出るのは当然です。しかもBBカードは上位にあるため、閉塞すると配下のカード(機能部・セル)にも状態変化が波及します。通知に<code>"8HRR2AD"</code><code>"2GLR2AA"</code><code>"BB-LTE"</code><code>"eNB-CNT"</code>といった複数のカード名が登場するのはそのためです。<strong>1枚のカードを閉塞すると、関連するカード全体に影響が出る</strong>という依存関係がログで見えています。
-                    </div>
-
+                    <div class="box box-info">BBカードを<span class="hl">意図的に閉塞</span>。閉塞＝強制アラーム状態なのでALMは当然。BBは上位にあるため、閉塞すると配下のカード(機能部・セル)にも波及します。通知に<code>"8HRR2AD"</code><code>"2GLR2AA"</code><code>"BB-LTE"</code><code>"eNB-CNT"</code>等が登場するのはそのため。<strong>1枚の閉塞が関連カード全体に影響</strong>する依存関係が見えています。</div>
                     <h4>【ALM】装置内試験の前後でも発生</h4>
-                    <div class="box box-info">
-                        装置内試験＝カード自身が内部の回路を自己チェックする試験です。この試験中にカードが一時的にアラーム状態になります。試験が終われば復旧します。
-                    </div>
-
+                    <div class="box box-info">装置内試験＝カード自身が内部回路を自己チェックする試験。試験中に一時的にアラーム状態になり、終われば復旧します。</div>
                     <h4>swait_70(70秒待ち)の意味</h4>
-                    <div class="box box-info">
-                        閉塞操作の後、70秒待っています。閉塞によって波及した状態変化が全部落ち着くまで待つための安定化時間です。シナリオ5・6のswait_10(10秒)より長いのは、それだけ影響範囲が広いからです。
-                    </div>
-
+                    <div class="box box-info">閉塞の後70秒待つ。波及した状態変化が落ち着くまでの安定化時間。5・6のswait_10(10秒)より長いのは影響範囲が広いからです。</div>
                     <h3>シナリオ8「HWY」</h3>
-                    <div class="box box-purpose">
-                        <strong>HWY-INF</strong>(伝送路インタフェース機能部=IP層以下の伝送路を扱う部分)カードの診断。約1分。カード診断テンプレに<span class="hl">遠隔EM実施判定が冒頭に追加</span>されている。マークなし。
-                    </div>
+                    <div class="box box-purpose"><strong>HWY-INF</strong>(伝送路IF機能部)カードの診断。約1分。テンプレに<span class="hl">遠隔EM実施判定が冒頭に追加</span>。マークなし。</div>
                     <div class="flow-item"><strong>流れ</strong>：<strong>遠隔EM実施判定処理</strong>(再開状態取得→遠隔EM実施済み確認) → カード全状態取得 → カード診断要求 → 状態変化通知 → 診断応答 → カード全状態取得 → swait_10 → 正常終了</div>
-                    <div class="box box-info">
-                        💡 <strong>なぜ冒頭に判定が入るのか</strong>：EM＝Element Management、つまりEMS(Element Management System)のことです。HWYは伝送路の入口にあたるカードなので、「この装置は遠隔(EMS経由)で管理されているか、それとも直接接続か」を最初に確認しています。管理形態によって次の処理が変わるため、他のカード(eNB-CNT・TRX・BB)にはない判定がHWYにだけ入っています。
-                    </div>
-
+                    <div class="box box-info">💡 <strong>なぜ冒頭に判定が入るのか</strong>：EM＝Element Management＝EMS。HWYは伝送路の入口にあたるので「遠隔(EMS経由)管理か直接接続か」を最初に確認します。管理形態で次処理が変わるため、HWYにだけこの判定が入ります。</div>
                     <h3>シナリオ9「PORT」</h3>
-                    <div class="box box-purpose">
-                        <strong>PORT</strong>(ポート/物理インタフェース)カードの単体自己診断。約1分。テンプレそのまま、マークなし。<br><br>
-                        PORTカードはイーサネットポートや光ポートなど、外部と繋がる<span class="hl">物理的な接続口</span>を管理します。シナリオ3(AP/PF共有)で「物理回線を休止すると対MME・対隣接eNBリンクが連鎖してリ断する」という場面がありましたが、あの「物理回線」を実際に担っているのがこのPORTカードです。シナリオ3のリ断の根本にいたカードを、ここで単体診断にかけています。
-                    </div>
-
+                    <div class="box box-purpose"><strong>PORT</strong>(ポート/物理IF)カードの単体自己診断。約1分。テンプレそのまま、マークなし。<br><br>イーサ/光ポートなど外部と繋がる<span class="hl">物理的な接続口</span>を管理。シナリオ3で「物理回線を休止すると連鎖リ断」した、あの物理回線を担うのがこのカード。シナリオ3のリ断の根本を単体診断にかけています。</div>
                     <h3>シナリオ10「SDM-LTE」</h3>
-                    <div class="box box-purpose">
-                        <strong>SDM</strong>(局データ保持の記憶系カード)のLTE側の単体自己診断。約1分。テンプレそのまま、マークなし。<br><br>
-                        SDM＝Station Data Memoryの略。基地局の設定情報(局データ)をA面・B面の2面で二重保持しています。前手順で「SDM面A/B等価のpause目視」が毎回入っていたのを覚えていますか。あれは「A面とB面の局データが同じ内容か」を確認する手順で、このSDMカードを使った確認作業です。FLD制御で「A面の局データをB面に転送してA面/B面を同値にする」のも、このSDMカードのA面・B面を操作しています。<span class="hl">局データクロスチェックの仕事と直接つながっているカード</span>です。
-                    </div>
-
+                    <div class="box box-purpose"><strong>SDM</strong>(局データ保持の記憶系カード)のLTE側の単体自己診断。約1分。テンプレそのまま、マークなし。<br><br>SDM=Station Data Memory。局データをA面・B面の2面で二重保持。前手順の「SDM面A/B等価のpause目視」も、FLD制御の「A→B同値化」も、このカードのA/B面を操作しています。<span class="hl">局データクロスチェックの仕事と直接つながるカード</span>。</div>
                     <h3>シナリオ11「新世代RE共通」(CPRI-MUX含む) 約57分</h3>
-                    <div class="box box-purpose">
-                        <strong>目的</strong>：RE(Radio Equipment=無線装置)との光伝送路(CPRI)を含むリセットを繰り返し、無線装置が毎回ちゃんと再接続・立ち上がるかを反復確認する。ASCIIアート「NEO」。
-                    </div>
-                    <div class="box box-memory">
-                        🔑 <strong>構造</strong>：eNBリセット(CPRI-MUX含む)ゾーンを<span class="hl">3回以上繰り返す</span>。<br>
-                        1ゾーン＝リセット要求 → 「10.1.1.6から切断しました」→ 再開通知待ち(残り3分→2分→1分) → 「10.255.68.11から10.1.1.6へ接続しました」→ 全状態取得一式 → State_Acquisition → 「装置立ち上がりまでしばらくお待ちください」→ TILT-INFヘルスチェック通知多数 → Dual/シングル判定 → また次のリセット… → END
-                    </div>
-
+                    <div class="box box-purpose"><strong>目的</strong>：RE(無線装置)との光伝送路(CPRI)を含むリセットを繰り返し、無線装置が毎回再接続・立ち上がるかを反復確認。ASCIIアート「NEO」。</div>
+                    <div class="box box-memory">🔑 <strong>構造</strong>：eNBリセット(CPRI-MUX含む)ゾーンを<span class="hl">3回以上繰り返す</span>。1ゾーン＝リセット要求 → 「切断」→ 再開通知待ち(3分) → 「接続」→ 全状態取得 → State_Acquisition → 「装置立ち上がりまでお待ちください」→ TILT-INFヘルスチェック多数 → Dual/シングル判定 → 次のリセット… → END</div>
                     <h4>【受NG】State_Acquisitionの整流装置・空調機で発生</h4>
-                    <div class="box box-info">
-                        リセット直後、装置がまだ完全に立ち上がりきっていない状態で状態取得要求を投げています。「今立ち上がり中だから受け付けられない」という返答です。ログにも「装置立ち上がりまでしばらくお待ちください」と書いてある。時間が経てば通ります。
-                    </div>
-
+                    <div class="box box-info">リセット直後、立ち上がりきっていない状態で状態取得要求を投げています。「今立ち上がり中だから受け付けられない」。ログにも「装置立ち上がりまでお待ちください」とある。待てば通ります。</div>
                     <h4>【ALM】架全状態取得の箇所で発生</h4>
-                    <div class="box box-info">
-                        同じく立ち上がり中のカードがまだアラーム状態にある記録です。完全に起動すれば消えます。<span class="hl">「リセット掛かってれば不安定は正常」</span>の典型例。
-                    </div>
-
+                    <div class="box box-info">立ち上がり中のカードがまだアラーム状態。完全起動で消えます。<span class="hl">「リセット掛かってれば不安定は正常」</span>の典型。</div>
                     <h4>Dual/シングル判定とは</h4>
-                    <div class="box box-info">
-                        各ゾーンの締めに必ず入る分岐。局データ情報を取得して「この装置はDual構成(冗長二重化)か、Single構成か」を判定して処理を分岐します。新世代REが二重化に対応しているからこその分岐で、構成によって次にやることが変わります。
-                    </div>
-
+                    <div class="box box-info">各ゾーンの締めに必ず入る分岐。局データ情報を取得して「Dual構成(冗長)かSingle構成か」を判定し処理を分岐。新世代REが二重化対応だからこその分岐です。</div>
                     <h4>なぜ3回以上繰り返すのか</h4>
-                    <div class="box box-info">
-                        1回リセットして戻ってくるだけでは「たまたま動いた」かもしれない。複数回繰り返して毎回正常に戻ってくることを確認することで、<span class="hl">再起動耐性</span>を検証しています。57分かかるのもこの反復のためです。
-                    </div>
-
+                    <div class="box box-info">1回では「たまたま動いた」かもしれない。複数回繰り返して毎回正常に戻ることで<span class="hl">再起動耐性</span>を検証。57分かかるのもこの反復のためです。</div>
                     <h3>シナリオ12「新世代RE共通_2」(CPRI-MUX含まない) 約3時間</h3>
-                    <div class="box box-purpose">
-                        <strong>目的</strong>：REとの光伝送路(CPRI)は保ったまま、eNB側だけをリセットする試験。シナリオ11との対比が核心。eNBリセット応答待ち<strong>58分×3ゾーン</strong>で約3時間になる。
-                    </div>
-
+                    <div class="box box-purpose"><strong>目的</strong>：REとの光伝送路(CPRI)は保ったまま、eNB側だけをリセット。シナリオ11との対比が核心。eNBリセット応答待ち<strong>58分×3ゾーン</strong>で約3時間。</div>
                     <h4>シナリオ11との違い</h4>
-                    <div class="box box-info">
-                        シナリオ11はCPRI-MUXを含むリセット(光伝送路ごとリセット)で再開まで約3分。シナリオ12はCPRI-MUXを含まないリセット(eNB側だけリセット、光伝送路は保つ)で再開まで58分。<br><br>
-                        なぜ含まない方が長いかというと、<span class="hl">光伝送路が切れないので無線装置側は再起動せずに待ち続けている</span>。eNBが再起動して戻ってきて再同期するまでの時間が長くかかるためです。
-                    </div>
-
+                    <div class="box box-info">11はCPRI-MUX含む(光伝送路ごとリセット)で再開約3分。12はCPRI-MUX含まない(eNB側だけ、光伝送路は保つ)で再開58分。含まない方が長いのは、<span class="hl">光伝送路が切れず無線装置側は再起動せず待ち続ける</span>ため、eNBが戻って再同期するまで長くかかるから。</div>
                     <h4>【処NG】★最重要の注記実例</h4>
-                    <div class="box box-info">
-                        リセット応答に【処NG】が出ますが、直前の☆行にこう書いてあります。<br><br>
-                        「<span class="hl">BBカードリセット動作となる。OAM(N)_s12B_004にて事象は整理済み</span>」<br><br>
-                        これが<strong>「☆コメント行を読む」</strong>の最も明確な実例です。この処NGは偶発的な異常ではなく、BBカードがリセットされるときに必ず発生する既知の動作で、管理番号(OAM(N)_s12B_004)まで採番されて整理が終わっている。だから出ても問題なし。<strong>☆注記に「整理済み」とあれば想定内</strong>というルールがここで確定します。
-                    </div>
-
+                    <div class="box box-info">リセット応答に【処NG】が出ますが、直前の☆行にこうあります。<br><br>「<span class="hl">BBカードリセット動作となる。OAM(N)_s12B_004にて事象は整理済み</span>」<br><br>これが<strong>「☆コメント行を読む」</strong>の最も明確な実例。偶発ではなく、BBカードリセット時に必ず出る既知動作で、管理番号(OAM(N)_s12B_004)まで採番済み。<strong>☆注記に「整理済み」とあれば想定内</strong>というルールがここで確定します。</div>
                     <h3>シナリオ13「N-LRE 出荷オペ」約19分</h3>
-                    <div class="box box-purpose">
-                        <strong>目的</strong>：1セクタ・1キャリアに対して実運用操作を一通り流す<span class="hl">最終リハーサル</span>。「FINISH!!」で締め。前半の「機能試験」・中盤の「カード診断」と違い、<strong>現場で実際にやる操作を順番に流す</strong>シナリオ。各操作の型：制御 → 状態安定化待ち → 復旧 → 前後状態確認。
-                    </div>
+                    <div class="box box-purpose"><strong>目的</strong>：1セクタ・1キャリアに実運用操作を一通り流す<span class="hl">最終リハーサル</span>。「FINISH!!」で締め。現場で実際にやる操作を順番に流す。各操作の型：制御 → 状態安定化待ち → 復旧 → 前後状態確認。</div>
                     <div class="flow-item"><strong>流れ</strong>：カード使用状態確認 → とまり木CH制御 → キャリア制御 → 送信アンテナ系制御(アンテナ数:2向け) → セル工事中規制 → 局舎制御 → 光伝送装置ON/OFF・リセット → チルト角遠隔制御(制御→10度に戻し) → 整流装置・空調機確認 → FINISH!!</div>
-                    <div class="box box-memory">
-                        🔑 シナリオ13は<strong>「マーク読み方の総復習ログ」</strong>。ALM・リ断・ERR・制御失敗が全部出て、全部「直前に操作があったか☆注記があるか」で説明できる。
-                    </div>
-
+                    <div class="box box-memory">🔑 シナリオ13は<strong>「マーク読み方の総復習ログ」</strong>。ALM・リ断・ERR・制御失敗が全部出て、全部「直前に操作があったか☆注記があるか」で説明できる。</div>
                     <h4>【ALM】カード制御(RRE/LRE閉塞)で発生</h4>
-                    <div class="box box-info">
-                        カードを意図的に閉塞しています。閉塞＝強制アラーム状態にする操作なので当然出ます。閉塞解除で復旧します。
-                    </div>
-
+                    <div class="box box-info">カードを意図的に閉塞。強制アラーム状態にする操作なので当然出る。閉塞解除で復旧します。</div>
                     <h4>【リ断】カード制御の直後に発生</h4>
-                    <div class="box box-info">
-                        カードを閉塞するとそのカードが担っているCPRIリンクが一時的に切れます。閉塞解除で戻ります。「閉塞したら上のリンクも切れる」という依存関係がここでも出ています。
-                    </div>
-
+                    <div class="box box-info">カードを閉塞するとそのカードが担うCPRIリンクが一時的に切れます。閉塞解除で戻る。「閉塞したら上のリンクも切れる」依存関係。</div>
                     <h4>【ERR】閉塞でカードがエラー状態</h4>
-                    <div class="box box-info">
-                        閉塞操作でカードがエラー状態になります。閉塞解除すれば消えます。早見表の「ERRはリセット/復旧で消える」がそのまま出ています。
-                    </div>
-
+                    <div class="box box-info">閉塞操作でカードがエラー状態に。閉塞解除で消えます。早見表の「ERRはリセット/復旧で消える」がそのまま出ています。</div>
                     <h4>【制御失敗】局舎制御の箇所 ★注記あり</h4>
-                    <div class="box box-info">
-                        局舎制御で制御失敗が出ますが、直前の☆行にこう書いてあります。<br><br>
-                        「<span class="hl">OF-AMPは非対応のため『制御失敗』となります。</span>」<br><br>
-                        OF-AMP(光増幅器)はこの制御に対応していない機器なので、制御失敗が出るのは設計どおり。マークだけ見ると「失敗した」に見えるが、☆注記に理由があれば想定内。
-                    </div>
+                    <div class="box box-info">局舎制御で制御失敗が出ますが、直前の☆行に「<span class="hl">OF-AMPは非対応のため『制御失敗』となります。</span>」とあります。OF-AMP(光増幅器)はこの制御に非対応なので、失敗は設計どおり。☆注記に理由があれば想定内です。</div>
                 </div>
             </div>
+<!-- ============================================================ -->
+<!-- サブタブ本体①：シナリオ14〜23                               -->
+<!-- ============================================================ -->
+<div id="sh-s14s23" class="sub-tab-content">
+    <h2>シナリオ14〜23（RE個別監制／後処理／ファイル更新へ）</h2>
+
+    <div class="box box-purpose">
+        <strong>大前提（25Aログ）</strong>：ここから読むのは25Aの出荷試験OPSログで、<span class="hl">すべて「試験実行：正常終了」で終わった完了済みログ</span>。出るマーク（ALM／ERR／リ断／受NG／処NG）は全部「OKログに当たり前に出る想定内のマーク」で、異常の証拠ではない。シナリオ1〜13で身につけた<strong>読み方の核心2点</strong>がそのまま使える。
+    </div>
+    <div class="box box-memory">
+        🔑 <strong>読み方の核心（再掲）</strong><br>
+        ①<span class="hl">そのマークの直前に「状態を揺らす操作」があったか</span>（制御／リセット／再開／停止／閉塞／休止）→ あれば「揺らした結果だから正常」<br>
+        ②<span class="hl">☆コメント行を読む</span> → シナリオが「期待されるNG」を自分で宣言している<br>
+        ③ 追加で覚えるのは2つだけ：<strong>マークは末尾の操作の結果が「次のシナリオの頭」に出る</strong>こと、<strong>取得・等価・削除だけのシナリオはマークが出ない</strong>こと。
+    </div>
+
+    <h4>ファイル名の早見（このパートで増えた分）</h4>
+    <table>
+        <tr><th>拡張子</th><th>中身</th></tr>
+        <tr><td><code>.LEN</code></td><td>LM（装置ソフト）</td></tr>
+        <tr><td><code>.SEN</code></td><td>局データ</td></tr>
+        <tr><td><code>.UEN</code></td><td>トラヒック</td></tr>
+        <tr><td><code>.MOA</code></td><td>OPSファイル</td></tr>
+        <tr><td><code>.FEN</code></td><td>FW／局データ系（BS3002カードのファーム等）</td></tr>
+        <tr><td><code>.FEP</code></td><td>RE系のFW</td></tr>
+    </table>
+
+    <!-- ============ シナリオ14 ============ -->
+    <h3>シナリオ14「N-LRE_RE個別監制」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：1つのRE（無線装置、RE_01/Sector_01）を相手に、CPRI・REのリセット、カードのリセット、スリープ制御といった<strong>個別の監視制御操作</strong>を一通り流す試験。シナリオ13「出荷オペ」のRE個別版にあたる。「FINISH」で締め。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：CPRI／REリセット → カードリセット → スリープ制御（0系→1系）→ スリープ解除 → FINISH</div>
+    <div class="box box-memory">
+        🔑 各操作とも「制御する → リンクやカードが一時的に切れる/エラーになる → 元に戻る」の型。マークは全部この“揺らし”の結果。
+    </div>
+
+    <h4>【リ断】【ERR】CPRI／REリセットの箇所</h4>
+    <div class="box box-info">
+        CPRI（DU↔RE間の光伝送路）やRE自体をリセットしています。リセットすればその光リンクは一時的に切れる＝<strong>リ断</strong>が出る。リセット中はREのカードがエラー状態として見える＝<strong>ERR</strong>が出る。どちらも「リセットという揺らす操作の直後」なので正常。立ち上がれば戻ります。
+    </div>
+
+    <h4>【リ断】カードリセットの箇所</h4>
+    <div class="box box-info">
+        カードをリセットすると、そのカードが担っていたリンクが一時的に切れます。やはり「リセットの直後だから切れて当然」のリ断です。
+    </div>
+
+    <h4>【受NG】スリープ制御（0系＋1系）の箇所</h4>
+    <div class="box box-info">
+        スリープ制御＝REを省電力の休眠状態にする操作です。状態を切り替えている真っ最中に次の要求を投げると、装置が「今切り替え中だから受け付けられない」と弾く＝<strong>受NG</strong>。少し待って再送すれば通ります。シナリオ16では同じ場面が<strong>ERR</strong>で出ますが、どちらも「状態遷移の途中」という同じ理由です（出方が違うだけ）。
+    </div>
+
+    <!-- ============ シナリオ15 ============ -->
+    <h3>シナリオ15「F-RRE_出荷オペ」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：Fベンダ（富士通系）のRRE（RE_02/Sector_02）に対して、シナリオ13と同じ「出荷オペ」を流す試験。閉塞・リセット・局舎制御・チルト角戻しなど、現場でやる運用操作を順番に実施。「FINISH」で締め。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：閉塞／強制閉塞 → Fベンダ(RRE)リセット → 局舎制御 → チルト角戻し(10度) → FINISH</div>
+
+    <h4>【ALM】閉塞／強制閉塞の箇所</h4>
+    <div class="box box-info">
+        カードを意図的に<span class="hl">閉塞</span>（＝強制的にアラーム状態にする操作）しています。ALMが出るのは当然で、閉塞解除でALMが消えることを確認するのがセットです。シナリオ13で見たのと同じパターン。
+    </div>
+
+    <h4>【リ断】Fベンダ(RRE)リセットの箇所</h4>
+    <div class="box box-info">
+        RREをリセットすると、その無線装置とのリンクが一時的に切れる＝リ断。リセットの直後なので正常です。
+    </div>
+
+    <h4>【制御失敗】局舎制御の箇所 ★☆注記あり</h4>
+    <div class="box box-info">
+        局舎制御で「制御失敗」が出ますが、直前の☆行に<span class="hl">「OF-AMPは非対応のため『制御失敗』となります。」</span>と書いてあります。OF-AMP（光増幅器）はこの制御に対応していない機器なので、失敗が出るのは設計どおり。シナリオ13と全く同じ☆注記で、想定内です。
+    </div>
+
+    <!-- ============ シナリオ16 ============ -->
+    <h3>シナリオ16「F-RRE_RE個別監制」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：FベンダのRRE（RE_02/Sector_02）に対する個別監視制御。シナリオ14（N-LRE版）とまったく同じ形の、Fベンダ版。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：リセット → リセット → スリープ制御(0系＋1系) → FINISH</div>
+
+    <h4>【リ断】リセット×2の箇所</h4>
+    <div class="box box-info">
+        2回のリセットそれぞれで、リンクが一時的に切れる＝リ断。シナリオ14と同じ理由です。
+    </div>
+
+    <h4>【ERR】スリープ制御(0系＋1系)の箇所</h4>
+    <div class="box box-info">
+        シナリオ14では同じ場面が<strong>受NG</strong>でしたが、16では<strong>ERR</strong>として出ます。どちらも「スリープへの状態遷移の真っ最中」という同じ原因で、装置がその瞬間どう報告したかの違いだけです。<span class="hl">受NGもERRも『状態が変化している途中だから』という同じ根っこ</span>と覚えておくと混乱しません。
+    </div>
+
+    <!-- ============ シナリオ17 ============ -->
+    <h3>シナリオ17（_16）「後処理」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：ここまでの試験で装置に溜まったログ・ファイルを<strong>回収して削除する</strong>後片付けのシナリオ。本編（機能試験・カード診断・出荷オペ）の締め。枝番が <code>_16</code> で、ファイル更新フェーズ（後述の_00〜）の手前にあたる。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：fm配下を全取得(.ROA/.VCA/.MCA/.MOA/.VOA, qsend.gz) → 全削除 → eNB拡張制御(TroubleLogGet) → 架/外部装置の状態取得 → トレース制御(FM) → 正常終了</div>
+
+    <h4>「削除失敗（削除ファイル無し）」の箇所</h4>
+    <div class="box box-info">
+        削除のところで「削除失敗（削除ファイル無し）」と出ますが、これは<span class="hl">エラーではありません</span>。「消すべきファイルがもう無かった＝既にキレイ」という意味で、正常です。シナリオ1「前手順」で見たのと同じ。
+    </div>
+
+    <h4>【処NG】eNB拡張制御（TroubleLogGet）の箇所 ★要OJT確認だったが後に解決</h4>
+    <div class="box box-info">
+        障害ログをまとめて吸い出す「TroubleLogGet」という拡張制御で、要求から応答まで<strong>約13分</strong>かかり、応答に<strong>処NG</strong>が付きます。この時点では☆注記が見当たらず「想定内だが要確認」と保留しました。<br><br>
+        ただし<span class="hl">後のシナリオ36でまったく同じTroubleLogGet（13分・処NG）が再現</span>します。偶発ではなく<strong>「重い障害ログ取得では処NGが返るのが既定の挙動（ログ自体は取得できている）」</strong>と整理できました。処NGの原則は「再試験」ですが、これはその例外（既知挙動）の一つです。
+    </div>
+
+    <!-- ============ シナリオ18 ============ -->
+    <h3>シナリオ18（_99）「試験継続用（中継ぎ）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：試験を次の段階へ繋ぐための<strong>中継ぎ</strong>シナリオ。「Go Next!!」で締め。eNBをリセットして再接続を待ち、全状態を取り直して、次（ファイル更新フェーズ）へ橋渡しする。枝番 <code>_99</code> は「一番後ろ＝繋ぎ目」を表す。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：試験準備削除 → eNBリセット(「10.1.1.6から切断」→再開通知, 約20分の再接続待ち) → 全状態取得 → 継続(Go Next!!)</div>
+
+    <h4>「削除NG（削除対象外）」の箇所 ★新顔だが正常</h4>
+    <div class="box box-info">
+        fm/local/traffic のところで「削除NG（削除対象外）」が出ます。これは「削除ファイル無し（＝そもそも無い）」とは<span class="hl">別物</span>で、<strong>「ファイルは存在するが、消してはいけない保護対象なので消さなかった」</strong>という意味。守るべきファイルをちゃんと守れている＝正常な動作です。
+    </div>
+
+    <h4>【ALM】架全状態取得／【受NG】外部装置の箇所</h4>
+    <div class="box box-info">
+        冒頭でeNBをリセットしているので、その後の全状態取得は<strong>立ち上がり途中</strong>を見ています。架はまだ完全に起動しきっていないので<strong>ALM</strong>、外部装置（整流装置・空調機など）は立ち上がり中で要求を弾くので<strong>受NG</strong>。どちらも「リセット直後だから」で、待てば消えます。
+    </div>
+
+    <!-- ============ シナリオ19 ============ -->
+    <h3>シナリオ19（_00）「ファイル更新前手順」★マークなし</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：これ以降に続く<strong>ファイル更新フェーズの入口</strong>。更新の前準備として、古いファイルを削除し、3G側のE系をActive化する。枝番 <code>_00</code> ＝「前手順」。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：fm配下削除（traffic は「削除NG（削除対象外）」＝保護されていて正常）→ ◆【手動】E系Active化 → OK → 正常終了</div>
+    <div class="box box-memory">
+        🔑 <strong>マークなし</strong>。やっているのは削除と手動Active化だけで、リセットも閉塞もリンク切断もしていない。<span class="hl">状態を揺らす操作がないとマークは出ない</span>——この後の「等価だけのシナリオ」でも同じことが起きる。シナリオ1「前手順」と同じ性格。
+    </div>
+
+    <h4>ここから「ファイル更新フェーズ」の地図</h4>
+    <div class="box box-purpose">
+        シナリオ19以降は「旧SEFと新SEFを行き来して、ファイル更新が正しくできるか」を検証するフェーズに入る。①〜⑤の5ラウンドあり、各ラウンドが<strong>「投入 → 立ち上げ確認 → 等価で両面同値化」</strong>という同じ型を繰り返す。先に全体像を持っておくと、1本ずつが迷子にならない。
+    </div>
+    <table>
+        <thead><tr><th>先頭_枝</th><th>ラウンド</th><th>中身</th><th>方式</th></tr></thead>
+        <tbody>
+            <tr><td>19 (_00)</td><td>前手順</td><td>削除＋E系Active化</td><td>—</td></tr>
+            <tr><td>20〜22 (_01〜03)</td><td>①ファイル更新戻し</td><td>一式投入→確認→等価</td><td>リセット方式</td></tr>
+            <tr><td>23〜25 (_04〜06)</td><td>②局データ更新戻し</td><td>局データ投入→確認→等価</td><td>リセット方式</td></tr>
+            <tr><td>26〜28 (_07〜09)</td><td>③局データ更新</td><td>新SEF局データ投入→確認→等価</td><td>リセット方式</td></tr>
+            <tr><td>29〜31 (_10〜12)</td><td>④ファイル更新</td><td>新SEF一式13本投入→<strong>新SEF化</strong>→等価</td><td>リセット方式</td></tr>
+            <tr><td>32〜34 (_13〜15)</td><td>⑤局データ更新_新SEF</td><td>ダミー局データを無停止で切替</td><td><strong>オンライン方式</strong></td></tr>
+        </tbody>
+    </table>
+
+    <!-- ============ ファイル更新4操作 ============ -->
+    <h3>ファイル更新で出てくる「4つの操作」を先に分解</h3>
+    <div class="box box-purpose">
+        ノートの「FLD制御」「SDM」「A面/B面」が、実ログでは次の4操作に分かれて出てくる。これを押さえると20以降が一気に読める。
+    </div>
+    <table>
+        <thead><tr><th>操作</th><th>ログでの名前</th><th>何をする</th><th>ノート対応</th></tr></thead>
+        <tbody>
+            <tr><td><strong>①ダウンロード</strong></td><td>OPSファイル送信開始/終了制御、<code>/fm/ftp/put</code></td><td>外部PC→装置へファイルを転送（＝投入）</td><td>ファイル投入</td></tr>
+            <tr><td><strong>②等価</strong></td><td>SDM面等価制御（A↔B）</td><td>装置内でA面とB面を同じ内容にコピー（同値化）</td><td>FLD制御＝A面/B面同値</td></tr>
+            <tr><td><strong>③書き込み</strong></td><td>SDM書き込み制御</td><td>転送したファイルをSDM面に書き込む（②等価とは別物）</td><td>局データをSDMにセット</td></tr>
+            <tr><td><strong>④リセット</strong></td><td>eNB/gNBリセット制御（SDM種別 A/B指定）</td><td>書き込んだ面を指定して装置を起動し直す</td><td>A面/B面指定リセット</td></tr>
+        </tbody>
+    </table>
+    <div class="box box-info">
+        💡 <strong>等価と書き込みは混ざりやすいが別物</strong>：<strong>書き込み</strong>＝外から持ってきたファイルをSDMに入れる。<strong>等価</strong>＝SDMのA面とB面を揃える（コピー）。<br>
+        💡 <strong>等価の方向は機械的に決まる</strong>：「直前に書き込んだ面 → もう片方の面」。A面に書いたら次の等価はA→B、B面に書いたら次はB→A。
+    </div>
+
+    <!-- ============ シナリオ20 ============ -->
+    <h3>シナリオ20（_01）「①ファイル更新戻し_1（投入）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：①ラウンドの1本目。旧SEFのファイル一式を装置へ投入し、A面をActive化する。OPS-IF=25A。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：全状態取得(架=【ALM】) → SDM面状態制御=A面Active化 → SEF互換シーケンス(カード制御=【ALM】, 多数の休止制御=【リ断】) → ファイルダウンロード(旧SEFの .LEN/.FEN/.FEP を /fm/ftp/put へ)</div>
+
+    <h4>【ALM】架全状態取得の箇所</h4>
+    <div class="box box-info">
+        制御を始める前の状態確認で出る、<strong>既存アラームの表示</strong>。まだ何も揺らしていない段階なので「もともと付いていたALMが見えているだけ」です。以降のシナリオでも冒頭の全状態取得で架の【ALM】が1個出るのは、ほぼ毎回この理由です。
+    </div>
+
+    <h4>【ALM】カード制御／【リ断】多数の休止制御の箇所</h4>
+    <div class="box box-info">
+        SEF互換シーケンスの中で、カードを制御（=ALM）し、対MME・対隣接eNB・物理回線などを次々<span class="hl">休止制御</span>（=意図的にリンクを止める→リ断）しています。どれも「自分で止めているから切れて当然」。シナリオ3で見た「物理を止めると上位リンクも連鎖で切れる」のと同じ仲間です。
+    </div>
+
+    <!-- ============ シナリオ21 ============ -->
+    <h3>シナリオ21（_02）「①ファイル更新戻し_2（立ち上げ確認）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：①ラウンドの2本目。20で投入した後、装置をリセットして立ち上げ直し、全状態を取り直して正常を確認する。OPS-IF=24B。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：eNBリセット(切断→約10分後 再接続) → 全状態取得 → 状態安定化5分 → SEF互換復旧シーケンス → 正常終了→25Aへ</div>
+
+    <h4>【リ断】全状態取得（対MME/対隣接/報知/規制）の箇所</h4>
+    <div class="box box-info">
+        リセット直後の<strong>立ち上がり途中</strong>に全状態を取りに行くと、まだ繋がりきっていないリンクが「断」として見えます。これは<span class="hl">“立ち上がり中のリ断”</span>で、待てば繋がります。シナリオ14で見た「休止制御で意図的に切ったリ断」とは出どころが違いますが、どちらも「今この瞬間そのリンクが繋がっていない」点は同じ。<strong>直前が全状態取得なら立ち上がり中、直前が休止制御なら意図的</strong>、で見分けます。
+    </div>
+
+    <h4>【ALM】機能部／架の箇所</h4>
+    <div class="box box-info">
+        同じく立ち上がり途中で、まだ起動しきっていないカードがアラーム状態で見えています。安定化待ち（5分）を経て消えます。
+    </div>
+
+    <!-- ============ シナリオ22 ============ -->
+    <h3>シナリオ22（_03）「①ファイル更新戻し_3（等価）」★マークなし</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：①ラウンドの3本目（仕上げ）。SDM面のA面とB面を<strong>等価（同値化）</strong>する。OPS-IF=24B。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：ファイル情報取得 → ◆【手動】3G_SDM E系→N系 等価＋E系Active化 → SDM面等価制御=B面→A面 → 等価確認 → 正常終了</div>
+    <div class="box box-memory">
+        🔑 <strong>マークなし</strong>。等価＝SDM内のコピー作業で、リセットも閉塞もリンク切断もしない。<span class="hl">取得・等価・削除だけのシナリオはマークが出ない</span>の好例（19・22・25・28・31・34がすべてこれ）。
+    </div>
+    <div class="box box-info">
+        💡 <strong>等価の方向＝B面→A面</strong>。「直前に書き込んだ面を起点に反対面へ配る」の法則どおり。①ラウンドはこの向き。
+    </div>
+
+    <!-- ============ シナリオ23 ============ -->
+    <h3>シナリオ23（_04）「②局データ更新戻し_1（投入・書込・リセット）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：②ラウンドの1本目。①が「LM・FW・局データ一式」だったのに対し、②は<span class="hl">局データだけ</span>を更新して戻す。「外から入れる→中に書き込む→リセットで反映」という、ファイル更新の本質3ステップが全部つながって見える重要ログ。OPS-IF=24B。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：全状態取得(架=【ALM】) → ファイル情報取得 → 局データ更新戻し=A面Active化 → <strong>①ダウンロード(.SEN を /fm/ftp/put)</strong> → <strong>②SDM書き込み(A面へ)</strong> → <strong>③eNB/gNBリセット(SDM種別=A面)</strong> → 正常終了</div>
+
+    <h4>核心の3ステップ（ここだけは丸暗記の価値あり）</h4>
+    <div class="box box-info">
+        ① <strong>ダウンロード</strong>：<code>旧SEf\02_00548_643130.SEN.gz の転送に成功しました</code>。局データ(.SEN)を装置の <code>/fm/ftp/put</code> に置く。<br>
+        ② <strong>SDM書き込み</strong>：置いたファイルを<strong>A面に書き込む</strong>（約28秒）。これは22で見た「等価（A↔Bコピー）」とは別の操作。<br>
+        ③ <strong>eNB/gNBリセット</strong>：<code>リセット種別0[CPRI-MUX含む]／SDM種別1[A面]</code>。A面を指定して起動し直す。ノートの「A面指定リセット後にERRが消える」の、あの操作そのもの。
+    </div>
+
+    <h4>【ALM】架全状態取得の箇所</h4>
+    <div class="box box-info">
+        冒頭の状態確認で出る<strong>既存アラーム</strong>。23の前半は「取得」ばかりで、状態を揺らす操作（書き込み・リセット）は末尾に集約されています。だから23本体は【ALM】1個だけ。<span class="hl">末尾のリセットの“結果”（切断→立ち上がり中のリ断/ALM）は、次のシナリオ24の頭に出ます</span>。
+    </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- サブタブ本体②：シナリオ24〜36                               -->
+<!-- ============================================================ -->
+<div id="sh-s24s36" class="sub-tab-content">
+    <h2>シナリオ24〜36（ファイル更新の完了 → 出荷判定まで）</h2>
+
+    <div class="box box-memory">
+        🔑 <strong>このパートで一番効く考え方</strong>：<span class="hl">前のシナリオの末尾でリセットをかけると、その結果（切断→再開→立ち上がり中のALM/リ断）が次のシナリオの“頭”に出る</span>。だから「立ち上げ確認」のシナリオ（24・27・30）は必ず冒頭が「◯◯から切断しました → 再開通知」で始まる。
+    </div>
+
+    <!-- ============ シナリオ24 ============ -->
+    <h3>シナリオ24（_05）「②局データ更新戻し_2（立ち上げ確認）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：②ラウンドの2本目。23の末尾でかけたA面リセットの結果、装置が立ち上がってくるのを待って、全状態を取り直して正常を確認する。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：「10.1.1.6から切断しました」→ 約5分後「再開通知」→ 時刻設定 → 再接続 → 全状態取得一式(架=【ALM】) → 状態安定化5分 → TILT-INFヘルスチェック通知の山 → 正常終了</div>
+
+    <h4>冒頭の「切断 → 再開通知」は23の結果</h4>
+    <div class="box box-info">
+        23でA面リセットをかけた時刻の直後に、24の冒頭で「切断しました」が記録されています。<span class="hl">シナリオをまたいで因果がつながっている</span>のが、この2本を並べるとはっきり見えます。23→24は「リセット → その立ち上がり確認」のワンセットです。
+    </div>
+
+    <h4>【ALM】架全状態取得の箇所</h4>
+    <div class="box box-info">
+        リセット後の<strong>立ち上がり途中</strong>を見ているので、架がまだアラーム状態。安定化待ち（5分）で消えます。21では立ち上がり中の【リ断】も出ましたが、24では全状態取得のタイミングでもう対向リンクが繋がっていてリ断が出ていません。<span class="hl">同じ立ち上げ確認でも、どのタイミングで状態を取りに行くかでマークの出方が変わる</span>（タイミング依存）と覚えておくと混乱しません。
+    </div>
+
+    <!-- ============ シナリオ25 ============ -->
+    <h3>シナリオ25（_06）「②局データ更新戻し_3（等価）」★マークなし</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：②ラウンドの3本目（仕上げ）。SDM面のA面とB面を等価する。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：ファイル情報取得 → SDM面等価制御=A面→B面 → 等価確認 → 正常終了</div>
+    <div class="box box-info">
+        💡 <strong>等価の方向＝A面→B面</strong>。23でA面に局データを書き込んだので、最新が入っているのはA面。それをA→Bでコピーして両面を揃える。①ラウンド（22, B→A）とちょうど逆向きで、<span class="hl">「書いた面を起点に反対面へ配る」</span>の法則どおり。<br>
+        🔑 等価だけなのでマークなし（19・22に続いて3例目）。
+    </div>
+
+    <!-- ============ シナリオ26 ============ -->
+    <h3>シナリオ26（_07）「③局データ更新_1（新SEF投入・本番）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：③ラウンドの1本目。①②は「旧SEFに戻す」方向だったが、③からは<span class="hl">新SEFへ上げる本番</span>。名前から「戻し」が消える。局データだけを新SEFにする。今回は<strong>B面</strong>を使う。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：全状態取得(架=【ALM】) → 局データ更新=B面Active化 → ①ダウンロード(<strong>新SEF</strong>の .SEN を /fm/ftp/put) → ②SDM書き込み(<strong>B面</strong>へ) → ◆【手動】3G新SEFダミー局データをN系へ投入 → ③eNB/gNBリセット(SDM種別=<strong>B面</strong>) → 正常終了</div>
+
+    <h4>23（②戻し）と26（③本番）の対比 — 面とSEFが揃って逆</h4>
+    <table>
+        <thead><tr><th></th><th>23（②局データ更新戻し）</th><th>26（③局データ更新）</th></tr></thead>
+        <tbody>
+            <tr><td>SEF</td><td>旧SEF（…643130.SEN）</td><td><strong>新SEF（…749047.SEN）</strong></td></tr>
+            <tr><td>Active化／書込／リセット面</td><td>A面</td><td><strong>B面</strong></td></tr>
+            <tr><td>手動投入</td><td>なし</td><td><strong>3G新SEFダミー局データ→N系</strong></td></tr>
+        </tbody>
+    </table>
+    <div class="box box-info">
+        💡 <strong>なぜ面を分けるのか</strong>：片面（A）を旧SEFのまま残し、もう片面（B）に新SEFを入れて立ち上げる。新SEFで問題が出てもA面（旧SEF）に戻せる、という<span class="hl">安全な切り替え方</span>。ノートの「A面=旧、B面=新で切り替え」が、実手順としてここで繋がる。<br>
+        🔑 マークは【ALM】1個（冒頭の既存アラーム）だけ。B面リセットの結果は次の27の頭に出る。
+    </div>
+
+    <!-- ============ シナリオ27 ============ -->
+    <h3>シナリオ27（_08）「③局データ更新_2（立ち上げ確認）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：③ラウンドの2本目。26のB面リセットの立ち上げ確認。24とまったく同じ役割。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：「切断しました」→ 約37秒後「再開通知」→ 時刻設定 → 再接続 → 全状態取得(架=【ALM】) → 状態安定化5分 → TILT-INFヘルスチェックの山 → 正常終了</div>
+    <div class="box box-info">
+        💡 <strong>新SEFを入れて初めて立ち上げた回でも、出るマークは架の【ALM】1個だけ</strong>。「新SEF初回ならではの特別なマーク」は出ません。<span class="hl">新SEFが正常に立ち上がっている証拠</span>です。24（旧SEF/A面）・27（新SEF/B面）でマークの出方が同じ＝これが「正常な立ち上げ確認」の基準線になります。
+    </div>
+
+    <!-- ============ シナリオ28 ============ -->
+    <h3>シナリオ28（_09）「③局データ更新_3（等価）」★マークなし</h3>
+    <div class="flow-item"><strong>流れ</strong>：ファイル情報取得 → SDM面等価制御=B面→A面 → 等価確認 → 正常終了</div>
+    <div class="box box-info">
+        💡 <strong>等価の方向＝B面→A面</strong>。26で新SEFをB面に書き込んだので、最新はB面。B→Aで配って<span class="hl">両面とも新SEF局データで同値</span>になる。これで③ラウンド完了。<br>
+        🔑 等価だけなのでマークなし（19・22・25に続いて4例目）。
+    </div>
+
+    <!-- ============ シナリオ29 ============ -->
+    <h3>シナリオ29（_10）「④ファイル更新_1（新SEF一式13本投入）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：④ラウンドの1本目。③が「局データだけ」だったのに対し、④は<span class="hl">LM・FW・局データの一式13ファイル</span>を新SEFで本格投入する。新操作「バックグラウンド配信」が登場。今回は<strong>A面</strong>。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：全状態取得(架=【ALM】) → ファイル更新=A面Active化 → ①ダウンロード(<strong>13本一括</strong>) → ②SDM書き込み(A面, 約5分) → ◆【手動】3G新SEF一式投入 → <strong>バックグラウンド配信制御(A面)</strong> → ③eNB/gNBリセット(SDM種別=A面) → 正常終了</div>
+
+    <h4>13本ダウンロードの中身（新SEFのFW一式）</h4>
+    <div class="box box-info">
+        <code>ENB_3002_T_1000.LEN</code>(LM) と、<code>BS3002_AIFE1700.FEN</code> 〜 <code>RE_*.FEP</code> のFW群（BS3002のAI/BB/CC/HW/SS/VDB/VMC各カード＋RE系）を約2分かけて13本転送。これは<strong>各カード・各REのファームウェアを全部新SEFに入れ替える</strong>作業。ノートの「カードごとにFWファイルがある」の実体です。
+    </div>
+
+    <h4>バックグラウンド配信制御 ★新操作</h4>
+    <div class="box box-info">
+        書き込んだファイルを装置内部の各カード・各REへ<span class="hl">バックグラウンドで配信する</span>操作と思われます。FWを各ハードに行き渡らせる工程で、FW一式更新（④）ならではのステップ。<br>
+        🔑 マークは冒頭の【ALM】1個だけ。書き込み・配信・A面リセットの結果は次の30の頭に出る。
+    </div>
+
+    <!-- ============ シナリオ30 ============ -->
+    <h3>シナリオ30（_11）「④ファイル更新_2（立ち上げ確認）」★新SEF化の到達点</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：④ラウンドの2本目。29のFW一式投入＋A面リセットの立ち上げ確認。<span class="hl">このログの冒頭で、解析が初めて「SEFバージョン：新SEF」と認識する</span>——ファイル更新シナリオ群のゴール地点。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：<strong>SEFバージョン：新SEF</strong> → 「切断」→ <strong>約5分40秒後</strong>「再開通知」→ 再接続 → 全状態取得(架=【ALM】, 規制系取得が追加) → 状態安定化5分 → TILT-INFヘルスチェックの山 → 正常終了</div>
+
+    <h4>冒頭が「新SEF」に変わった意味</h4>
+    <div class="box box-info">
+        20〜29まで一貫して「旧SEF」だった解析行が、30で初めて<strong>「新SEF」</strong>になります。29でFW一式を新SEFで書き込み→配信→リセットした装置が立ち上がってきて、<span class="hl">装置が新SEFに切り替わった瞬間</span>がこの1行に出ています。
+    </div>
+
+    <h4>立ち上がりが長い（約5分40秒）</h4>
+    <div class="box box-info">
+        27（③局データのみ）の立ち上がりは約37秒でしたが、30は<strong>約5分40秒</strong>。FW一式を入れ替えた初回起動なので、各カードにFWを反映して起動し直すぶん桁違いに時間がかかります。「時間はかかるが、出るマークは架の【ALM】1個だけ」＝<span class="hl">新SEFのFW一式が全カード正常に立ち上がった＝出荷試験として合格</span>を意味します。
+    </div>
+
+    <!-- ============ シナリオ31 ============ -->
+    <h3>シナリオ31（_12）「④ファイル更新_3（等価・全新SEF）」★マークなし</h3>
+    <div class="flow-item"><strong>流れ</strong>：ファイル情報取得 → ◆【手動】3G N系→E系 等価 → SDM面等価制御=A面→B面(<strong>LM・FW・局データすべて新SEF</strong>) → 等価確認 → 正常終了</div>
+    <div class="box box-info">
+        💡 29でA面に新SEF一式を入れた → 31でA→Bにコピー → <span class="hl">両面とも完全に新SEFで同値</span>。これで装置全体が新SEF化・両面同値という「出荷可能状態」に到達。22・25はファイル名に旧SEFが混じっていたが、31は全部新SEF。<br>
+        🔑 等価だけなのでマークなし（5例目）。
+    </div>
+
+    <!-- ============ シナリオ32 ============ -->
+    <h3>シナリオ32（_13）「⑤局データ更新_新SEF_1（オンライン切替）」★新方式</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：⑤ラウンドの1本目。新SEF化が済んだ装置で、今度は<span class="hl">装置を止めずに（無停止で）局データを切り替える</span>「オンライン更新」を試験する。①〜④の「リセット方式」とは別の、もう一つの更新方式。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：全状態取得(架=【ALM】) → ①ダウンロード(新SEF<strong>ダミー</strong>局データ .SEN) → ②SDM書き込み(B面) → ◆【手動】3Gダミー局データをE系へ投入 → <strong>SDM面状態制御=B面 閉塞解除</strong> → <strong>オンライン更新局データ準備→切替</strong> → receive完了 → 正常終了</div>
+
+    <h4>①〜④（リセット方式）と ⑤（オンライン方式）の違い</h4>
+    <table>
+        <thead><tr><th></th><th>①〜④ リセット方式</th><th>⑤ オンライン方式</th></tr></thead>
+        <tbody>
+            <tr><td>反映方法</td><td>eNB/gNBリセット（装置再起動）</td><td><strong>オンライン更新切替（無停止）</strong></td></tr>
+            <tr><td>面の操作</td><td>リセット</td><td><strong>閉塞解除</strong></td></tr>
+            <tr><td>切断・再開</td><td>あり（立ち上げ確認が必要）</td><td><strong>なし</strong></td></tr>
+            <tr><td>所要時間</td><td>長い（数分〜十数分）</td><td><strong>短い（約1分）</strong></td></tr>
+        </tbody>
+    </table>
+    <div class="box box-info">
+        💡 実運用では、稼働中の基地局の局データを<span class="hl">止めずに</span>更新したい。そのための無停止方式を出荷試験で検証している。ノートの「オンライン/無瞬断の局データ更新」がこれ。<br>
+        🔑 マークは冒頭の【ALM】1個。リセットしないので、次のシナリオに「立ち上げ確認」は来ない。
+    </div>
+
+    <!-- ============ シナリオ33 ============ -->
+    <h3>シナリオ33（_14）「⑤局データ更新_新SEF_2（無停止確認）」</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：⑤ラウンドの2本目。32のオンライン切替の後、状態を確認する。24・27・30の「立ち上げ確認」とは決定的に違い、<span class="hl">切断・再開がない</span>。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：（切断なし、いきなり）全状態取得(架=【ALM】) → 状態安定化5分 → 正常終了</div>
+
+    <h4>「切断行が出ない」のがオンライン方式の証拠</h4>
+    <div class="box box-info">
+        リセット方式の立ち上げ確認（24・27・30）は必ず冒頭が「◯◯から切断しました → 再開通知」でした。ところが33は<strong>切断行がなく、前のシナリオから時刻も連続</strong>しています。32のオンライン更新が装置を止めなかった証拠です。末尾の「TILT-INFヘルスチェックの山」も出ません（再起動していないので揃え直す必要がない）。<span class="hl">ノートの「無瞬断」が、ログ上では「切断行が出ない」という形で確認できる</span>。
+    </div>
+
+    <!-- ============ シナリオ34 ============ -->
+    <h3>シナリオ34（_15）「⑤局データ更新_新SEF_3（最終確認）」★マークなし・最短</h3>
+    <div class="flow-item"><strong>流れ</strong>：ファイル情報取得のみ → 正常終了（32行・約2秒）</div>
+    <div class="box box-info">
+        💡 ①〜④の_3は「等価」だったが、⑤の_3は<strong>等価がなくファイル情報の確認だけ</strong>。オンライン更新が<span class="hl">両面まとめて切り替える方式</span>と思われ、後から等価して揃える工程が要らないため（断定はできず要確認）。<br>
+        🔑 取得だけなのでマークなし。これでファイル更新フェーズ（①〜⑤）が完了。
+    </div>
+
+    <!-- ============ シナリオ35 ============ -->
+    <h3>シナリオ35（_16）「ファイル更新トラヒック」★実トラヒック＋総回収</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：新SEF化が済んだ装置で、実際にトラヒック（呼処理）を流して動作を確認し、全ログを回収（出荷エビデンス）して全削除（クリーン化）する総仕上げ。「TRAFFIC START/END」のアスキーアートで挟まれる。<span class="hl">日付が9/9→9/10へまたぐ</span>（約80分）。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：TRAFFIC START → ログ強制出力(全呼処理・OAM異常) → fm配下を全取得(SETUP系/トラヒック/各種ログ/FW一式/局データ/qsend) → fm配下を全削除 → 定期トラヒック収集待ち(残り60→45→30→15分のカウントダウン) → 定期トラヒック収集 → TRAFFIC END → 正常終了</div>
+    <div class="box box-info">
+        💡 <strong>マークなし</strong>。トラヒック試験・ログ回収・削除・収集だけで、状態を異常に揺らす制御がないため。全工程が「成功しました」で埋まる。<br>
+        💡 回収・削除のファイル名に <code>BS3002_*.FEN</code>〜<code>RE_*.FEP</code>、<code>…749047.SEN</code> が並ぶ＝<span class="hl">29で投入した新SEF一式が装置内に正しく置かれていた</span>裏づけ（回収できる＝入っていた、削除できる＝存在した）。
+    </div>
+
+    <!-- ============ シナリオ36 ============ -->
+    <h3>シナリオ36（_17）「ファイル更新後手順」★出荷判定で締め</h3>
+    <div class="box box-purpose">
+        <strong>目的</strong>：出荷試験全体の最終締めくくり（742行・最大）。装置を出荷状態に整え、最後に<span class="hl">全シナリオの受信数を集計して出荷の合否を判定</span>する。
+    </div>
+    <div class="flow-item"><strong>流れ</strong>：ログ出力＋fm配下DL → fm配下削除 → <strong>eNB拡張制御 TroubleLogGet(=【処NG】)</strong> → pf配下のログを大量DL→削除 → 全状態取得(架=【ALM】, 新SEF確認) → トレース制御 → <strong>最終受信数集計[SEF:25A][SEF:24B]</strong> → 正常終了</div>
+
+    <h4>【処NG】TroubleLogGet の箇所 ★17で保留した謎がここで解決</h4>
+    <div class="box box-info">
+        障害ログをまとめて取得する <code>LGN TroubleLogGet</code> で、要求から応答まで<strong>約13分</strong>、応答に<strong>処NG</strong>。これは<span class="hl">シナリオ17で「想定内だが要確認」と保留したものと全く同じ形（TroubleLogGet・13分・処NG）</span>。同じ形が2回再現したことで、<strong>「重い障害ログ取得では処NGが返るのが既定の挙動（ログ自体は取れている）」</strong>と確定できました。処NGの原則は「再試験」ですが、これはその既知例外です。
+    </div>
+
+    <h4>【ALM】架全状態取得の箇所</h4>
+    <div class="box box-info">
+        冒頭の状態確認で出る既存アラーム。新SEF状態（<code>ENB_3002_T_1000.LEN</code>, <code>743046.SEN</code> を確認）のままで、揺らした結果ではありません。
+    </div>
+
+    <h4>最後の「受信数集計」が出荷の合否判定</h4>
+    <div class="box box-info">
+        末尾で、全シナリオを通して受信した状態変化通知の数を、SEF版（25A／24B）ごとに集計します（対隣接eNBリンク27、カード状態100、機能部37、セル95、TILT-INFヘルスチェック57…）。すべて<span class="hl">[期待数：0]</span>が並ぶ＝「想定外の通知は来ていない」という意味で、<strong>試験全体で異常が発生しなかったことの最終確認＝出荷OK</strong>です。
+    </div>
+
+    <!-- ============ 全体まとめ ============ -->
+    <h2>14〜36で確立した「ログの読み方」7つの法則</h2>
+    <div class="box box-memory">
+        🔑 ここまでで、マークの判断は次の7つでほぼ説明しきれる。迷ったらこの順に当てはめる。
+    </div>
+    <table>
+        <thead><tr><th>#</th><th>法則</th><th>根拠シナリオ</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>マークは「直前の揺らす操作」の結果。制御/リセット/閉塞/休止の直後なら正常。</td><td>全般</td></tr>
+            <tr><td>2</td><td><strong>取得・等価・削除だけのシナリオはマークが出ない。</strong></td><td>19・22・25・28・31・34・35</td></tr>
+            <tr><td>3</td><td>末尾のリセットの結果（切断→再開→立ち上がり中ALM/リ断）は<strong>次のシナリオの頭</strong>に出る。</td><td>23→24, 26→27, 29→30</td></tr>
+            <tr><td>4</td><td><strong>【ALM】1個（架）は正常な立ち上がりの基準線</strong>。面・SEF・規模が変わっても、正常ならこれだけ。</td><td>24・27・30</td></tr>
+            <tr><td>5</td><td>ファイル更新は4操作に分解：ダウンロード／書き込み／等価／リセット。等価方向は「書いた面→反対面」。</td><td>20〜31</td></tr>
+            <tr><td>6</td><td>更新には2方式：リセット方式（停止あり・立ち上げ確認が要る）と<strong>オンライン方式（無停止・切断行が出ない）</strong>。</td><td>32〜34</td></tr>
+            <tr><td>7</td><td><strong>TroubleLogGet の【処NG】は既知挙動</strong>（重い障害ログ取得で処NGが返るが取得自体は成功）。処NG=再試験の例外。</td><td>17・36で再現</td></tr>
+        </tbody>
+    </table>
+
+    <h4>受NG／ERR／リ断 — 似たマークの見分け（混乱しやすい所）</h4>
+    <table>
+        <thead><tr><th>マーク</th><th>このパートでの出どころ</th><th>見分け方</th></tr></thead>
+        <tbody>
+            <tr><td><strong>受NG</strong></td><td>スリープ制御中(14)、立ち上がり中の外部装置(18)</td><td>状態遷移の途中で要求を弾いた。再送で通る。</td></tr>
+            <tr><td><strong>ERR</strong></td><td>CPRI/REリセット中(14)、スリープ制御中(16)</td><td>対象が一時的にエラー状態。リセット/解除で消える。受NGと根は同じ「遷移の途中」。</td></tr>
+            <tr><td><strong>リ断（意図的）</strong></td><td>休止制御(20)、CPRI/カードリセット(14)</td><td><strong>直前が休止制御/リセット</strong>なら、自分で切ったリ断。</td></tr>
+            <tr><td><strong>リ断（立ち上がり中）</strong></td><td>全状態取得(21)</td><td><strong>直前が全状態取得</strong>なら、まだ繋がりきっていないリ断。待てば繋がる。</td></tr>
+            <tr><td><strong>ALM</strong></td><td>冒頭の架全状態取得(ほぼ毎回)</td><td>制御前なら既存アラームの表示。リセット後なら立ち上がり中。どちらも待てば/解除で消える。</td></tr>
+            <tr><td><strong>処NG</strong></td><td>TroubleLogGet(17・36)、Traceroute停止(3)</td><td>☆注記や既知挙動があれば想定内。なければ要確認。</td></tr>
+        </tbody>
+    </table>
+</div>
             <!-- ===== 出荷試験タブ ここまで ===== -->
 
         </div>
@@ -2049,42 +1456,22 @@ mstsc（リモートデスクトップ接続）
         }
         function showSubTab(section, subTabId) {
             const sec = document.getElementById(section);
-            sec.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
+            sec.querySelectorAll('.sub-content, .sub-tab-content').forEach(c => c.classList.remove('active'));
             sec.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
             document.getElementById(subTabId).classList.add('active');
             event.target.classList.add('active');
         }
-        // モード切り替え（クロスチェック / 業務ノート）
-        const workTabs = {'vran':1,'security':1,'install':1,'meeting':1};
-        function openTabById(tabId) {
-            applyMode(workTabs[tabId] ? 'work' : 'cross');
-            activateTab(tabId);
-        }
-        // 検索結果リンク用：タブ＋サブタブまで直接開く
-        function openSubTabById(tabId, subId) {
-            openTabById(tabId);
-            const sec = document.getElementById(tabId);
-            sec.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
-            sec.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(subId).classList.add('active');
-            const sbtn = sec.querySelector('.sub-tab[onclick*="\'' + subId + '\'"]');
-            if (sbtn) sbtn.classList.add('active');
-        }
         function searchContent() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const resultsDiv = document.getElementById('searchResults');
-            document.querySelectorAll('.search-hl').forEach(el => { el.outerHTML = el.innerHTML; });
             if (query.length < 1) { resultsDiv.innerHTML = ''; return; }
             const safe = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const re = new RegExp(safe, 'gi');
-            const tabNames = {
-                'vran':'vRAN','security':'セキュリティ','install':'インストール','meeting':'定例','shipping':'出荷試験'
-            };
-            // サブタブを持つタブは、サブタブ単位で件数を出して直接開けるようにする
+            const tabNames = {'vran':'vRAN','security':'セキュリティ','install':'インストール','meeting':'定例','shipping':'出荷試験'};
             const subTabNames = {
                 'vran': {'v-terms':'単語帳','v-arch':'構成・IF','v-link':'リンク確認','v-trouble':'障害対応事例','v-flow':'active化フロー','v-gen':'GEN試験'},
                 'meeting': {'m-20260603':'06/03'},
-                'shipping': {'sh-overview':'概要・一覧','sh-marks':'マーク解説','sh-s01s04':'シナリオ1〜4','sh-s05s13':'シナリオ5〜13'}
+                'shipping': {'sh-overview':'概要・一覧','sh-marks':'マーク解説','sh-s01s04':'シナリオ1〜4','sh-s05s13':'シナリオ5〜13','sh-s14s23':'シナリオ14〜23','sh-s24s36':'シナリオ24〜36'}
             };
             const links = []; let totalCount = 0;
             Object.keys(tabNames).forEach(tabId => {
@@ -2097,7 +1484,7 @@ mstsc（リモートデスクトップ接続）
                         const m = sub.innerText.match(re);
                         const count = m ? m.length : 0;
                         if (count > 0) {
-                            links.push('<a href="#" onclick="openSubTabById(\''+tabId+'\',\''+subId+'\'); return false;" style="color:#007bff;">'+tabNames[tabId]+'›'+subTabNames[tabId][subId]+'('+count+')</a>');
+                            links.push('<a href="#" onclick="showTab(\''+tabId+'\'); showSubTab(\''+tabId+'\',\''+subId+'\'); return false;" style="color:#007bff;">'+tabNames[tabId]+'›'+subTabNames[tabId][subId]+'('+count+')</a>');
                             totalCount += count;
                         }
                     });
@@ -2105,7 +1492,7 @@ mstsc（リモートデスクトップ接続）
                     const m = el.innerText.match(re);
                     const count = m ? m.length : 0;
                     if (count > 0) {
-                        links.push('<a href="#" onclick="openTabById(\''+tabId+'\'); return false;" style="color:#007bff;">'+tabNames[tabId]+'('+count+')</a>');
+                        links.push('<a href="#" onclick="showTab(\''+tabId+'\'); return false;" style="color:#007bff;">'+tabNames[tabId]+'('+count+')</a>');
                         totalCount += count;
                     }
                 }
