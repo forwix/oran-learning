@@ -851,7 +851,7 @@ mstsc（リモートデスクトップ接続）
                     <table>
                         <thead><tr><th>#</th><th>シナリオ名</th><th>所要時間</th><th>区分</th><th>核心</th></tr></thead>
                         <tbody>
-                            <tr><td>1</td><td>前手順</td><td>約10分</td><td>前半</td><td>全状態確認。読み取り専用。マークなし</td></tr>
+                            <tr><td>1</td><td>前手順</td><td>約10分</td><td>前半</td><td>全状態確認。操作なしでもALM・受NGが出る</td></tr>
                             <tr><td>2</td><td>AP固有</td><td>約30分</td><td>前半</td><td>呼処理試験。リ断(意図的)/ALM(閉塞)/受NG/時刻偽装+.UEN</td></tr>
                             <tr><td>3</td><td>AP/PF共有</td><td>約17分</td><td>前半</td><td>SDM面・eNBリセット・対MME・物理回線・Traceroute</td></tr>
                             <tr><td>4</td><td>PF固有</td><td>約12分</td><td>前半</td><td>遠隔リセット＋OPSファイル取得サイクル(.MOA)</td></tr>
@@ -888,7 +888,11 @@ mstsc（リモートデスクトップ接続）
                     <h3>シナリオ1「前手順」</h3>
                     <div class="box box-purpose"><strong>目的</strong>：試験開始前の全体状態確認。装置が試験を受けられる状態かを確認する準備シナリオ。</div>
                     <div class="flow-item"><strong>流れ</strong>：バージョンチェック → 古いログ削除 → ファイル情報取得 → SDM面A/B等価のpause目視 → 全状態取得一式 → State_Acquisition(外部装置) → 正常終了</div>
-                    <div class="box box-info">💡 <strong>マークについて</strong>：このシナリオでは【ALM】【ERR】【受NG】【リ断】は出ません。<span class="hl">前手順は「何も動かさず、ただ状態を読みに行くだけ」</span>だから。読み取り専用で状態を揺らす操作がなく、マークが出る場面がそもそもありません。<br><br>唯一「削除ファイル無し」が出ることがありますが、これはエラーではなく「削除すべき古いログが無かった＝正常」という意味です。</div>
+                    <h4>【ALM】架全状態取得の箇所</h4>
+                    <div class="box box-info">前手順は基本的に状態を読みに行くだけですが、架の全状態取得で【ALM】が出ます。これは<span class="hl">装置が元々持っているアラームを読み取った</span>もので、このシナリオで何かを揺らした結果ではありません。冒頭の状態確認で「もともと付いていたALMが見えているだけ」という位置づけです。</div>
+                    <h4>【受NG】外部装置(整流装置・空調機)の状態取得の箇所</h4>
+                    <div class="box box-info">外部装置（整流装置・空調機）の状態取得で【受NG】が出ます。要求を投げたタイミングで装置が一時的に受け付けられず弾いたもので、<span class="hl">直後に再送して応答が返っていれば問題なし</span>です。</div>
+                    <div class="box box-info">💡 「削除ファイル無し」が出ることがありますが、これはエラーではなく「削除すべき古いログが無かった＝正常」という意味です。</div>
                     <h3>シナリオ2「AP固有」約30分</h3>
                     <div class="box box-purpose"><strong>目的</strong>：AP(呼処理アプリ)の機能ブロック試験。呼処理に関わる各機能を「制御→通知→復旧」のサイクルで一つずつ確認する。</div>
                     <div class="flow-item"><strong>流れ</strong>：試験準備(qsend/.gz転送、オペレータ操作あり) → トラヒック警報(3単位) → 自動規制休止/試験呼 → 隣接eNBリンク → セル設定 → アクセス規制・定期診断 → 時刻偽装(2010/08/01)+トラヒック収集 → 時刻を現在に戻して正常終了</div>
