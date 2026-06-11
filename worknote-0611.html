@@ -259,6 +259,441 @@ M-Plane（管理プレーン）: SMO/EMS → RU（管理・設定・監視）</p
                         <tr><td><strong>F1AP</strong></td><td>F1上のアプリケーションプロトコル。CU-DU間の業務通信</td></tr>
                         <tr><td><strong>NGAP</strong></td><td>NG上のプロトコル。AMFとのやり取り</td></tr>
                     </table>
+
+                    <h3>信号の通り道（図解） <span class="badge badge-new">追加</span></h3>
+                    <div class="box box-purpose">
+                        信号が基地局の中を通る順番と、それが物理的に何でつながっているかの図。カード診断（出荷試験S5〜10）は、この各ブロックを1個ずつ自己診断にかけている。
+                    </div>
+                    <h4>① 信号が通る順番（コア → 端末）</h4>
+                    <div style="border:1px solid #ddd;border-radius:6px;overflow:hidden;margin:10px 0;">
+<svg style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" font-family="'Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
+  <rect x="0" y="0" width="980" height="520" fill="#ffffff"/>
+
+  <!-- title -->
+  <rect x="0" y="0" width="980" height="54" fill="#333333"/>
+  <text x="20" y="34" fill="#ffffff" font-size="20" font-weight="bold">信号が通る順番（コア → 端末）</text>
+
+  <!-- subtitle -->
+  <text x="20" y="80" fill="#555555" font-size="14">基地局の中を信号が流れる順。各ブロックの役割を一言で。</text>
+
+  <!-- ===== nodes ===== -->
+  <!-- geometry: 7 boxes, box width 112, gap fits arrows -->
+  <!-- y for boxes -->
+  <!-- box1 コア -->
+  <g>
+    <rect x="20" y="120" width="112" height="64" rx="6" fill="#e8f5e9" stroke="#4caf50" stroke-width="1.5"/>
+    <text x="76" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">コア</text>
+    <text x="76" y="172" text-anchor="middle" font-size="11" fill="#555">ネットワーク側</text>
+  </g>
+  <!-- box2 HWY -->
+  <g>
+    <rect x="142" y="120" width="112" height="64" rx="6" fill="#f0f0f0" stroke="#333" stroke-width="1.5"/>
+    <text x="198" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">HWY</text>
+    <text x="198" y="172" text-anchor="middle" font-size="11" fill="#555">入口（伝送路IF）</text>
+  </g>
+  <!-- box3 CNT -->
+  <g>
+    <rect x="264" y="120" width="112" height="64" rx="6" fill="#f0f0f0" stroke="#333" stroke-width="1.5"/>
+    <text x="320" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">CNT</text>
+    <text x="320" y="172" text-anchor="middle" font-size="11" fill="#555">指揮（監視制御）</text>
+  </g>
+  <!-- box4 BB -->
+  <g>
+    <rect x="386" y="120" width="112" height="64" rx="6" fill="#f0f0f0" stroke="#333" stroke-width="1.5"/>
+    <text x="442" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">BB</text>
+    <text x="442" y="172" text-anchor="middle" font-size="11" fill="#555">計算（信号処理）</text>
+  </g>
+  <!-- box5 TRX -->
+  <g>
+    <rect x="508" y="120" width="112" height="64" rx="6" fill="#f0f0f0" stroke="#333" stroke-width="1.5"/>
+    <text x="564" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">TRX</text>
+    <text x="564" y="172" text-anchor="middle" font-size="11" fill="#555">電波へ変換</text>
+  </g>
+  <!-- box6 PORT/アンテナ -->
+  <g>
+    <rect x="630" y="120" width="112" height="64" rx="6" fill="#f0f0f0" stroke="#333" stroke-width="1.5"/>
+    <text x="686" y="148" text-anchor="middle" font-size="15" font-weight="bold" fill="#333">PORT</text>
+    <text x="686" y="170" text-anchor="middle" font-size="11" fill="#555">/アンテナ（送出）</text>
+  </g>
+  <!-- box7 端末 -->
+  <g>
+    <rect x="752" y="120" width="112" height="64" rx="6" fill="#d1ecf1" stroke="#17a2b8" stroke-width="1.5"/>
+    <text x="808" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">端末</text>
+    <text x="808" y="172" text-anchor="middle" font-size="11" fill="#555">スマホ等(UE)</text>
+  </g>
+
+  <!-- arrows between boxes (down-link direction, right) -->
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#333"/>
+    </marker>
+  </defs>
+  <g stroke="#333" stroke-width="2" marker-end="url(#ah)">
+    <line x1="132" y1="152" x2="140" y2="152"/>
+    <line x1="254" y1="152" x2="262" y2="152"/>
+    <line x1="376" y1="152" x2="384" y2="152"/>
+    <line x1="498" y1="152" x2="506" y2="152"/>
+    <line x1="620" y1="152" x2="628" y2="152"/>
+    <line x1="742" y1="152" x2="750" y2="152"/>
+  </g>
+
+  <!-- direction labels -->
+  <text x="442" y="108" text-anchor="middle" font-size="12" fill="#888">▶ 下り（コア→端末）の流れ。上りは逆向き</text>
+
+  <!-- ===== detail strip ===== -->
+  <rect x="20" y="220" width="844" height="1" fill="#ddd"/>
+
+  <!-- box of explanation -->
+  <g font-size="13" fill="#333">
+    <text x="20" y="252" font-weight="bold" fill="#333">各ブロックの仕事</text>
+
+    <circle cx="28" cy="278" r="3" fill="#4caf50"/>
+    <text x="40" y="282"><tspan font-weight="bold">コア</tspan>：ネットワーク本体。基地局へデータを渡す出発点／戻りの終点。</text>
+
+    <circle cx="28" cy="304" r="3" fill="#333"/>
+    <text x="40" y="308"><tspan font-weight="bold">HWY（入口）</tspan>：伝送路インターフェース。コアと基地局をつなぐ玄関口。</text>
+
+    <circle cx="28" cy="330" r="3" fill="#333"/>
+    <text x="40" y="334"><tspan font-weight="bold">CNT（指揮）</tspan>：監視制御の司令塔。どこへ何を流すかを取り仕切る。</text>
+
+    <circle cx="28" cy="356" r="3" fill="#333"/>
+    <text x="40" y="360"><tspan font-weight="bold">BB（計算）</tspan>：ベースバンド信号処理。電波に乗せる中身を作る。</text>
+
+    <circle cx="28" cy="382" r="3" fill="#333"/>
+    <text x="40" y="386"><tspan font-weight="bold">TRX（電波変換）</tspan>：デジタル信号を無線（電波）の形へ変換。基地局の「口と耳」。</text>
+
+    <circle cx="28" cy="408" r="3" fill="#333"/>
+    <text x="40" y="412"><tspan font-weight="bold">PORT／アンテナ（送出）</tspan>：物理的な出口。電波を空中へ送り出す。</text>
+
+    <circle cx="28" cy="434" r="3" fill="#17a2b8"/>
+    <text x="40" y="438"><tspan font-weight="bold">端末（UE）</tspan>：スマホなど。電波を受け取る最終地点。</text>
+  </g>
+
+  <!-- memory note -->
+  <rect x="20" y="458" width="844" height="44" rx="4" fill="#e8f5e9" stroke="#4caf50" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="34" y="478" font-size="13" fill="#333">🔑 <tspan font-weight="bold">覚え方</tspan>：入口(HWY) → 指揮(CNT) → 計算(BB) → 電波化(TRX) → 送出(PORT/アンテナ)。</text>
+  <text x="34" y="496" font-size="13" fill="#333">　 出荷試験のカード診断（S5〜10）は、この各ブロックを1個ずつ自己診断にかけている。</text>
+</svg>
+                    </div>
+                    <h4>② 物理的につながっている絵（光ファイバ・同軸・電波）</h4>
+                    <div style="border:1px solid #ddd;border-radius:6px;overflow:hidden;margin:10px 0;">
+<svg style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 720" font-family="'Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
+  <rect x="0" y="0" width="1000" height="720" fill="#ffffff"/>
+
+  <!-- title bar -->
+  <rect x="0" y="0" width="1000" height="54" fill="#333333"/>
+  <text x="20" y="34" fill="#ffffff" font-size="20" font-weight="bold">物理的につながっている絵（EPC → 端末）</text>
+  <text x="20" y="80" fill="#555" font-size="13">信号が通る区間ごとに「つなぐ物」が変わる。光ファイバ → 基地局の中 → 同軸 → 電波（無線）。</text>
+
+  <!-- ===================== EPC (core) ===================== -->
+  <g>
+    <!-- cloud-ish core building -->
+    <rect x="30" y="150" width="120" height="120" rx="8" fill="#e8f5e9" stroke="#4caf50" stroke-width="2"/>
+    <rect x="48" y="172" width="84" height="14" rx="2" fill="#c8e6c9"/>
+    <rect x="48" y="194" width="84" height="14" rx="2" fill="#c8e6c9"/>
+    <rect x="48" y="216" width="84" height="14" rx="2" fill="#c8e6c9"/>
+    <rect x="48" y="238" width="84" height="14" rx="2" fill="#c8e6c9"/>
+    <text x="90" y="138" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">EPC（コア）</text>
+    <text x="90" y="288" text-anchor="middle" font-size="11" fill="#555">ネットワーク本体</text>
+  </g>
+
+  <!-- ===================== fiber from EPC to base station ===================== -->
+  <!-- light-blue thick line = optical fiber -->
+  <path d="M150 210 H250" stroke="#17a2b8" stroke-width="5" fill="none"/>
+  <circle cx="150" cy="210" r="4" fill="#17a2b8"/>
+  <circle cx="250" cy="210" r="4" fill="#17a2b8"/>
+  <text x="200" y="198" text-anchor="middle" font-size="11" font-weight="bold" fill="#117a8b">光ファイバ</text>
+  <text x="200" y="232" text-anchor="middle" font-size="10" fill="#888">伝送路（遠くまで）</text>
+
+  <!-- ===================== base station rack ===================== -->
+  <g>
+    <!-- rack body -->
+    <rect x="250" y="120" width="200" height="300" rx="6" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+    <text x="350" y="110" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">基地局ラック（局舎の中）</text>
+
+    <!-- cards stacked -->
+    <!-- HWY -->
+    <rect x="266" y="138" width="168" height="46" rx="4" fill="#ffffff" stroke="#333"/>
+    <text x="278" y="160" font-size="13" font-weight="bold" fill="#333">HWY</text>
+    <text x="278" y="177" font-size="10" fill="#666">入口（伝送路IF）＝光の受け口</text>
+
+    <!-- CNT -->
+    <rect x="266" y="190" width="168" height="46" rx="4" fill="#ffffff" stroke="#333"/>
+    <text x="278" y="212" font-size="13" font-weight="bold" fill="#333">CNT</text>
+    <text x="278" y="229" font-size="10" fill="#666">指揮（監視制御の司令塔）</text>
+
+    <!-- BB -->
+    <rect x="266" y="242" width="168" height="46" rx="4" fill="#ffffff" stroke="#333"/>
+    <text x="278" y="264" font-size="13" font-weight="bold" fill="#333">BB</text>
+    <text x="278" y="281" font-size="10" fill="#666">計算（信号処理）</text>
+
+    <!-- TRX -->
+    <rect x="266" y="294" width="168" height="46" rx="4" fill="#fff3cd" stroke="#333"/>
+    <text x="278" y="316" font-size="13" font-weight="bold" fill="#333">TRX</text>
+    <text x="278" y="333" font-size="10" fill="#666">電波へ変換</text>
+
+    <!-- PORT -->
+    <rect x="266" y="346" width="168" height="46" rx="4" fill="#fff3cd" stroke="#333"/>
+    <text x="278" y="368" font-size="13" font-weight="bold" fill="#333">PORT</text>
+    <text x="278" y="385" font-size="10" fill="#666">出口（アンテナへの口）</text>
+
+    <!-- internal arrows down the rack -->
+    <g stroke="#999" stroke-width="2" marker-end="url(#ahg)">
+      <line x1="350" y1="184" x2="350" y2="189"/>
+      <line x1="350" y1="236" x2="350" y2="241"/>
+      <line x1="350" y1="288" x2="350" y2="293"/>
+      <line x1="350" y1="340" x2="350" y2="345"/>
+    </g>
+    <text x="458" y="270" font-size="10" fill="#999" transform="rotate(90 458 270)">ラック内部の配線（カード間）</text>
+  </g>
+
+  <!-- ===================== coax from PORT to tower ===================== -->
+  <!-- thick dark line = coax / feeder -->
+  <path d="M450 369 H560" stroke="#555" stroke-width="6" fill="none"/>
+  <circle cx="450" cy="369" r="4" fill="#555"/>
+  <circle cx="560" cy="369" r="4" fill="#555"/>
+  <text x="505" y="357" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">同軸ケーブル</text>
+  <text x="505" y="389" text-anchor="middle" font-size="10" fill="#888">給電線（or 一体型）</text>
+
+  <!-- ===================== tower + antenna ===================== -->
+  <g>
+    <!-- tower legs -->
+    <line x1="585" y1="160" x2="600" y2="400" stroke="#777" stroke-width="4"/>
+    <line x1="635" y1="160" x2="620" y2="400" stroke="#777" stroke-width="4"/>
+    <!-- cross braces -->
+    <line x1="588" y1="210" x2="632" y2="210" stroke="#777" stroke-width="2"/>
+    <line x1="592" y1="260" x2="628" y2="260" stroke="#777" stroke-width="2"/>
+    <line x1="595" y1="310" x2="625" y2="310" stroke="#777" stroke-width="2"/>
+    <line x1="598" y1="360" x2="622" y2="360" stroke="#777" stroke-width="2"/>
+    <line x1="588" y1="210" x2="628" y2="260" stroke="#777" stroke-width="1.5"/>
+    <line x1="632" y1="210" x2="592" y2="260" stroke="#777" stroke-width="1.5"/>
+    <!-- antenna panel -->
+    <rect x="596" y="150" width="28" height="64" rx="4" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2"/>
+    <text x="610" y="138" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">アンテナ</text>
+    <text x="610" y="418" text-anchor="middle" font-size="10" fill="#555">鉄塔の上</text>
+  </g>
+
+  <!-- ===================== radio waves to phone ===================== -->
+  <!-- concentric arcs from antenna toward phone -->
+  <g stroke="#e07b00" stroke-width="2.5" fill="none">
+    <path d="M650 150 q34 30 0 60"/>
+    <path d="M672 140 q50 40 0 80"/>
+    <path d="M694 130 q66 50 0 100"/>
+  </g>
+  <text x="730" y="120" text-anchor="middle" font-size="12" font-weight="bold" fill="#c0670a">電波（無線）</text>
+  <text x="730" y="250" text-anchor="middle" font-size="10" fill="#888">ケーブルなし・空中</text>
+
+  <!-- ===================== phone (UE) ===================== -->
+  <g>
+    <rect x="820" y="150" width="80" height="150" rx="12" fill="#ffffff" stroke="#17a2b8" stroke-width="2.5"/>
+    <rect x="832" y="168" width="56" height="100" rx="3" fill="#d1ecf1"/>
+    <circle cx="860" cy="285" r="6" fill="#cfe9ef"/>
+    <!-- signal bars on phone -->
+    <rect x="842" y="250" width="6" height="8" fill="#17a2b8"/>
+    <rect x="851" y="244" width="6" height="14" fill="#17a2b8"/>
+    <rect x="860" y="238" width="6" height="20" fill="#17a2b8"/>
+    <text x="860" y="138" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">端末（UE）</text>
+    <text x="860" y="318" text-anchor="middle" font-size="11" fill="#555">スマホ等</text>
+  </g>
+
+  <!-- arrow marker -->
+  <defs>
+    <marker id="ahg" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#999"/>
+    </marker>
+  </defs>
+
+  <!-- ===================== bottom legend ===================== -->
+  <rect x="30" y="452" width="940" height="1" fill="#ddd"/>
+  <text x="30" y="480" font-size="14" font-weight="bold" fill="#333">区間ごとの「つなぐ物」</text>
+
+  <g font-size="12.5" fill="#333">
+    <!-- fiber -->
+    <line x1="40" y1="502" x2="78" y2="502" stroke="#17a2b8" stroke-width="5"/>
+    <text x="88" y="506"><tspan font-weight="bold">① EPC〜基地局＝光ファイバ</tspan>：遠くまで光で伝送。HWY（入口）が受ける。</text>
+    <!-- internal -->
+    <line x1="40" y1="528" x2="78" y2="528" stroke="#999" stroke-width="3" stroke-dasharray="3 3"/>
+    <text x="88" y="532"><tspan font-weight="bold">② 基地局の中＝ラック内部の配線</tspan>：HWY→CNT→BB→TRX→PORT とカードを渡り歩く。</text>
+    <!-- coax -->
+    <line x1="40" y1="554" x2="78" y2="554" stroke="#555" stroke-width="6"/>
+    <text x="88" y="558"><tspan font-weight="bold">③ PORT〜アンテナ＝同軸ケーブル</tspan>：電波になった信号を鉄塔のアンテナまで運ぶ（給電線）。</text>
+    <!-- wave -->
+    <path d="M40 580 q12 -8 19 0 q12 8 19 0" stroke="#e07b00" stroke-width="2.5" fill="none"/>
+    <text x="88" y="584"><tspan font-weight="bold">④ アンテナ〜端末＝電波（無線）</tspan>：ここだけケーブルなし。空中を飛んで端末へ。</text>
+  </g>
+
+  <text x="30" y="610" font-size="11" fill="#888">※ 5G vRAN実機ではケーブルは光ファイバが主。同軸/一体型など細部は装置構成で変わる（要現場確認）。</text>
+
+  <!-- ===================== home analogy strip ===================== -->
+  <rect x="30" y="626" width="940" height="80" rx="6" fill="#e8f5e9" stroke="#4caf50" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="44" y="648" font-size="13" font-weight="bold" fill="#333">🏠 家庭でたとえると（同じ並び順）</text>
+
+  <g font-size="11.5" fill="#333" text-anchor="middle">
+    <!-- EPC -->
+    <text x="90" y="676" font-weight="bold">インターネット側</text>
+    <text x="90" y="692" fill="#666">プロバイダ・ネット全体</text>
+    <text x="170" y="684" fill="#117a8b" font-size="14">→</text>
+    <!-- HWY -->
+    <text x="250" y="676" font-weight="bold">ONU（光の箱）</text>
+    <text x="250" y="692" fill="#666">＝HWY・光の入口</text>
+    <text x="330" y="684" fill="#999" font-size="14">→</text>
+    <!-- CNT -->
+    <text x="410" y="676" font-weight="bold">ルーター</text>
+    <text x="410" y="692" fill="#666">＝CNT・振り分け</text>
+    <text x="490" y="684" fill="#999" font-size="14">→</text>
+    <!-- BB -->
+    <text x="560" y="676" font-weight="bold">中の処理</text>
+    <text x="560" y="692" fill="#666">＝BB・データ処理</text>
+    <text x="630" y="684" fill="#999" font-size="14">→</text>
+    <!-- TRX+PORT -->
+    <text x="710" y="676" font-weight="bold">Wi-Fiアンテナ</text>
+    <text x="710" y="692" fill="#666">＝TRX/PORT・電波化</text>
+    <text x="800" y="684" fill="#e07b00" font-size="14">))</text>
+    <!-- UE -->
+    <text x="880" y="676" font-weight="bold">スマホ</text>
+    <text x="880" y="692" fill="#666">＝端末（UE）</text>
+  </g>
+</svg>
+                    </div>
+                    <div class="box box-info">
+                        💡 <strong>HWY＝光の入口</strong>：コアから来る光ファイバ(伝送路)を最初に受けるカード。家庭でいうONU(光回線終端装置)に相当。ONUは光⇄デジタル変換の箱で、銅線(電話/CATV)時代のモデムが光時代に置き換わったもの。
+                    </div>
+                    <h4>③ 4G と 5G の流れの対比（MME＝AMF、S1＝NG） <span class="badge badge-new">追加</span></h4>
+                    <div style="border:1px solid #ddd;border-radius:6px;overflow:hidden;margin:10px 0;">
+<svg style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" font-family="'Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
+  <rect x="0" y="0" width="1000" height="640" fill="#ffffff"/>
+
+  <!-- title -->
+  <rect x="0" y="0" width="1000" height="54" fill="#333333"/>
+  <text x="20" y="34" fill="#ffffff" font-size="20" font-weight="bold">コア → 端末の流れ（4G と 5G の対比）</text>
+  <text x="20" y="80" fill="#555" font-size="13">同じ「コア→基地局→端末」だが、4Gは1つの箱(eNB)、5GはCU/DU/RUに分かれる。制御役はMME→AMF、区間名はS1→NG。</text>
+
+  <!-- arrow marker -->
+  <defs>
+    <marker id="a4" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#444"/></marker>
+  </defs>
+
+  <!-- ============ 4G row ============ -->
+  <rect x="20" y="100" width="60" height="180" rx="6" fill="#6c757d"/>
+  <text x="50" y="195" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" transform="rotate(-90 50 195)">4G / LTE</text>
+
+  <!-- EPC (with MME inside) -->
+  <rect x="95" y="118" width="150" height="144" rx="6" fill="#e8f5e9" stroke="#4caf50" stroke-width="2"/>
+  <text x="170" y="140" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">EPC（コア）</text>
+  <rect x="110" y="150" width="120" height="40" rx="4" fill="#fff" stroke="#888"/>
+  <text x="170" y="167" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">MME</text>
+  <text x="170" y="182" text-anchor="middle" font-size="9.5" fill="#666">制御(C-Plane)</text>
+  <rect x="110" y="196" width="120" height="40" rx="4" fill="#fff" stroke="#888"/>
+  <text x="170" y="213" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">S-GW / P-GW</text>
+  <text x="170" y="228" text-anchor="middle" font-size="9.5" fill="#666">データ(U-Plane)</text>
+  <text x="170" y="252" text-anchor="middle" font-size="9" fill="#999">制御とデータが別の箱</text>
+
+  <!-- S1 link -->
+  <line x1="245" y1="190" x2="320" y2="190" stroke="#444" stroke-width="3" marker-end="url(#a4)"/>
+  <text x="282" y="180" text-anchor="middle" font-size="12" font-weight="bold" fill="#c0670a">S1</text>
+  <text x="282" y="205" text-anchor="middle" font-size="9" fill="#999">バックホール</text>
+
+  <!-- eNB (single box) -->
+  <rect x="322" y="130" width="150" height="120" rx="6" fill="#f0f0f0" stroke="#333" stroke-width="2"/>
+  <text x="397" y="155" text-anchor="middle" font-size="15" font-weight="bold" fill="#333">eNB</text>
+  <text x="397" y="178" text-anchor="middle" font-size="11" fill="#555">基地局（1つの箱）</text>
+  <text x="397" y="200" text-anchor="middle" font-size="10" fill="#777">上位処理〜無線処理を</text>
+  <text x="397" y="215" text-anchor="middle" font-size="10" fill="#777">1台でまとめて担当</text>
+  <text x="397" y="237" text-anchor="middle" font-size="9" fill="#999">(中はHWY/CNT/BB/TRX/PORT)</text>
+
+  <!-- radio 4G -->
+  <g stroke="#e07b00" stroke-width="2.5" fill="none">
+    <path d="M478 175 q24 15 0 30"/>
+    <path d="M494 167 q36 23 0 46"/>
+  </g>
+  <text x="540" y="165" text-anchor="middle" font-size="11" font-weight="bold" fill="#c0670a">電波</text>
+
+  <!-- UE 4G -->
+  <rect x="560" y="150" width="60" height="100" rx="10" fill="#fff" stroke="#17a2b8" stroke-width="2.5"/>
+  <rect x="569" y="163" width="42" height="62" rx="3" fill="#d1ecf1"/>
+  <text x="590" y="140" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">端末(UE)</text>
+
+  <!-- ============ 5G row ============ -->
+  <rect x="20" y="330" width="60" height="250" rx="6" fill="#6f42c1"/>
+  <text x="50" y="455" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" transform="rotate(-90 50 455)">5G / NR</text>
+
+  <!-- 5GC (with AMF inside) -->
+  <rect x="95" y="360" width="150" height="144" rx="6" fill="#e8f5e9" stroke="#4caf50" stroke-width="2"/>
+  <text x="170" y="382" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">5GC（コア）</text>
+  <rect x="110" y="392" width="120" height="40" rx="4" fill="#fff" stroke="#888"/>
+  <text x="170" y="409" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">AMF</text>
+  <text x="170" y="424" text-anchor="middle" font-size="9.5" fill="#666">制御(C-Plane)</text>
+  <rect x="110" y="438" width="120" height="40" rx="4" fill="#fff" stroke="#888"/>
+  <text x="170" y="455" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">UPF</text>
+  <text x="170" y="470" text-anchor="middle" font-size="9.5" fill="#666">データ(U-Plane)</text>
+  <text x="170" y="494" text-anchor="middle" font-size="9" fill="#999">MMEに相当＝AMF</text>
+
+  <!-- NG link -->
+  <line x1="245" y1="432" x2="300" y2="432" stroke="#444" stroke-width="3" marker-end="url(#a4)"/>
+  <text x="272" y="422" text-anchor="middle" font-size="12" font-weight="bold" fill="#c0670a">NG</text>
+  <text x="272" y="447" text-anchor="middle" font-size="8.5" fill="#999">(NGAP)</text>
+
+  <!-- CU -->
+  <rect x="302" y="372" width="90" height="120" rx="6" fill="#f0f0f0" stroke="#333" stroke-width="2"/>
+  <text x="347" y="394" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">CU</text>
+  <rect x="312" y="404" width="70" height="34" rx="3" fill="#fff" stroke="#999"/>
+  <text x="347" y="425" text-anchor="middle" font-size="10" fill="#333">CU-CP</text>
+  <rect x="312" y="444" width="70" height="34" rx="3" fill="#fff" stroke="#999"/>
+  <text x="347" y="465" text-anchor="middle" font-size="10" fill="#333">CU-UP</text>
+  <!-- E1 label between CP/UP -->
+  <text x="347" y="500" text-anchor="middle" font-size="8.5" fill="#999">CP↔UP=E1</text>
+
+  <!-- F1 link -->
+  <line x1="392" y1="432" x2="442" y2="432" stroke="#444" stroke-width="3" marker-end="url(#a4)"/>
+  <text x="417" y="422" text-anchor="middle" font-size="11" font-weight="bold" fill="#c0670a">F1</text>
+  <text x="417" y="447" text-anchor="middle" font-size="8" fill="#999">ミッドホール</text>
+
+  <!-- DU -->
+  <rect x="444" y="392" width="80" height="80" rx="6" fill="#f0f0f0" stroke="#333" stroke-width="2"/>
+  <text x="484" y="428" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">DU</text>
+  <text x="484" y="446" text-anchor="middle" font-size="9" fill="#666">無線処理</text>
+
+  <!-- FH link -->
+  <line x1="524" y1="432" x2="574" y2="432" stroke="#444" stroke-width="3" marker-end="url(#a4)"/>
+  <text x="549" y="422" text-anchor="middle" font-size="11" font-weight="bold" fill="#c0670a">FH</text>
+  <text x="549" y="447" text-anchor="middle" font-size="8" fill="#999">フロントホール</text>
+
+  <!-- RU -->
+  <rect x="576" y="392" width="80" height="80" rx="6" fill="#fff3cd" stroke="#333" stroke-width="2"/>
+  <text x="616" y="428" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">RU</text>
+  <text x="616" y="446" text-anchor="middle" font-size="9" fill="#666">電波を出す</text>
+
+  <!-- radio 5G -->
+  <g stroke="#e07b00" stroke-width="2.5" fill="none">
+    <path d="M662 417 q24 15 0 30"/>
+    <path d="M678 409 q36 23 0 46"/>
+  </g>
+  <text x="724" y="407" text-anchor="middle" font-size="11" font-weight="bold" fill="#c0670a">電波</text>
+
+  <!-- UE 5G -->
+  <rect x="744" y="392" width="60" height="100" rx="10" fill="#fff" stroke="#17a2b8" stroke-width="2.5"/>
+  <rect x="753" y="405" width="42" height="62" rx="3" fill="#d1ecf1"/>
+  <text x="774" y="382" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">端末(UE)</text>
+
+  <!-- ============ correspondence table ============ -->
+  <rect x="20" y="528" width="960" height="1" fill="#ddd"/>
+  <text x="20" y="552" font-size="14" font-weight="bold" fill="#333">4G ⇄ 5G 対応（同じ役割で名前が違うだけ）</text>
+
+  <g font-size="12.5" fill="#333">
+    <circle cx="28" cy="574" r="3" fill="#4caf50"/>
+    <text x="40" y="578"><tspan font-weight="bold">コア</tspan>：EPC（4G）＝5GC（5G）。 　制御役：<tspan font-weight="bold">MME＝AMF</tspan>。 　データ役：S/P-GW＝UPF。</text>
+
+    <circle cx="28" cy="598" r="3" fill="#c0670a"/>
+    <text x="40" y="602"><tspan font-weight="bold">コア〜基地局</tspan>：<tspan font-weight="bold">S1（4G）＝NG（5G）</tspan>。 バックホール。光ファイバで結ばれ、入口で受ける。</text>
+
+    <circle cx="28" cy="622" r="3" fill="#333"/>
+    <text x="40" y="626"><tspan font-weight="bold">基地局</tspan>：eNB（4G・1つの箱）＝ CU＋DU＋RU（5G・3つに分割）。 5GはCU↔DU=F1、DU↔RU=FH。</text>
+  </g>
+</svg>
+                    </div>
+                    <div class="box box-info">
+                        💡 <strong>4Gと5Gの一番の違い</strong>：4Gの基地局(eNB)は1つの箱で全部やるが、5Gは<strong>CU・DU・RU</strong>の3つに分かれる。コアの制御役は<strong>MME(4G)＝AMF(5G)</strong>、コア〜基地局の区間は<strong>S1(4G)＝NG(5G)</strong>。ノート単語帳の「AMF-SIM」「NGAP」「N2pod」「E1 Disabled」は全部この5G側の話。
+                    </div>
                 </div>
 
                 <div id="v-link" class="sub-content">
